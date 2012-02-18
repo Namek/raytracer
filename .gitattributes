@@ -1,0 +1,11 @@
+* text=auto !eol
+/RayTracer.sln -text
+/RayTracer.vcxproj -text
+/RayTracer.vcxproj.filters -text
+data/room.ATR -text
+data/room.BRS -text
+data/room.CAM -text
+src/common.h -text
+src/geometry.cpp -text
+src/geometry.h -text
+src/main.cpp -text
