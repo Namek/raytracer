@@ -29,6 +29,9 @@ Assets/data/v7/v7.cam -text
 Assets/data/v7/v7.lgt -text
 /BaseUtils.vcxproj -text
 /BaseUtils.vcxproj.filters -text
+Dependencies/Dynamic/FreeImage.dll -text
+Dependencies/Include/FreeImage.h -text
+Dependencies/Static/FreeImage.lib -text
 /RayTracer.sln -text
 /RayTracer.vcxproj -text
 /RayTracer.vcxproj.filters -text
@@ -43,6 +46,8 @@ Source/BaseUtils/CGeneralTree.h -text
 Source/BaseUtils/CSingleton.h -text
 Source/BaseUtils/CTextFile.cpp -text
 Source/BaseUtils/CTextFile.h -text
+Source/BaseUtils/Params.cpp -text
+Source/BaseUtils/Params.h -text
 Source/RaytracerMain/Geometry/Point3d.cpp -text
 Source/RaytracerMain/Geometry/Point3d.h -text
 Source/RaytracerMain/Geometry/Triangle.cpp -text

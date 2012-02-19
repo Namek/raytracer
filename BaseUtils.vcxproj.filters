@@ -31,10 +31,7 @@
     <ClInclude Include="Source\BaseUtils\CSingleton.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\BaseUtils\PNGWriter.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\BaseUtils\png.h">
+    <ClInclude Include="Source\BaseUtils\Params.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -48,7 +45,7 @@
     <ClCompile Include="Source\BaseUtils\CTextFile.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\BaseUtils\PNGWriter.cpp">
+    <ClCompile Include="Source\BaseUtils\Params.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

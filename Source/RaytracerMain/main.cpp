@@ -3,6 +3,7 @@
 
 #include "BaseUtils\BaseCore.h"
 #include "Scene.h"
+#include "BaseUtils\Params.h"
 
 using namespace std;
 using namespace Utils;
@@ -10,25 +11,13 @@ using namespace nprt;
 
 
 int main(int argc, char* argv[])
-{	
-	char params[1024];
-	std::string paramsFileName = "params.txt";
-	std::ifstream paramsFile(paramsFileName);
+{
+	Params params = Params(argc > 1 ? argv[1] : "params.txt");
+	
+	Scene scene;
+	scene.LoadGeometry("data/room.brs");
 
-	if (argc > 0)
-		paramsFileName = argv[0];
-
-	if (paramsFile.is_open())
-	{
-		memset(params, 0, sizeof(params));
-		paramsFile.getline(params, sizeof(params));
-		paramsFile.close();
-	}
-
-	// TODO Interpret parameters
-
-	Scene sc;
-	sc.LoadGeometry("data/room.brs");
+	scene.RenderToFile("test.png", params.GetInt("width", 800), params.GetInt("height", 600));
 
 	_getch();
 

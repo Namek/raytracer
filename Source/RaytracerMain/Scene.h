@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <FreeImage.h>
 
 #include "Geometry\Triangle.h"
 
@@ -14,6 +15,7 @@ class Scene
 		Scene();
 
 		void LoadGeometry(const char* filename);
+		void RenderToFile(const char* filename, int width, int height);
 
 	private:
 		std::vector<Triangle> m_Triangles;

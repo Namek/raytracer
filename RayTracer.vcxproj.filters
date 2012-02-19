@@ -10,34 +10,34 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\RaytracerMain\Geometry\Point3d.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\RaytracerMain\Geometry\Triangle.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\RaytracerMain\Geometry\Vector3d.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\RaytracerMain\main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\RaytracerMain\Scene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Geometry\Point3d.cpp">
+      <Filter>Source\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Geometry\Triangle.cpp">
+      <Filter>Source\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Geometry\Vector3d.cpp">
+      <Filter>Source\Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\RaytracerMain\Geometry\Point3d.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\RaytracerMain\Geometry\Vector3d.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\RaytracerMain\Scene.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\Geometry\Point3d.h">
+      <Filter>Source\Geometry</Filter>
+    </ClInclude>
     <ClInclude Include="Source\RaytracerMain\Geometry\Triangle.h">
-      <Filter>Source</Filter>
+      <Filter>Source\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\Geometry\Vector3d.h">
+      <Filter>Source\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

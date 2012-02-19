@@ -110,3 +110,13 @@ void Scene::LoadGeometry(const char* filename)
 	m_DomainSize.y = m_MaxDomain.y - m_MinDomain.y;
 	m_DomainSize.z = m_MaxDomain.z - m_MinDomain.z;
 }
+
+void Scene::RenderToFile(const char* filename, int width, int height)
+{
+	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
+
+	// TODO modify dib->data
+
+	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
+	FreeImage_Unload(dib);
+}

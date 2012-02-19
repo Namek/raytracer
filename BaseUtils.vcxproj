@@ -22,7 +22,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
@@ -41,10 +41,16 @@
     <OutDir>$(SolutionDir)\Bin\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)\Build\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)\Bin\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)\Build\$(Configuration)\$(ProjectName)\</IntDir>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Dependencies\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -56,6 +62,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Dependencies\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -72,14 +79,13 @@
     <ClInclude Include="Source\BaseUtils\CGeneralTree.h" />
     <ClInclude Include="Source\BaseUtils\CSingleton.h" />
     <ClInclude Include="Source\BaseUtils\CTextFile.h" />
-    <ClInclude Include="Source\BaseUtils\png.h" />
-    <ClInclude Include="Source\BaseUtils\PNGWriter.h" />
+    <ClInclude Include="Source\BaseUtils\Params.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\BaseUtils\CApplicationLog.cpp" />
     <ClCompile Include="Source\BaseUtils\CFile.cpp" />
     <ClCompile Include="Source\BaseUtils\CTextFile.cpp" />
-    <ClCompile Include="Source\BaseUtils\PNGWriter.cpp" />
+    <ClCompile Include="Source\BaseUtils\Params.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
