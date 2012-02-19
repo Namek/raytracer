@@ -70,17 +70,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Geometry\Point3d.cpp" />
-    <ClCompile Include="Geometry\Triangle.cpp" />
-    <ClCompile Include="Geometry\Vector3d.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Source\RaytracerMain\Geometry\Point3d.cpp" />
+    <ClCompile Include="Source\RaytracerMain\Geometry\Triangle.cpp" />
+    <ClCompile Include="Source\RaytracerMain\Geometry\Vector3d.cpp" />
+    <ClCompile Include="Source\RaytracerMain\main.cpp" />
+    <ClCompile Include="Source\RaytracerMain\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Geometry\Point3d.h" />
-    <ClInclude Include="Geometry\Triangle.h" />
-    <ClInclude Include="Geometry\Vector3d.h" />
-    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Source\RaytracerMain\Geometry\Point3d.h" />
+    <ClInclude Include="Source\RaytracerMain\Geometry\Triangle.h" />
+    <ClInclude Include="Source\RaytracerMain\Geometry\Vector3d.h" />
+    <ClInclude Include="Source\RaytracerMain\Scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

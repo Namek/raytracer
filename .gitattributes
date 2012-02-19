@@ -27,12 +27,13 @@ Assets/data/v7/img1.jpg -text
 Assets/data/v7/v7.atr -text
 Assets/data/v7/v7.cam -text
 Assets/data/v7/v7.lgt -text
+/BaseUtils.vcxproj -text
+/BaseUtils.vcxproj.filters -text
 /RayTracer.sln -text
+/RayTracer.vcxproj -text
+/RayTracer.vcxproj.filters -text
 Source/BaseUtils/Base.h -text
 Source/BaseUtils/BaseCore.h -text
-Source/BaseUtils/BaseUtils.vcxproj -text
-Source/BaseUtils/BaseUtils.vcxproj.filters -text
-Source/BaseUtils/BaseUtils.vcxproj.user -text
 Source/BaseUtils/CApplicationLog.cpp -text
 Source/BaseUtils/CApplicationLog.h -text
 Source/BaseUtils/CBinaryTree.h -text
@@ -48,9 +49,6 @@ Source/RaytracerMain/Geometry/Triangle.cpp -text
 Source/RaytracerMain/Geometry/Triangle.h -text
 Source/RaytracerMain/Geometry/Vector3d.cpp -text
 Source/RaytracerMain/Geometry/Vector3d.h -text
-Source/RaytracerMain/Raytracer.vcxproj -text
-Source/RaytracerMain/Raytracer.vcxproj.filters -text
-Source/RaytracerMain/Raytracer.vcxproj.user -text
 Source/RaytracerMain/Scene.cpp -text
 Source/RaytracerMain/Scene.h -text
 Source/RaytracerMain/main.cpp -text

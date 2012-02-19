@@ -31,6 +31,9 @@
     <ClInclude Include="CTextFile.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\BaseUtils\asdad.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CApplicationLog.cpp">

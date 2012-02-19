@@ -64,19 +64,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Base.h" />
-    <ClInclude Include="BaseCore.h" />
-    <ClInclude Include="CApplicationLog.h" />
-    <ClInclude Include="CBinaryTree.h" />
-    <ClInclude Include="CFile.h" />
-    <ClInclude Include="CGeneralTree.h" />
-    <ClInclude Include="CSingleton.h" />
-    <ClInclude Include="CTextFile.h" />
+    <ClInclude Include="Source\BaseUtils\Base.h" />
+    <ClInclude Include="Source\BaseUtils\BaseCore.h" />
+    <ClInclude Include="Source\BaseUtils\CApplicationLog.h" />
+    <ClInclude Include="Source\BaseUtils\CBinaryTree.h" />
+    <ClInclude Include="Source\BaseUtils\CFile.h" />
+    <ClInclude Include="Source\BaseUtils\CGeneralTree.h" />
+    <ClInclude Include="Source\BaseUtils\CSingleton.h" />
+    <ClInclude Include="Source\BaseUtils\CTextFile.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CApplicationLog.cpp" />
-    <ClCompile Include="CFile.cpp" />
-    <ClCompile Include="CTextFile.cpp" />
+    <ClCompile Include="Source\BaseUtils\CApplicationLog.cpp" />
+    <ClCompile Include="Source\BaseUtils\CFile.cpp" />
+    <ClCompile Include="Source\BaseUtils\CTextFile.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
