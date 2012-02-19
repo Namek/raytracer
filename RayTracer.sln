@@ -1,7 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracer", "RayTracer.vcxproj", "{58D77ABD-B2B2-4A9D-9191-B73A585D803F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "Source\BaseUtils\BaseUtils.vcxproj", "{BB1E1135-830F-49B5-8820-CD46D5837985}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RaytracerMain", "Source\RaytracerMain\Raytracer.vcxproj", "{C50E3391-4559-46F3-B487-C07C3078A651}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BB1E1135-830F-49B5-8820-CD46D5837985} = {BB1E1135-830F-49B5-8820-CD46D5837985}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +14,14 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{58D77ABD-B2B2-4A9D-9191-B73A585D803F}.Debug|Win32.ActiveCfg = Debug|Win32
-		{58D77ABD-B2B2-4A9D-9191-B73A585D803F}.Debug|Win32.Build.0 = Debug|Win32
-		{58D77ABD-B2B2-4A9D-9191-B73A585D803F}.Release|Win32.ActiveCfg = Release|Win32
-		{58D77ABD-B2B2-4A9D-9191-B73A585D803F}.Release|Win32.Build.0 = Release|Win32
+		{BB1E1135-830F-49B5-8820-CD46D5837985}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BB1E1135-830F-49B5-8820-CD46D5837985}.Debug|Win32.Build.0 = Debug|Win32
+		{BB1E1135-830F-49B5-8820-CD46D5837985}.Release|Win32.ActiveCfg = Release|Win32
+		{BB1E1135-830F-49B5-8820-CD46D5837985}.Release|Win32.Build.0 = Release|Win32
+		{C50E3391-4559-46F3-B487-C07C3078A651}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C50E3391-4559-46F3-B487-C07C3078A651}.Debug|Win32.Build.0 = Debug|Win32
+		{C50E3391-4559-46F3-B487-C07C3078A651}.Release|Win32.ActiveCfg = Release|Win32
+		{C50E3391-4559-46F3-B487-C07C3078A651}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
