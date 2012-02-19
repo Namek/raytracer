@@ -115,7 +115,16 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 {
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
 
-	// TODO modify dib->data
+	RGBQUAD color;
+	
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			color.rgbRed = color.rgbGreen = color.rgbBlue = unsigned char((x*y) % 255);
+			FreeImage_SetPixelColor(dib, x, y, &color);
+		}
+	}
 
 	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
