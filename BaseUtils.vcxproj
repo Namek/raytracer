@@ -72,11 +72,14 @@
     <ClInclude Include="Source\BaseUtils\CGeneralTree.h" />
     <ClInclude Include="Source\BaseUtils\CSingleton.h" />
     <ClInclude Include="Source\BaseUtils\CTextFile.h" />
+    <ClInclude Include="Source\BaseUtils\png.h" />
+    <ClInclude Include="Source\BaseUtils\PNGWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\BaseUtils\CApplicationLog.cpp" />
     <ClCompile Include="Source\BaseUtils\CFile.cpp" />
     <ClCompile Include="Source\BaseUtils\CTextFile.cpp" />
+    <ClCompile Include="Source\BaseUtils\PNGWriter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
