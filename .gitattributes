@@ -1,4 +1,5 @@
 * text=auto !eol
+Assets/FreeImage.dll -text
 Assets/data/room.brs -text
 Assets/data/v0/man_lgt.jpg -text
 Assets/data/v0/v0.atr -text
@@ -29,7 +30,6 @@ Assets/data/v7/v7.cam -text
 Assets/data/v7/v7.lgt -text
 /BaseUtils.vcxproj -text
 /BaseUtils.vcxproj.filters -text
-Dependencies/Dynamic/FreeImage.dll -text
 Dependencies/Include/FreeImage.h -text
 Dependencies/Static/FreeImage.lib -text
 /RayTracer.sln -text
