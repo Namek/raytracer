@@ -115,13 +115,36 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 {
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
 
-	RGBQUAD color;
-	
+	RGBQUAD color = {0};
+	RGBQUAD backColor = {0};
+	const int numTriangles = m_Triangles.size();
+
+	cout << endl;
 	for (int x = 0; x < width; x++)
 	{
+		cout << "Row: " << x << "/" << width << endl;
 		for (int y = 0; y < height; y++)
 		{
-			color.rgbRed = color.rgbGreen = color.rgbBlue = unsigned char((x*y) % 255);
+			// The background color is black
+			color.rgbRed = color.rgbGreen = color.rgbBlue = 0;
+			FreeImage_GetPixelColor(dib, x, y, &backColor);
+
+			// Calculate the color
+			Vector3d observerPos(static_cast<float>(x), static_cast<float>(y), -1000.0f);
+			Vector3d rayDir(0.0f, 0.0f, 1.0f);
+			for(int t = 0; t < numTriangles; ++t)
+			{
+				if(m_Triangles[t].intersection(observerPos, rayDir) > -1.0f)
+				{
+					color.rgbBlue = color.rgbGreen = color.rgbRed = 25;
+				}
+			}
+
+			// Fill the pixel with the calculated color
+			color.rgbBlue = static_cast<BYTE>(min(static_cast<int>(color.rgbBlue) + backColor.rgbBlue, 255));
+			color.rgbGreen = static_cast<BYTE>(min(static_cast<int>(color.rgbGreen) + backColor.rgbGreen, 255));
+			color.rgbRed = static_cast<BYTE>(min(static_cast<int>(color.rgbRed) + backColor.rgbRed, 255));
+
 			FreeImage_SetPixelColor(dib, x, y, &color);
 		}
 	}

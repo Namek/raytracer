@@ -11,7 +11,7 @@ namespace nprt
 		float x, y, z;
 		Vector3d(void);
 		Vector3d(Point3d&, Point3d&, bool);
-		Vector3d(float, float, float, bool);
+		Vector3d(float, float, float, bool norm = true);
 		~Vector3d(void) { };
 		float dotProduct(Vector3d&);
 		Vector3d crossProduct(Vector3d&, bool);
