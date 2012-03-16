@@ -16,6 +16,7 @@ int main(int argc, char* argv[])
 	
 	Scene scene;
 	scene.LoadGeometry("data/room.brs");
+	scene.LoadAttributes("data/attributes.atr");
 
 	scene.RenderToFile("test.png", params.GetInt("width", 320), params.GetInt("height", 240));
 

@@ -96,6 +96,7 @@ xcopy /Y /E $(ProjectDir)\Dependencies\Dynamic\* $(ProjectDir)\Bin\$(Configurati
     <ClInclude Include="Source\RaytracerMain\Geometry\Point3d.h" />
     <ClInclude Include="Source\RaytracerMain\Geometry\Triangle.h" />
     <ClInclude Include="Source\RaytracerMain\Geometry\Vector3d.h" />
+    <ClInclude Include="Source\RaytracerMain\Material.h" />
     <ClInclude Include="Source\RaytracerMain\Scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

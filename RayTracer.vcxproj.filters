@@ -39,5 +39,8 @@
     <ClInclude Include="Source\RaytracerMain\Geometry\Vector3d.h">
       <Filter>Source\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\Material.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -8,8 +8,8 @@ using namespace nprt;
 Triangle::Triangle() {
 	p1 = Point3d();
 	p2 = Point3d();
-	p3 = Point3d();
-	attributeIndex = -1;
+	p3 = Point3d();	
+	materialIndex = -1;
 	d = -1;
 	norm = Vector3d();
 	a1 = a2 = a3 = b1 = b2 = b3 = 0.f;
@@ -23,7 +23,7 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind) {
 	this->p2 = p2;
 	this->p3 = p3;
 	this->ind = ind;
-	attributeIndex = -1;
+	materialIndex = -1;
 
 	Vector3d p1p2(p1, p2, false);
 	Vector3d p1p3(p1, p3, false);
@@ -37,7 +37,7 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind) {
 	this->p2 = p2;
 	this->p3 = p3;
 	this->ind = ind;
-	attributeIndex = index;
+	materialIndex = index;
 
 	Vector3d p1p2(p1, p2, false);
 	Vector3d p1p3(p1, p3, false);
@@ -46,9 +46,9 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind) {
 	preprocess();
 }
 
-void Triangle::setAtributeIndex(int index) 
+void Triangle::setMaterialIndex(int index) 
 {
-	attributeIndex = index;
+	materialIndex = index;
 }
 
 //Wyznaczam wartoœæ a1, b1, d1, a2, b2, d2, a3, b3, d3, max1, max2, min1, min2

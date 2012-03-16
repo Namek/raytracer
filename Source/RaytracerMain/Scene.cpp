@@ -96,7 +96,7 @@ void Scene::LoadGeometry(const char* filename)
 
 						while (lineStream >> ind) 
 						{
-							m_Triangles[i].setAtributeIndex(ind);
+							m_Triangles[i].setMaterialIndex(ind);
 							i++;
 						}
 					}
@@ -109,6 +109,97 @@ void Scene::LoadGeometry(const char* filename)
 	m_DomainSize.x = m_MaxDomain.x - m_MinDomain.x;
 	m_DomainSize.y = m_MaxDomain.y - m_MinDomain.y;
 	m_DomainSize.z = m_MaxDomain.z - m_MinDomain.z;
+}
+
+void Scene::LoadAttributes(const char* filePath) 
+{
+	ifstream file;
+	string line, token;
+	stringstream lineStream;
+
+	float kd, ks, wg, ka, r, g, b, kt, eta, kr;
+	kd = ks = wg = ka = r = g = b = kt = eta = kr = 0.0f;
+
+	file.open(filePath);
+
+	if (file.is_open())
+	{
+		getline(file, line);
+		lineStream.clear();
+		lineStream.str(line);
+
+		int attributeNumber = 0;
+		lineStream >> attributeNumber;			
+		getline(file, line);
+		while(!file.eof())
+		{
+			for (int i=0; i<attributeNumber; i++) 
+			{
+				getline(file, line);
+				getline(file, line);
+				getline(file, line);
+				lineStream.clear();
+				lineStream.str(line);
+				while(lineStream>>token) 
+				{
+					if (token=="kd")		
+					{
+						lineStream >> kd;
+					}
+					else if (token=="ks")		
+					{
+						lineStream >> ks;
+					}
+					else if (token=="gs")		
+					{
+						lineStream >> wg;
+					}
+					else if (token=="color")	
+					{
+						lineStream >> r;
+						lineStream >> g;
+						lineStream >> b;
+					}
+					else if (token=="kts")	
+					{
+						lineStream >> kt;
+					}
+					else if (token=="eta")	
+					{
+						lineStream >> eta;
+					}
+					else if (token=="kf")		
+					{
+						lineStream >> kr;
+					}
+					else if (token=="ka")		
+					{
+						lineStream >> ka;
+					}
+					else if (token=="enddef") 
+					{
+						Material m(kd, ks, wg, ka, r / 255.0f, g / 255.0f, b / 255.0f, kt, eta, kr);
+						m.kdcG = kd;
+						m.kdcB = kd;
+						m.kscG = ks;
+						m.kscB = ks;
+						m.krcG = kt;
+						m.krcB = kt;
+						m.kacR = m.kacG = m.kacB = 0.0f;
+						m_Materials.push_back(m);
+
+						break;
+					}
+					getline(file, line);
+					lineStream.clear();
+					lineStream.str(line);
+				}
+				getline(file, line);
+			}
+			break;
+		}
+	}
+	file.close();
 }
 
 void Scene::RenderToFile(const char* filename, int width, int height)
@@ -136,7 +227,9 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 			{
 				if(m_Triangles[t].intersection(observerPos, rayDir) > -1.0f)
 				{
-					color.rgbBlue = color.rgbGreen = color.rgbRed = 25;
+					color.rgbRed = static_cast<BYTE>(255 * m_Materials[m_Triangles[t].materialIndex].r);
+					color.rgbGreen = static_cast<BYTE>(255 * m_Materials[m_Triangles[t].materialIndex].g);
+					color.rgbBlue = static_cast<BYTE>(255 * m_Materials[m_Triangles[t].materialIndex].b);
 				}
 			}
 
