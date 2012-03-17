@@ -87,8 +87,9 @@ void Scene::LoadGeometry(const char* filename)
 				{
 					int i=0;
 					int ind;
+					const int numTriangles = m_Triangles.size();
 
-					while (i<trianSize) 
+					while (i < numTriangles) 
 					{
 						getline(file, line);
 						lineStream.clear();
@@ -205,38 +206,56 @@ void Scene::LoadAttributes(const char* filePath)
 void Scene::RenderToFile(const char* filename, int width, int height)
 {
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
-
 	RGBQUAD color = {0};
-	RGBQUAD backColor = {0};
 	const int numTriangles = m_Triangles.size();
+	
+	Vector3d rayDir;
+	const Vector3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
 
-	cout << endl;
 	for (int x = 0; x < width; x++)
 	{
-		cout << "Row: " << x << "/" << width << endl;
+		cout << "Row: " << (x + 1) << "/" << width << "\n";
 		for (int y = 0; y < height; y++)
 		{
 			// The background color is black
 			color.rgbRed = color.rgbGreen = color.rgbBlue = 0;
-			FreeImage_GetPixelColor(dib, x, y, &backColor);
 
-			// Calculate the color
-			Vector3d observerPos(static_cast<float>(x), static_cast<float>(y), -1000.0f);
-			Vector3d rayDir(0.0f, 0.0f, 1.0f);
+			// Calculate the ray direction based on the magic equations from the lecture
+			Point3d U = m_Camera.topRight - m_Camera.topLeft;
+			Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
+			Point3d ul = m_Camera.topLeft;
+			Point3d P_ij = ul + U * ((float)x / (m_Camera.xResolution - 1)) + V * ((float)y / (m_Camera.yResolution - 1));
+
+			rayDir.x = (P_ij.x - observerPos.x);
+			rayDir.y = (P_ij.y - observerPos.y);
+			rayDir.z = (P_ij.z - observerPos.z);
+			rayDir.normalize();
+
+			// Select the driangle that has the smallest intersection distance
+			float minDist = numeric_limits<float>::max();
+			int idx = -1;
 			for(int t = 0; t < numTriangles; ++t)
 			{
-				if(m_Triangles[t].intersection(observerPos, rayDir) > -1.0f)
+				float intersectionDist = m_Triangles[t].intersection(observerPos, rayDir);
+				if(intersectionDist > -1.0f && intersectionDist < minDist)
 				{
-					color.rgbRed = static_cast<BYTE>(255 * m_Materials[m_Triangles[t].materialIndex].r);
-					color.rgbGreen = static_cast<BYTE>(255 * m_Materials[m_Triangles[t].materialIndex].g);
-					color.rgbBlue = static_cast<BYTE>(255 * m_Materials[m_Triangles[t].materialIndex].b);
+					idx = t;
+					minDist = intersectionDist;
 				}
 			}
 
-			// Fill the pixel with the calculated color
-			color.rgbBlue = static_cast<BYTE>(min(static_cast<int>(color.rgbBlue) + backColor.rgbBlue, 255));
-			color.rgbGreen = static_cast<BYTE>(min(static_cast<int>(color.rgbGreen) + backColor.rgbGreen, 255));
-			color.rgbRed = static_cast<BYTE>(min(static_cast<int>(color.rgbRed) + backColor.rgbRed, 255));
+			// Get the colour only if a triangle has been hit
+			if(idx != -1)
+			{
+				color.rgbRed = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].r);
+				color.rgbGreen = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].g);
+				color.rgbBlue = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].b);
+			}
+
+			// Debug output
+			//cout << (int)color.rgbRed << ", " << (int)color.rgbGreen << ", " << (int)color.rgbBlue << "\n";
+			//cout << "hit: " << x << ", " << y << " (" << idx << ")\n";
+			//cin.get();
 
 			FreeImage_SetPixelColor(dib, x, y, &color);
 		}
@@ -244,4 +263,73 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 
 	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
+}
+
+void Scene::LoadCamera(const char* filePath) 
+{
+	ifstream file;
+	string line, token;
+	stringstream lineStream;
+	Point3d cameraCenter, topLeft, bottomLeft, topRight;
+	int xRes=-1, yRes=-1;
+
+	file.open(filePath);
+
+	if (file.is_open()) 
+	{
+		while(!file.eof())
+		{
+			getline(file, line);
+			lineStream.clear();
+			lineStream.str(line);
+			while (lineStream >> token)
+			{
+
+				if (token == "viewpoint")
+				{
+					float x, y, z;
+					lineStream >> x;
+					lineStream >> y;
+					lineStream >> z;
+					cameraCenter = Point3d(x, y, z);
+				}
+
+				if (token == "screen")
+				{
+					getline(file, line);
+					lineStream.clear();
+					lineStream.str(line);
+					float x, y, z;
+					lineStream >> x;
+					lineStream >> y;
+					lineStream >> z;
+					topLeft = Point3d(x, y, z);
+
+					getline(file, line);
+					lineStream.clear();
+					lineStream.str(line);
+					lineStream >> x;
+					lineStream >> y;
+					lineStream >> z;
+					topRight = Point3d(x, y, z);
+
+					getline(file, line);
+					lineStream.clear();
+					lineStream.str(line);
+					lineStream >> x;
+					lineStream >> y;
+					lineStream >> z;
+					bottomLeft = Point3d(x, y, z);
+				}
+
+				if (token == "resolution")
+				{
+					lineStream >> xRes;
+					lineStream >> yRes;
+				}
+			}
+		}
+	}
+	file.close();
+	m_Camera = Camera(cameraCenter, topLeft, bottomLeft, topRight, xRes, yRes);
 }

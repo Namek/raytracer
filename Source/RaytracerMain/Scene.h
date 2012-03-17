@@ -5,6 +5,7 @@
 
 #include "Geometry\Triangle.h"
 #include "Material.h"
+#include "Camera.h"
 
 namespace nprt
 {
@@ -16,6 +17,7 @@ class Scene
 
 		void LoadGeometry(const char* filename);
 		void LoadAttributes(const char* filePath);
+		void LoadCamera(const char* filename);
 		void RenderToFile(const char* filename, int width, int height);
 
 	private:
@@ -25,6 +27,7 @@ class Scene
 		Point3d m_MaxDomain;
 		Point3d m_MinDomain;
 		Point3d m_DomainSize;
+		Camera m_Camera;
 };
 
 

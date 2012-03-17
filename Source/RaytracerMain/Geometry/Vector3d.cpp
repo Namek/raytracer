@@ -36,11 +36,11 @@ Vector3d::Vector3d(Point3d& p1, Point3d& p2, bool nor) {
 }
 
 
-float Vector3d::dotProduct(Vector3d& vector) {
+float Vector3d::dotProduct(const Vector3d& vector) const {
 	return x*vector.x + y*vector.y + z*vector.z;
 }
 
-Vector3d Vector3d::crossProduct(Vector3d& vector, bool nor) {
+Vector3d Vector3d::crossProduct(const Vector3d& vector, bool nor) const {
 	float xC = y*vector.z - z*vector.y;
 	float yC = z*vector.x - x*vector.z;
 	float zC = x*vector.y - y*vector.x;

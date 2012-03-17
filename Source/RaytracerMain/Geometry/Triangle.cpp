@@ -157,13 +157,12 @@ void Triangle::preprocess()
 		//Rzutujemy na p³aszczyznê XZ
 		plane = 1;
 
-		max1 = (p1.x>p2.x && p1.x>p3.x)?p1.x:(p2.x>p3.x?p2.x:p3.x);
-		max2 = (p1.z>p2.z && p1.z>p3.z)?p1.z:(p2.z>p3.z?p2.z:p3.z);
-		min1 = (p1.x<p2.x && p1.x<p3.x)?p1.x:(p2.x<p3.x?p2.x:p3.x);
-		min2 = (p1.z<p2.z && p1.z<p3.z)?p1.z:(p2.z<p3.z?p2.z:p3.z);
+		max1 = (p1.x > p2.x && p1.x > p3.x) ? p1.x : (p2.x > p3.x ? p2.x : p3.x);
+		max2 = (p1.z > p2.z && p1.z > p3.z) ? p1.z : (p2.z > p3.z ? p2.z : p3.z);
+		min1 = (p1.x < p2.x && p1.x < p3.x) ? p1.x : (p2.x < p3.x ? p2.x : p3.x);
+		min2 = (p1.z < p2.z && p1.z < p3.z) ? p1.z : (p2.z < p3.z ? p2.z : p3.z);
 
 		//Prosta zawieraj¹ca punkty P1 P2
-
 		if (p1.x == p2.x)
 		{
 			a1 = 1;
@@ -351,10 +350,26 @@ void Triangle::preprocess()
 }
 
 
-float Triangle::intersection(const Vector3d& observer_pos, const Vector3d& ray)
+float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 {
-	// TODO
-	observer_pos;
-	ray;
-	return -1;
+	// Check ray-plane intersection
+	float dist = -(origin.dotProduct(norm) + d) / (dir.dotProduct(norm));
+
+	if(dist > 1000000.0f)
+		return -1;
+	
+	// Calculate the intersection point
+	Vector3d intersectionPt = origin + dir * dist;
+
+	// Check if the point is inside the triangle (algebraic method)
+	Vector3d v1 = origin - p1;
+	Vector3d v2 = origin - p2;
+	Vector3d n1 = v1.crossProduct(v2, true);
+
+	if(origin.dotProduct(n1) + d < 0)
+	{
+		return -1;
+	}
+
+	return dist;
 }

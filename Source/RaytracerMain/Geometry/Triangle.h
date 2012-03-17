@@ -15,7 +15,7 @@ namespace nprt
 			void setMaterialIndex(int);
 
 			// Returns the intersection distance or -1
-			float intersection(const Vector3d& observer_pos, const Vector3d& ray);
+			float intersection(const Vector3d& observer_pos, const Vector3d& ray) const;
 			friend std::ostream& operator<<(std::ostream& os, const Triangle& t) 
 			{
 				return os << t.p1 << t.p2 << t.p3 <<  t.materialIndex << " " << t.d << "\n" << t.norm

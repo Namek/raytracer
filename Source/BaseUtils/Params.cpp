@@ -37,7 +37,7 @@ Params::Params(const char* filename)
 	}
 	else
 	{
-		cout << "No params file exists.";
+		cout << "No params file exists.\n";
 	}
 	file.close();
 }

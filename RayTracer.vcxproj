@@ -51,7 +51,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include\;$(SolutionDir)\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -86,6 +86,7 @@ xcopy /Y /E $(ProjectDir)\Dependencies\Dynamic\* $(ProjectDir)\Bin\$(Configurati
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\RaytracerMain\Camera.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Point3d.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Triangle.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Vector3d.cpp" />
@@ -93,6 +94,7 @@ xcopy /Y /E $(ProjectDir)\Dependencies\Dynamic\* $(ProjectDir)\Bin\$(Configurati
     <ClCompile Include="Source\RaytracerMain\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\RaytracerMain\Camera.h" />
     <ClInclude Include="Source\RaytracerMain\Geometry\Point3d.h" />
     <ClInclude Include="Source\RaytracerMain\Geometry\Triangle.h" />
     <ClInclude Include="Source\RaytracerMain\Geometry\Vector3d.h" />
