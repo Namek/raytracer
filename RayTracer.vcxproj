@@ -81,8 +81,7 @@
       <AdditionalDependencies>$(SolutionDir)Bin\$(Configuration)\Utils\Utils.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /E $(ProjectDir)\Assets\* $(ProjectDir)\Bin\$(Configuration)\$(ProjectName)\
-xcopy /Y /E $(ProjectDir)\Dependencies\Dynamic\* $(ProjectDir)\Bin\$(Configuration)\$(ProjectName)\</Command>
+      <Command>xcopy /Y /E $(ProjectDir)\Assets\* $(ProjectDir)\Bin\$(Configuration)\$(ProjectName)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

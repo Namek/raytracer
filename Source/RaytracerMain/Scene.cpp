@@ -212,10 +212,10 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 	Vector3d rayDir;
 	const Vector3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
 
-	for (int x = 0; x < width; x++)
+	for (int y = 0; y < height; y++)
 	{
-		cout << "Row: " << (x + 1) << "/" << width << "\n";
-		for (int y = 0; y < height; y++)
+		cout << "Row: " << (y + 1) << "/" << height << "\n";
+		for (int x = 0; x < width; x++)
 		{
 			// The background color is black
 			color.rgbRed = color.rgbGreen = color.rgbBlue = 0;
