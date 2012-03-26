@@ -115,19 +115,20 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 	{
 		std::vector<Triangle> nodesTriangles[CHILD_SUBNODES_COUNT];
 		pair<Point3d, Point3d> nodesDomains[CHILD_SUBNODES_COUNT];
-		Point3d center = m_MinDomain + m_DomainSize*0.5f;
+		Vector3d halfDomainSize = m_DomainSize * 0.5f;
+		Point3d center = m_MinDomain + halfDomainSize;
 		bool assigned;
 
 		// Calculate subboxes' domains
 		nodesDomains[CHILD_LOWER_NEAR_LEFT_INDEX] = pair<Point3d, Point3d>(minDomain, center);
-		nodesDomains[CHILD_LOWER_FAR_LEFT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(0, 0, m_DomainSize.z), center + Vector3d(0, 0, m_DomainSize.z));
-		nodesDomains[CHILD_UPPER_NEAR_LEFT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(0, m_DomainSize.y, 0), center + Vector3d(0, m_DomainSize.y, 0));
-		nodesDomains[CHILD_UPPER_FAR_LEFT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(0, m_DomainSize.y, m_DomainSize.z), center + Vector3d(0, m_DomainSize.y, m_DomainSize.z));
+		nodesDomains[CHILD_LOWER_FAR_LEFT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(0, 0, halfDomainSize.z), center + Vector3d(0, 0, halfDomainSize.z));
+		nodesDomains[CHILD_UPPER_NEAR_LEFT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(0, halfDomainSize.y, 0), center + Vector3d(0, halfDomainSize.y, 0));
+		nodesDomains[CHILD_UPPER_FAR_LEFT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(0, halfDomainSize.y, halfDomainSize.z), center + Vector3d(0, halfDomainSize.y, halfDomainSize.z));
 
-		nodesDomains[CHILD_LOWER_NEAR_RIGHT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(m_DomainSize.x, 0, 0), center + Vector3d(m_DomainSize.x, 0, 0));
-		nodesDomains[CHILD_LOWER_FAR_RIGHT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(m_DomainSize.x, 0, 0), center + Vector3d(m_DomainSize.x, 0, 0));
-		nodesDomains[CHILD_UPPER_NEAR_RIGHT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(m_DomainSize.x, m_DomainSize.y, 0), center + Vector3d(m_DomainSize.x, m_DomainSize.y, 0));
-		nodesDomains[CHILD_UPPER_FAR_RIGHT_INDEX] = pair<Point3d, Point3d>(minDomain, center);
+		nodesDomains[CHILD_LOWER_NEAR_RIGHT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(halfDomainSize.x, 0, 0), center + Vector3d(halfDomainSize.x, 0, 0));
+		nodesDomains[CHILD_LOWER_FAR_RIGHT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(halfDomainSize.x, 0, halfDomainSize.z), center + Vector3d(halfDomainSize.x, 0, halfDomainSize.z));
+		nodesDomains[CHILD_UPPER_NEAR_RIGHT_INDEX] = pair<Point3d, Point3d>(minDomain + Vector3d(halfDomainSize.x, halfDomainSize.y, 0), center + Vector3d(halfDomainSize.x, halfDomainSize.y, 0));
+		nodesDomains[CHILD_UPPER_FAR_RIGHT_INDEX] = pair<Point3d, Point3d>(center, center + Vector3d(halfDomainSize.x, halfDomainSize.y, halfDomainSize.z));
 
 
 		// Assign triangles to the subnodes. Some triangles may exist in multiple subnodes.
