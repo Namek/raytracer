@@ -1,20 +1,24 @@
 #pragma once
 
-#include "Point3d.h"
-
+#include <iostream>
 
 namespace nprt 
 {
+	class Vector3d;
+	typedef Vector3d Point3d;
+
 	class Vector3d
 	{
 	public:
 		float x, y, z;
 		Vector3d(void);
 		Vector3d(Point3d&, Point3d&, bool);
-		Vector3d(float, float, float, bool norm = true);
+		Vector3d(float, float, float, bool norm = false);
 		~Vector3d(void) { };
+		void set(float x, float y, float z);
 		float dotProduct(const Vector3d&) const;
 		Vector3d crossProduct(const Vector3d&, bool) const;
+		bool isInAABB(const Point3d& minDomain, const Point3d& maxDomain) const;
 		
 		inline Vector3d operator*(float scalar) const
 		{
@@ -25,10 +29,6 @@ namespace nprt
 			return Vector3d(x + vec.x, y + vec.y, z + vec.z);
 		}
 		inline Vector3d operator-(const Vector3d& vec) const
-		{
-			return Vector3d(x - vec.x, y - vec.y, z - vec.z);
-		}
-		inline Vector3d operator-(const Point3d& vec) const
 		{
 			return Vector3d(x - vec.x, y - vec.y, z - vec.z);
 		}

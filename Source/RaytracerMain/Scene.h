@@ -3,9 +3,9 @@
 #include <vector>
 #include <FreeImage.h>
 
-#include "Geometry\Triangle.h"
 #include "Material.h"
 #include "Camera.h"
+#include "Geometry\Octree.h"
 
 namespace nprt
 {
@@ -21,12 +21,10 @@ class Scene
 		void RenderToFile(const char* filename, int width, int height);
 
 	private:
-		std::vector<Triangle> m_Triangles;
+		std::vector<Triangle> m_Triangles;//deprecated: Octree will build it's own list of triangles (they will be cut)
 		std::vector<Material> m_Materials;
 
-		Point3d m_MaxDomain;
-		Point3d m_MinDomain;
-		Point3d m_DomainSize;
+		Octree m_Octree;
 		Camera m_Camera;
 };
 

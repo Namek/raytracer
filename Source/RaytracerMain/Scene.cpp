@@ -5,10 +5,7 @@ using namespace nprt;
 using namespace std;
 
 
-Scene::Scene() : m_Triangles(), 
-	m_MaxDomain(-numeric_limits<float>::infinity(), -numeric_limits<float>::infinity(), -numeric_limits<float>::infinity()),
-	m_MinDomain(numeric_limits<float>::infinity(), numeric_limits<float>::infinity(), numeric_limits<float>::infinity()),
-	m_DomainSize(0, 0, 0)
+Scene::Scene() : m_Triangles()
 { }
 
 
@@ -19,9 +16,10 @@ void Scene::LoadGeometry(const char* filename)
 	string line, token;
 	stringstream lineStream;
 	vector<Point3d> vertices;
+	Point3d minDomain, maxDomain;
 
-	m_MaxDomain.x = m_MaxDomain.y = m_MaxDomain.z = -numeric_limits<float>::infinity();
-	m_MinDomain.x = m_MinDomain.y = m_MinDomain.z = numeric_limits<float>::infinity();
+	maxDomain.x = maxDomain.y = maxDomain.z = -numeric_limits<float>::infinity();
+	minDomain.x = minDomain.y = minDomain.z = numeric_limits<float>::infinity();
 	
 	file.open(filename);
 
@@ -51,13 +49,13 @@ void Scene::LoadGeometry(const char* filename)
 						lineStream >> t2;
 						lineStream >> t3;
 
-						m_MinDomain.x = t1 < m_MinDomain.x ? t1 : m_MinDomain.x;
-						m_MinDomain.y = t2 < m_MinDomain.y ? t2 : m_MinDomain.y;
-						m_MinDomain.z = t3 < m_MinDomain.z ? t3 : m_MinDomain.z;
+						minDomain.x = t1 < minDomain.x ? t1 : minDomain.x;
+						minDomain.y = t2 < minDomain.y ? t2 : minDomain.y;
+						minDomain.z = t3 < minDomain.z ? t3 : minDomain.z;
 
-						m_MaxDomain.x = t1 > m_MaxDomain.x ? t1 : m_MaxDomain.x;
-						m_MaxDomain.y = t2 > m_MaxDomain.y ? t2 : m_MaxDomain.y;
-						m_MaxDomain.z = t3 > m_MaxDomain.z ? t3 : m_MaxDomain.z;
+						maxDomain.x = t1 > maxDomain.x ? t1 : maxDomain.x;
+						maxDomain.y = t2 > maxDomain.y ? t2 : maxDomain.y;
+						maxDomain.z = t3 > maxDomain.z ? t3 : maxDomain.z;
 						
 						vertices[i] = Point3d(t1, t2, t3);
 					}
@@ -107,9 +105,7 @@ void Scene::LoadGeometry(const char* filename)
 	}
 	file.close();
 
-	m_DomainSize.x = m_MaxDomain.x - m_MinDomain.x;
-	m_DomainSize.y = m_MaxDomain.y - m_MinDomain.y;
-	m_DomainSize.z = m_MaxDomain.z - m_MinDomain.z;
+	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
 }
 
 void Scene::LoadAttributes(const char* filePath) 

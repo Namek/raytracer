@@ -38,14 +38,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)\Bin\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\$(ProjectName)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(SolutionDir)\Build\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)\Bin\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)\Build\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -61,8 +61,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /Y /E $(ProjectDir)\Assets\* $(ProjectDir)\Bin\$(Configuration)\$(ProjectName)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -86,7 +85,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\RaytracerMain\Camera.cpp" />
-    <ClCompile Include="Source\RaytracerMain\Geometry\Point3d.cpp" />
+    <ClCompile Include="Source\RaytracerMain\Geometry\Octree.cpp" />
+    <ClCompile Include="Source\RaytracerMain\Geometry\Plane.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Triangle.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Vector3d.cpp" />
     <ClCompile Include="Source\RaytracerMain\main.cpp" />
@@ -94,7 +94,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RaytracerMain\Camera.h" />
-    <ClInclude Include="Source\RaytracerMain\Geometry\Point3d.h" />
+    <ClInclude Include="Source\RaytracerMain\Geometry\Octree.h" />
+    <ClInclude Include="Source\RaytracerMain\Geometry\Plane.h" />
     <ClInclude Include="Source\RaytracerMain\Geometry\Triangle.h" />
     <ClInclude Include="Source\RaytracerMain\Geometry\Vector3d.h" />
     <ClInclude Include="Source\RaytracerMain\Material.h" />

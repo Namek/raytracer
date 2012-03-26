@@ -35,6 +35,12 @@ Vector3d::Vector3d(Point3d& p1, Point3d& p2, bool nor) {
 	}
 }
 
+void Vector3d::set(float x, float y, float z)
+{
+	this->x = x;
+	this->y = y;
+	this->z = z;
+}
 
 float Vector3d::dotProduct(const Vector3d& vector) const {
 	return x*vector.x + y*vector.y + z*vector.z;
@@ -46,6 +52,13 @@ Vector3d Vector3d::crossProduct(const Vector3d& vector, bool nor) const {
 	float zC = x*vector.y - y*vector.x;
 
 	return Vector3d(xC, yC, zC, nor);
+}
+
+bool Vector3d::isInAABB(const Point3d& minDomain, const Point3d& maxDomain) const
+{
+	return x >= minDomain.x && x <= maxDomain.x
+		&& y >= minDomain.y && x <= maxDomain.y
+		&& z >= minDomain.z && x <= maxDomain.z;
 }
 
 float Vector3d::length() {
