@@ -6,8 +6,6 @@
 
 namespace nprt
 {
-	const int NODE_AXIS_INDEX_X = 1;
-
 	class Octree
 	{
 	private:
@@ -20,7 +18,7 @@ namespace nprt
 			OctreeNode* findNode(const Vector3d& point, const Vector3d& ray);		
 			OctreeNode* findNode(const Vector3d& point);
 
-
+			bool m_isLeaf;
 			int m_TrianglesInclusiveCount;
 			std::unique_ptr<OctreeNode*[]> m_NearNodes;
 			std::unique_ptr<OctreeNode*[]> m_Subnodes;
@@ -32,6 +30,7 @@ namespace nprt
 
 		private:
 			void divide(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int depth);
+			void updateNearNodes(bool isRoot);
 
 			static const int NEAR_NODE_ABOVE_INDEX = 0;
 			static const int NEAR_NODE_BELOW_INDEX = 1;
@@ -56,7 +55,7 @@ namespace nprt
 			static const int AXIS_PLANE_XOZ = 2;
 			static const int AXIS_PLANE_YOZ = 3;
 
-			static const int MAX_DIVIDE_DEPTH = 4;
+			static const int MAX_DIVIDE_DEPTH = 6;
 		};
 
 	public:

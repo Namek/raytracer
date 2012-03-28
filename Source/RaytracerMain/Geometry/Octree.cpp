@@ -5,6 +5,7 @@ using namespace std;
 
 
 Octree::OctreeNode::OctreeNode() : 
+	m_isLeaf(false),
 	m_TrianglesInclusiveCount(0),
 	m_NearNodes(new OctreeNode*[NEAR_NODES_COUNT]),
 	m_Subnodes(new OctreeNode*[CHILD_SUBNODES_COUNT]),
@@ -17,6 +18,7 @@ Octree::OctreeNode::OctreeNode() :
 }
 
 Octree::OctreeNode::OctreeNode(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int divideDepth) :
+	m_isLeaf(false),
 	m_TrianglesInclusiveCount(0),
 	m_NearNodes(new OctreeNode*[NEAR_NODES_COUNT]),
 	m_Subnodes(new OctreeNode*[CHILD_SUBNODES_COUNT]),
@@ -148,7 +150,6 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 				}
 			}
 		}
-		printf("Assignments: %d\n", assignments);
 
 		// Create subnodes
 		for (int i = 0; i < CHILD_SUBNODES_COUNT; ++i)
@@ -161,18 +162,31 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 			);
 			m_TrianglesInclusiveCount += m_Subnodes[i]->m_TrianglesInclusiveCount;
 		}
-		for (int i = 0; i < depth; i++)
-			printf("  ");
-		printf("%d\n", m_TrianglesInclusiveCount);
 	}
 	else
 	{
 		// We won't divide deeper so gimme teh your triangles.
 		m_Triangles.assign(triangles.begin(), triangles.end());
 		m_TrianglesInclusiveCount = m_Triangles.size();
+		m_isLeaf = true;
 	}
 }
 
+void Octree::OctreeNode::updateNearNodes(bool isRoot)
+{
+	if (!m_isLeaf)
+	{
+		for (int i = 0; i < CHILD_SUBNODES_COUNT; ++i)
+		{
+			bool onTop = false;
+			bool onLeftEdge = false;
+			bool onRightEdge = false;
+			bool onBottom = false;
+
+			//m_Subnodes[i]->m_NearNodes[NEAR_NODE_ABOVE_INDEX] = isRoot && onTop ? nullptr : m_Subnodes[i^2];
+		}
+	}
+}
 
 
 ///////////////////////////////////////////////////////////////
@@ -192,6 +206,7 @@ void Octree::buildTree(const std::vector<Triangle>& triangles, const Point3d& mi
 	// Create root node. Save domain boundaries and build whole tree!
 	m_pRoot.reset(new OctreeNode(minDomain, maxDomain, triangles));
 
+	//m_pRoot->updateNearNodes(true);
 	// TODO
 	// in the end update near nodes
 }
