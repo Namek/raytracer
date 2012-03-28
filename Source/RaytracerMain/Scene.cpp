@@ -224,14 +224,14 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 			Point3d U = m_Camera.topRight - m_Camera.topLeft;
 			Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
 			Point3d ul = m_Camera.topLeft;
-			Point3d P_ij = ul + U * ((float)x / (m_Camera.xResolution - 1)) + V * ((float)y / (m_Camera.yResolution - 1));
+			Point3d P_ij = ul + U * ((float)x / (width - 1)) + V * ((float)y / (height - 1));
 
 			rayDir.x = (P_ij.x - observerPos.x);
 			rayDir.y = (P_ij.y - observerPos.y);
 			rayDir.z = (P_ij.z - observerPos.z);
 			rayDir.normalize();
 
-			// Select the driangle that has the smallest intersection distance
+			// Select the triangle that has the smallest intersection distance
 			float minDist = numeric_limits<float>::max();
 			int idx = -1;
 			for(int t = 0; t < numTriangles; ++t)

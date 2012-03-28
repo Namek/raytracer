@@ -21,14 +21,14 @@ Point3d::Point3d(float x, float y, float z) {
 Point3d::~Point3d() {
 }
 
-float Point3d::getX() {
+float Point3d::getX() const {
 	return x;
 }
 
-float Point3d::getY() {
+float Point3d::getY() const {
 	return y;
 }
 
-float Point3d::getZ() {
+float Point3d::getZ() const {
 	return z;
 }

@@ -10,6 +10,7 @@ namespace nprt
 	public:
 		float x, y, z;
 		Vector3d(void);
+		Vector3d(const Point3d& pt);
 		Vector3d(Point3d&, Point3d&, bool);
 		Vector3d(float, float, float, bool norm = true);
 		~Vector3d(void) { };

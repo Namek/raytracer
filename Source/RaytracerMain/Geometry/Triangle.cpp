@@ -5,6 +5,9 @@
 using namespace nprt;
 
 
+float Triangle::MaxDistance = 100000.0f;
+
+
 Triangle::Triangle() {
 	p1 = Point3d();
 	p2 = Point3d();
@@ -355,21 +358,40 @@ float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 	// Check ray-plane intersection
 	float dist = -(origin.dotProduct(norm) + d) / (dir.dotProduct(norm));
 
-	if(dist > 1000000.0f)
+	if(dist > Triangle::MaxDistance)
+	{
 		return -1;
+	}
 	
 	// Calculate the intersection point
 	Vector3d intersectionPt = origin + dir * dist;
 
-	// Check if the point is inside the triangle (algebraic method)
-	Vector3d v1 = origin - p1;
-	Vector3d v2 = origin - p2;
-	Vector3d n1 = v1.crossProduct(v2, true);
+	// Check if the point is inside the triangle (barycentric method)
+	// Compute vectors        
+	Vector3d v0 = p3 - p1;
+	Vector3d v1 = p2 - p1;
+	Vector3d v2 = intersectionPt - p1;
 
-	if(origin.dotProduct(n1) + d < 0)
+	// Compute dot products
+	float dot00 = v0.dotProduct(v0);
+	float dot01 = v0.dotProduct(v1);
+	float dot02 = v0.dotProduct(v2);
+	float dot11 = v1.dotProduct(v1);
+	float dot12 = v1.dotProduct(v2);
+
+	// Compute barycentric coordinates
+	float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+	float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+	float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+	// Check if point is in triangle
+	if((u >= 0) && (v >= 0) && (u + v < 1))
+	{
+		return dist;
+	}
+	else
 	{
 		return -1;
 	}
-
-	return dist;
 }
+

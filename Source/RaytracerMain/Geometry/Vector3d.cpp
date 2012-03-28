@@ -35,6 +35,12 @@ Vector3d::Vector3d(Point3d& p1, Point3d& p2, bool nor) {
 	}
 }
 
+Vector3d::Vector3d(const Point3d& pt)
+{
+	x = pt.getX();
+	y = pt.getY();
+	z = pt.getZ();
+}
 
 float Vector3d::dotProduct(const Vector3d& vector) const {
 	return x*vector.x + y*vector.y + z*vector.z;

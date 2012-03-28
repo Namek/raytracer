@@ -12,9 +12,9 @@ namespace nprt
 		Point3d();
 		Point3d(float, float, float);
 		~Point3d();
-		float getX();
-		float getY();
-		float getZ();
+		float getX() const;
+		float getY() const;
+		float getZ() const;
 		void setX(float);
 		void setY(float);
 		void setZ(float);

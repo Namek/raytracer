@@ -8,6 +8,8 @@ namespace nprt
 	class Triangle 
 	{
 		public:
+			static float MaxDistance;
+
 			Triangle();
 			Triangle(Point3d, Point3d, Point3d, int);
 			Triangle(Point3d, Point3d, Point3d, int, int);
