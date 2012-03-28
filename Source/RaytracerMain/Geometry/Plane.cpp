@@ -47,3 +47,9 @@ float Plane::distance(const Point3d& point) const
 {
 	return abs(alfa*point.x + beta*point.y + gamma*point.z + delta);
 }
+
+Point3d Plane::intersectLine(const Point3d& origin, const Vector3d& dir) const
+{
+	// TODO
+	return Point3d();
+}

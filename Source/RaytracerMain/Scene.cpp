@@ -206,7 +206,8 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 	const int numTriangles = m_Triangles.size();
 	
 	Vector3d rayDir;
-	const Vector3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
+	const Point3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
+	m_Octree.setObserverPoint(observerPos);
 
 	for (int y = 0; y < height; y++)
 	{
@@ -224,6 +225,10 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 
 			rayDir = P_ij - observerPos;
 			rayDir.normalize();
+
+			// Trace the ray in Octree
+			Triangle triangle;
+			m_Octree.castRayForTriangle(rayDir, triangle);
 
 			// Select the triangle that has the smallest intersection distance
 			float minDist = numeric_limits<float>::max();

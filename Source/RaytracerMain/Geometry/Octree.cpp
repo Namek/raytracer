@@ -32,7 +32,7 @@ Octree::OctreeNode::OctreeNode(Point3d minDomain, Point3d maxDomain, const std::
 	divide(minDomain, maxDomain, triangles, divideDepth);
 }
 
-Octree::OctreeNode* Octree::OctreeNode::findNode(const Vector3d& point, const Vector3d& ray)
+Octree::OctreeNode* Octree::OctreeNode::findNode(const Vector3d& point, const Vector3d& rayDir)
 {
 	Vector3d p = point;
 
@@ -57,7 +57,7 @@ Octree::OctreeNode* Octree::OctreeNode::findNode(const Vector3d& point, const Ve
 		}
 
 		// Calculate ray's intersection point with nearest plane
-		p = point + ray*dist;
+		p = point + rayDir*dist;
 	}
 	
 	// Now we have point inside of the domain.
@@ -70,39 +70,6 @@ Octree::OctreeNode* Octree::OctreeNode::findNode(const Vector3d& point)
 {
 	OctreeNode* node = this;
 	
-	/*do
-	{
-		switch (node->m_CutAxisPlane)
-		{
-			case AXIS_PLANE_XOY:
-			{
-				if (point.x < m_MinDomain.x + m_DomainSize.x/2)
-					node = m_pLeftChild.get();
-				else
-					node = m_pRightChild.get();
-			}
-			break;
-
-			case AXIS_PLANE_XOZ:
-			{
-				if (point.y < m_MinDomain.y + m_DomainSize.y/2)
-					node = m_pLeftChild.get();
-				else
-					node = m_pRightChild.get();
-			}
-			break;
-
-			case AXIS_PLANE_YOZ:
-			{
-				if (point.z < m_MinDomain.z + m_DomainSize.z/2)
-					node = m_pLeftChild.get();
-				else
-					node = m_pRightChild.get();
-			}
-		}
-	}
-	while (node->m_CutAxisPlane != AXIS_PLANE_NONE);*/
-
 	return node;
 }
 
@@ -202,6 +169,11 @@ Octree::Octree() :
 
 void Octree::buildTree(const std::vector<Triangle>& triangles, const Point3d& minDomain, const Point3d& maxDomain)
 {
+	// Save domain
+	m_MinDomain = minDomain;
+	m_MaxDomain = maxDomain;
+	m_DomainSize = maxDomain - minDomain;
+
 	// Create root node. Save domain boundaries and build whole tree!
 	m_pRoot.reset(new OctreeNode(minDomain, maxDomain, triangles));
 
@@ -215,9 +187,146 @@ void Octree::setObserverPoint(const Point3d& point)
 	m_ObserverPoint = point;
 }
 
-bool Octree::castRayForTriangle(const Vector3d& ray, Triangle& out_triangle) const
+
+bool Octree::castRayForTriangle(const Vector3d& rayDir, Triangle& out_triangle)
 {
-	//TODO cast ray from observer point
+	indexSwapper = 0;
+	Vector3d rayOrigin = m_ObserverPoint;
+
+	if (rayDir.x < 0)
+	{
+		rayOrigin.x = m_DomainSize.x - m_ObserverPoint.x;
+		rayOrigin.x = - rayOrigin.x;
+		indexSwapper |= 4;
+	}
+
+	if (rayDir.y < 0)
+	{
+		rayOrigin.y = m_DomainSize.y - m_ObserverPoint.y;
+		rayOrigin.y = - rayOrigin.y;
+		indexSwapper |= 2;
+	}
+
+	if (rayDir.z < 0)
+	{
+		rayOrigin.z = m_DomainSize.z - m_ObserverPoint.z;
+		rayOrigin.z = - rayOrigin.z;
+		indexSwapper |= 1;
+	}
+
+	float tx0 = (m_MinDomain.x - rayOrigin.x) / rayDir.x;
+	float tx1 = (m_MaxDomain.x - rayOrigin.x) / rayDir.x;
+	float ty0 = (m_MinDomain.y - rayOrigin.y) / rayDir.y;
+	float ty1 = (m_MaxDomain.y - rayOrigin.y) / rayDir.y;
+	float tz0 = (m_MinDomain.z - rayOrigin.z) / rayDir.z;
+	float tz1 = (m_MaxDomain.z - rayOrigin.z) / rayDir.z;
+
+	if (max(tx0, max(ty0, tz0)) < min(tx1, min(ty1, tz1)))
+		procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get());
 
 	return false;
+}
+
+// Implements tables 1 and 2 [Revelles95].
+int Octree::firstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm) const
+{
+	float tmax = max(tx0, max(ty0, tz0));
+	int nodeIndex = 0;
+
+	// Entry plane: XOY
+	if (tmax == tz0)
+	{
+		nodeIndex |= (txm < tz0) << 0;
+		nodeIndex |= (tym < tz0) << 1;
+	}
+
+	// Entry plane: XOZ
+	else if (tmax == ty0)
+	{
+		nodeIndex |= (txm < ty0) << 0;
+		nodeIndex |= (tzm < ty0) << 2;
+	}
+
+	// Entry plane: YOZ
+	else if (tmax == tx0)
+	{
+		nodeIndex |= (tym < tx0) << 1;
+		nodeIndex |= (tzm < tx0) << 2;
+	}
+
+	return nodeIndex;
+}
+
+// Returns the i-th integer where the i-th float value is the minimum of the three float values.
+inline int Octree::nextNode(float tx, float ty, float tz, int ix, int iy, int iz) const
+{
+	int ret;
+
+	if (tx < ty)
+	{
+		if (tx < tz)
+			ret = ix;
+		else
+			ret = iz;
+	}
+	else
+	{
+		if (ty < tz)
+			ret = iy;
+		else
+			ret = iz;
+	}
+
+	return ret;
+}
+
+void Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node)
+{	
+	if (tx1 < 0 || ty1 < 0 || tz1 < 0)
+		return;
+
+
+	if (node->m_isLeaf)
+	{
+		// TODO check ray collision with ray
+		// proc_terminal(n)
+		return;
+	}
+
+	float txm = 0.5f * (tx0 + tx1);
+	float tym = 0.5f * (ty0 + ty1);
+	float tzm = 0.5f * (tz0 + tz1);
+
+	int currNode = firstNode(tx0, ty0, tz0, txm, tym, tzm); 
+
+	do
+	{
+		switch(currNode)
+		{
+			case 0: procSubtree(tx0,ty0,tz0,txm,tym,tzm, node->m_Subnodes[indexSwapper]);
+					currNode = nextNode(txm,tym,tzm,4,2,1);
+					break;
+			case 1: procSubtree(tx0,ty0,tzm,txm,tym,tz1, node->m_Subnodes[1^indexSwapper]);
+					currNode = nextNode(txm,tym,tz1,5,3,8);
+					break;
+			case 2: procSubtree(tx0,tym,tz0,txm,ty1,tzm, node->m_Subnodes[2^indexSwapper]);
+					currNode = nextNode(txm,ty1,tzm,6,8,3);
+					break;
+			case 3: procSubtree(tx0,tym,tzm,txm,ty1,tz1, node->m_Subnodes[3^indexSwapper]);
+					currNode = nextNode(txm,ty1,tz1,7,8,8);
+					break;
+			case 4: procSubtree(txm,ty0,tz0,tx1,tym,tzm, node->m_Subnodes[4^indexSwapper]);
+					currNode = nextNode(tx1,tym,tzm,8,6,5);
+					break;
+			case 5: procSubtree(txm,ty0,tzm,tx1,tym,tz1, node->m_Subnodes[5^indexSwapper]);
+					currNode = nextNode(tx1,tym,tz1,8,7,8);
+					break;
+			case 6: procSubtree(txm,tym,tz0,tx1,ty1,tzm, node->m_Subnodes[6^indexSwapper]);
+					currNode = nextNode(tx1,ty1,tzm,8,8,7);
+					break;
+			case 7: procSubtree(txm,txm,tzm,tx1,ty1,tz1, node->m_Subnodes[7^indexSwapper]);
+					currNode = 8;
+					break;
+		}
+	} while (currNode < 8); 
 }
