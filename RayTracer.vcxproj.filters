@@ -16,9 +16,6 @@
     <ClCompile Include="Source\RaytracerMain\Scene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RaytracerMain\Geometry\Point3d.cpp">
-      <Filter>Source\Geometry</Filter>
-    </ClCompile>
     <ClCompile Include="Source\RaytracerMain\Geometry\Triangle.cpp">
       <Filter>Source\Geometry</Filter>
     </ClCompile>
@@ -28,13 +25,16 @@
     <ClCompile Include="Source\RaytracerMain\Camera.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Geometry\Octree.cpp">
+      <Filter>Source\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Geometry\Plane.cpp">
+      <Filter>Source\Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RaytracerMain\Scene.h">
       <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\RaytracerMain\Geometry\Point3d.h">
-      <Filter>Source\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="Source\RaytracerMain\Geometry\Triangle.h">
       <Filter>Source\Geometry</Filter>
@@ -47,6 +47,12 @@
     </ClInclude>
     <ClInclude Include="Source\RaytracerMain\Camera.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\Geometry\Octree.h">
+      <Filter>Source\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\Geometry\Plane.h">
+      <Filter>Source\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

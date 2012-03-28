@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Point3d.h"
 #include "Vector3d.h"
 
 namespace nprt
@@ -18,6 +17,11 @@ namespace nprt
 
 			// Returns the intersection distance or -1
 			float intersection(const Vector3d& observer_pos, const Vector3d& ray) const;
+
+			// Checks if Axis-Aligned Bounding Box contains (minimum partly containment) this triangle.
+			bool overlapsWithAABB(const Point3d& minDomain, const Point3d& maxDomain) const;
+			bool overlapsWithAABB_byDomainCenter(const Point3d& boxCenter, const Point3d& boxHalfSize) const;
+
 			friend std::ostream& operator<<(std::ostream& os, const Triangle& t) 
 			{
 				return os << t.p1 << t.p2 << t.p3 <<  t.materialIndex << " " << t.d << "\n" << t.norm

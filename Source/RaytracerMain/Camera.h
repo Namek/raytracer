@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Geometry\Point3d.h"
+#include "Geometry\Vector3d.h"
 
 namespace nprt
 {
