@@ -30,6 +30,7 @@ Assets/data/v7/img1.jpg -text
 Assets/data/v7/v7.atr -text
 Assets/data/v7/v7.cam -text
 Assets/data/v7/v7.lgt -text
+Assets/params.txt -text
 /BaseUtils.vcxproj -text
 /BaseUtils.vcxproj.filters -text
 Dependencies/Include/FreeImage.h -text

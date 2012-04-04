@@ -13,7 +13,7 @@ using namespace nprt;
 
 int main(int argc, char* argv[])
 {
-	Params params = Params(argc > 1 ? argv[1] : "params.txt");
+	Params params(argc > 1 ? argv[1] : "params.txt");
 	
 	Scene scene;
 	scene.LoadGeometry("data/room.brs");
