@@ -182,13 +182,13 @@ void Octree::buildTree(const std::vector<Triangle>& triangles, const Point3d& mi
 	// in the end update near nodes
 }
 
-void Octree::setObserverPoint(const Point3d& point)
+void Octree::setObserverPoint(const Point3d& point) const
 {
 	m_ObserverPoint = point;
 }
 
 
-bool Octree::castRayForTriangle(const Vector3d& rayDir, Triangle& out_triangle)
+bool Octree::castRayForTriangle(const Vector3d& rayDir, Triangle& out_triangle) const
 {
 	indexSwapper = 0;
 	Vector3d rayOrigin = m_ObserverPoint;
@@ -222,7 +222,9 @@ bool Octree::castRayForTriangle(const Vector3d& rayDir, Triangle& out_triangle)
 	float tz1 = (m_MaxDomain.z - rayOrigin.z) / rayDir.z;
 
 	if (max(tx0, max(ty0, tz0)) < min(tx1, min(ty1, tz1)))
+	{
 		procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get());
+	}
 
 	return false;
 }
@@ -280,7 +282,7 @@ inline int Octree::nextNode(float tx, float ty, float tz, int ix, int iy, int iz
 	return ret;
 }
 
-void Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node)
+void Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node) const
 {	
 	if (tx1 < 0 || ty1 < 0 || tz1 < 0)
 		return;

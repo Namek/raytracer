@@ -104,7 +104,7 @@ void Scene::LoadGeometry(const char* filename)
 		}
 	}
 	file.close();
-
+	
 	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
 }
 
@@ -199,7 +199,7 @@ void Scene::LoadAttributes(const char* filePath)
 	file.close();
 }
 
-void Scene::RenderToFile(const char* filename, int width, int height)
+void Scene::RenderToFile(const char* filename, int width, int height) const
 {
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
 	RGBQUAD color = {0};
@@ -211,7 +211,7 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 
 	for (int y = 0; y < height; y++)
 	{
-		cout << "Row: " << (y + 1) << "/" << height << "\n";
+		cout << "Completed: " << (100 * (y + 1) / height) << "%\r";
 		for (int x = 0; x < width; x++)
 		{
 			// The background color is black
@@ -221,7 +221,7 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 			Point3d U = m_Camera.topRight - m_Camera.topLeft;
 			Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
 			Point3d ul = m_Camera.topLeft;
-			Point3d P_ij = ul + U * ((float)x / (width - 1)) + V * ((float)y / (height - 1));
+			Point3d P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
 
 			rayDir = P_ij - observerPos;
 			rayDir.normalize();
@@ -230,7 +230,10 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 			Triangle triangle;
 			m_Octree.castRayForTriangle(rayDir, triangle);
 
+			///////////////////////////////////////////////////////
+			// Deprecated: octree will be used 
 			// Select the triangle that has the smallest intersection distance
+			///////////////////////////////////////////////////////
 			float minDist = numeric_limits<float>::max();
 			int idx = -1;
 			for(int t = 0; t < numTriangles; ++t)
@@ -242,6 +245,9 @@ void Scene::RenderToFile(const char* filename, int width, int height)
 					minDist = intersectionDist;
 				}
 			}
+			///////////////////////////////////////////////////////
+			// End Deprecated
+			///////////////////////////////////////////////////////
 
 			// Get the colour only if a triangle has been hit
 			if(idx != -1)
