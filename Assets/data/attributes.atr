@@ -1,5 +1,5 @@
 13
-;; main_lgt4.atr
+;; man_lgt.atr
 
 Attr A000001
   kd 0.5000
@@ -7,7 +7,7 @@ Attr A000001
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -33,7 +33,7 @@ Attr A000002
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -59,7 +59,7 @@ Attr A000003
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -85,7 +85,7 @@ Attr A000004
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 10
   gm 1
   SelfLuminance 0.0000
@@ -111,7 +111,7 @@ Attr A000005
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -137,7 +137,7 @@ Attr A000006
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -163,7 +163,7 @@ Attr A000007
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -189,7 +189,7 @@ Attr A000008
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -215,7 +215,7 @@ Attr A000009
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -241,7 +241,7 @@ Attr A000010
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -267,7 +267,7 @@ Attr A000011
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -293,7 +293,7 @@ Attr A000012
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -319,7 +319,7 @@ Attr A000013
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -345,7 +345,7 @@ Attr A000014
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 10
   gm 1
   SelfLuminance 0.0000
@@ -371,7 +371,7 @@ Attr A000015
   kts 0.8000
   ktd 0.1000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 10
   gm 1
   SelfLuminance 0.0000
@@ -397,7 +397,7 @@ Attr set_login_part_0_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -423,7 +423,7 @@ Attr set_login_part_1_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -449,7 +449,7 @@ Attr set_login_part_2_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -475,7 +475,7 @@ Attr set_login_part_3_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 10
   gm 1
   SelfLuminance 0.0000
@@ -501,7 +501,7 @@ Attr set_login_part_4_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -527,7 +527,7 @@ Attr set_login_part_5_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -553,7 +553,7 @@ Attr set_login_part_6_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -579,7 +579,7 @@ Attr set_login_part_7_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -605,7 +605,7 @@ Attr set_login_part_8_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -631,7 +631,7 @@ Attr set_login_part_9_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -657,7 +657,7 @@ Attr set_login_part_10_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -683,7 +683,7 @@ Attr set_login_part_11_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000
@@ -709,7 +709,7 @@ Attr set_login_part_12_bundle_0
   kts 0.0000
   ktd 0.0000
   ka 0.0000
-  kf 1.0000
+  kf 0.0000
   gs 1
   gm 1
   SelfLuminance 0.0000

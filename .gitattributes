@@ -2,6 +2,7 @@
 Assets/FreeImage.dll -text
 Assets/data/attributes.atr -text
 Assets/data/camera.cam -text
+Assets/data/lights.lgt -text
 Assets/data/room.brs -text
 Assets/data/v0/man_lgt.jpg -text
 Assets/data/v0/v0.atr -text
@@ -61,6 +62,8 @@ Source/RaytracerMain/Geometry/Triangle.cpp -text
 Source/RaytracerMain/Geometry/Triangle.h -text
 Source/RaytracerMain/Geometry/Vector3d.cpp -text
 Source/RaytracerMain/Geometry/Vector3d.h -text
+Source/RaytracerMain/LightSource.cpp -text
+Source/RaytracerMain/LightSource.h -text
 Source/RaytracerMain/Material.h -text
 Source/RaytracerMain/Scene.cpp -text
 Source/RaytracerMain/Scene.h -text

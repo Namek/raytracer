@@ -204,6 +204,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
 	RGBQUAD color = {0};
 	const int numTriangles = m_Triangles.size();
+	const int numLights = m_Lights.size();
 	
 	Vector3d rayDir;
 	const Point3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
@@ -252,9 +253,22 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 			// Get the colour only if a triangle has been hit
 			if(idx != -1)
 			{
+				const Vector3d intersectionPt = observerPos + rayDir * minDist;
 				color.rgbRed = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].r);
 				color.rgbGreen = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].g);
 				color.rgbBlue = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].b);
+
+				//for(int lgt = 0; lgt < numLights; ++lgt)
+				//{
+				//	Vector3d lgtDir = (m_Lights[lgt].position - intersectionPt);
+				//	lgtDir.normalize();
+
+				//	lgtDir;
+				//	rayDir;
+				//	m_Lights[lgt].r;
+				//	m_Lights[lgt].g;
+				//	m_Lights[lgt].b;
+				//}
 			}
 
 			// Debug output
@@ -268,6 +282,59 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
+}
+
+void Scene::LoadLights(const char* filename)
+{
+	ifstream file;
+	string line, token;
+	stringstream lineStream;
+	float x, y, z, flux, r, g, b;
+	int lightCount = 0;
+
+	file.open(filename);
+
+	if (file.is_open()) 
+	{
+		while(!file.eof()) 
+		{
+			getline(file, line);
+			lineStream.clear();
+			lineStream.str(line);
+			while(lineStream >> token) 
+			{
+				if (token == "lights")
+				{
+					getline(file, line);
+					lineStream.clear();
+					lineStream.str(line);
+
+					lineStream >> lightCount;
+				}
+
+				if (token == "Position")
+				{
+					for (int i = 0; i < lightCount; i++)
+					{
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+
+						lineStream >> x;
+						lineStream >> y;
+						lineStream >> z;
+						lineStream >> flux;
+						lineStream >> r;
+						lineStream >> g;
+						lineStream >> b;
+
+						m_Lights.push_back(LightSource(x, y, z, flux, r, g, b));
+					}
+				}
+			}
+		}
+	}
+	file.close();
 }
 
 void Scene::LoadCamera(const char* filePath) 

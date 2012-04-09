@@ -21,6 +21,9 @@ int main(int argc, char* argv[])
 	scene.LoadAttributes("data/attributes.atr");
 	cout << "Geometry attributes loaded successfully." << endl;
 	scene.LoadCamera("data/camera.cam");
+	cout << "Camera loaded successfully." << endl;
+	scene.LoadLights("data/lights.lgt");
+	cout << "Lights loaded successfully." << endl;
 
 	unsigned start_tm = timeGetTime();
 

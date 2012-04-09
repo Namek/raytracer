@@ -31,6 +31,9 @@
     <ClCompile Include="Source\RaytracerMain\Geometry\Plane.cpp">
       <Filter>Source\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\LightSource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RaytracerMain\Scene.h">
@@ -53,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="Source\RaytracerMain\Geometry\Plane.h">
       <Filter>Source\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\LightSource.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
