@@ -182,7 +182,7 @@ void Scene::LoadAttributes(const char* filePath)
 						m.kscB = ks;
 						m.krcG = kt;
 						m.krcB = kt;
-						m.kacR = m.kacG = m.kacB = 0.0f;
+						m.kacR = m.kacG = m.kacB = ka;
 						m_Materials.push_back(m);
 
 						break;
@@ -203,6 +203,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 {
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
 	RGBQUAD color = {0};
+	Vector3d floatColor(0, 0, 0);
 	const int numTriangles = m_Triangles.size();
 	const int numLights = m_Lights.size();
 	
@@ -254,28 +255,60 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 			if(idx != -1)
 			{
 				const Vector3d intersectionPt = observerPos + rayDir * minDist;
-				color.rgbRed = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].r);
-				color.rgbGreen = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].g);
-				color.rgbBlue = static_cast<BYTE>(255 * m_Materials[m_Triangles[idx].materialIndex].b);
+				const Triangle& hitTriangle = m_Triangles[idx];
+				const Material& material = m_Materials[hitTriangle.materialIndex];
+				floatColor.x = 1.0f * material.r;
+				floatColor.y = 1.0f * material.g;
+				floatColor.z = 1.0f * material.b;
 
-				//for(int lgt = 0; lgt < numLights; ++lgt)
-				//{
-				//	Vector3d lgtDir = (m_Lights[lgt].position - intersectionPt);
-				//	lgtDir.normalize();
+				for(int lgt = 0; lgt < numLights; ++lgt)
+				{
+					const LightSource& light = m_Lights[lgt];
+					Vector3d lgtDir = (intersectionPt - light.position);
+					lgtDir.normalize();
 
-				//	lgtDir;
-				//	rayDir;
-				//	m_Lights[lgt].r;
-				//	m_Lights[lgt].g;
-				//	m_Lights[lgt].b;
-				//}
+					float intensityDiffuse = (hitTriangle.norm.dotProduct(lgtDir));
+
+					// Value clamping is being done after the rendering
+					float valRed = material.kdcR * intensityDiffuse * light.r;
+					//if(floatColor.x + valRed > 1.0f)
+					//	floatColor.x = 1.0f;
+					//else if(floatColor.x + valRed < 0.0f)
+					//	floatColor.x = 0.0f;
+					//else
+						floatColor.x += valRed;
+
+					float valGreen = material.kdcG * intensityDiffuse * light.g;
+					//if(floatColor.y + valGreen > 1.0f)
+					//	floatColor.y = 1.0f;
+					//else if(floatColor.y + valGreen < 0.0f)
+					//	floatColor.y = 0.0f;
+					//else
+						floatColor.y += valGreen;
+
+					float valBlue = material.kdcB * intensityDiffuse * light.b;
+					//if(floatColor.z + valBlue > 1.0f)
+					//	floatColor.z = 1.0f;
+					//else if (floatColor.z + valBlue < 0.0f)
+					//	floatColor.z = 0.0f;
+					//else
+						floatColor.z += valBlue;
+				}
+
 			}
 
 			// Debug output
 			//cout << (int)color.rgbRed << ", " << (int)color.rgbGreen << ", " << (int)color.rgbBlue << "\n";
 			//cout << "hit: " << x << ", " << y << " (" << idx << ")\n";
 			//cin.get();
+				
+			floatColor.x = Utils::Clamp(floatColor.x, 0.0f, 1.0f);
+			floatColor.y = Utils::Clamp(floatColor.y, 0.0f, 1.0f);
+			floatColor.z = Utils::Clamp(floatColor.z, 0.0f, 1.0f);
 
+			color.rgbRed = static_cast<BYTE>(255 * floatColor.x);
+			color.rgbGreen = static_cast<BYTE>(255 * floatColor.y);
+			color.rgbBlue = static_cast<BYTE>(255 * floatColor.z);
 			FreeImage_SetPixelColor(dib, x, height - y, &color);
 		}
 	}
@@ -343,7 +376,7 @@ void Scene::LoadCamera(const char* filePath)
 	string line, token;
 	stringstream lineStream;
 	Point3d cameraCenter, topLeft, bottomLeft, topRight;
-	int xRes=-1, yRes=-1;
+	int xRes = -1, yRes = -1;
 
 	file.open(filePath);
 
@@ -356,7 +389,6 @@ void Scene::LoadCamera(const char* filePath)
 			lineStream.str(line);
 			while (lineStream >> token)
 			{
-
 				if (token == "viewpoint")
 				{
 					float x, y, z;

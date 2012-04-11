@@ -1,2 +1,12 @@
 width 640
 height 480
+num_scenes 8
+data_folder0 v0
+data_folder1 v1
+data_folder2 v2
+data_folder3 v3
+data_folder4 v4
+data_folder5 v5
+data_folder6 v6
+data_folder7 v7
+geometry_name room

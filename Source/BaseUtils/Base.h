@@ -71,8 +71,15 @@ inline double DegToRad(const double& Deg) {return 3.14159265/ 180.0f * Deg;};
 //! Converts degrees to radians.
 inline double RadToDeg(const double& Rad) {return Rad * 180.0f / 3.14159265;};
 // !}
-
-
+template<typename T> inline T Clamp(T value, T lower_bound, T upper_bound)
+{
+	if(value > upper_bound)
+		return upper_bound;
+	else if(value < lower_bound)
+		return lower_bound;
+	else 
+		return value;
+}
 
 /*! @{
 	@name Type conversion functions

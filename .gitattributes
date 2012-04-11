@@ -1,16 +1,13 @@
 * text=auto !eol
 Assets/FreeImage.dll -text
-Assets/data/attributes.atr -text
-Assets/data/camera.cam -text
-Assets/data/lights.lgt -text
 Assets/data/room.brs -text
 Assets/data/v0/man_lgt.jpg -text
 Assets/data/v0/v0.atr -text
 Assets/data/v0/v0.cam -text
 Assets/data/v0/v0.lgt -text
+Assets/data/v1/man_lgt.jpg -text
 Assets/data/v1/v1.atr -text
 Assets/data/v1/v1.cam -text
-Assets/data/v1/v1.jpg -text
 Assets/data/v1/v1.lgt -text
 Assets/data/v2/v2.atr -text
 Assets/data/v2/v2.cam -text
