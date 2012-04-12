@@ -201,11 +201,11 @@ void Scene::LoadAttributes(const char* filePath)
 
 void Scene::RenderToFile(const char* filename, int width, int height) const
 {
-	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
-	RGBQUAD color = {0};
+	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);	
 	Vector3d floatColor(0, 0, 0);
 	const int numTriangles = m_Triangles.size();
 	const int numLights = m_Lights.size();
+	Vector3d* pixels = new Vector3d[width * height];
 	
 	Vector3d rayDir;
 	const Point3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
@@ -216,9 +216,6 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 		cout << "Completed: " << (100 * (y + 1) / height) << "%\r";
 		for (int x = 0; x < width; x++)
 		{
-			// The background color is black
-			color.rgbRed = color.rgbGreen = color.rgbBlue = 0;
-
 			// Calculate the ray direction based on the magic equations from the lecture
 			Point3d U = m_Camera.topRight - m_Camera.topLeft;
 			Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
@@ -267,51 +264,44 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 					Vector3d lgtDir = (intersectionPt - light.position);
 					lgtDir.normalize();
 
-					float intensityDiffuse = (hitTriangle.norm.dotProduct(lgtDir));
+					float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
 
 					// Value clamping is being done after the rendering
 					float valRed = material.kdcR * intensityDiffuse * light.r;
-					//if(floatColor.x + valRed > 1.0f)
-					//	floatColor.x = 1.0f;
-					//else if(floatColor.x + valRed < 0.0f)
-					//	floatColor.x = 0.0f;
-					//else
-						floatColor.x += valRed;
+					floatColor.x += valRed;
 
 					float valGreen = material.kdcG * intensityDiffuse * light.g;
-					//if(floatColor.y + valGreen > 1.0f)
-					//	floatColor.y = 1.0f;
-					//else if(floatColor.y + valGreen < 0.0f)
-					//	floatColor.y = 0.0f;
-					//else
-						floatColor.y += valGreen;
+					floatColor.y += valGreen;
 
 					float valBlue = material.kdcB * intensityDiffuse * light.b;
-					//if(floatColor.z + valBlue > 1.0f)
-					//	floatColor.z = 1.0f;
-					//else if (floatColor.z + valBlue < 0.0f)
-					//	floatColor.z = 0.0f;
-					//else
-						floatColor.z += valBlue;
+					floatColor.z += valBlue;
 				}
-
 			}
 
-			// Debug output
-			//cout << (int)color.rgbRed << ", " << (int)color.rgbGreen << ", " << (int)color.rgbBlue << "\n";
-			//cout << "hit: " << x << ", " << y << " (" << idx << ")\n";
-			//cin.get();
-				
-			floatColor.x = Utils::Clamp(floatColor.x, 0.0f, 1.0f);
-			floatColor.y = Utils::Clamp(floatColor.y, 0.0f, 1.0f);
-			floatColor.z = Utils::Clamp(floatColor.z, 0.0f, 1.0f);
-
-			color.rgbRed = static_cast<BYTE>(255 * floatColor.x);
-			color.rgbGreen = static_cast<BYTE>(255 * floatColor.y);
-			color.rgbBlue = static_cast<BYTE>(255 * floatColor.z);
-			FreeImage_SetPixelColor(dib, x, height - y, &color);
+			pixels[y * width + x].x = floatColor.x;
+			pixels[y * width + x].y = floatColor.y;
+			pixels[y * width + x].z = floatColor.z;
 		}
 	}
+
+	//Determine the maximum colour value
+	const int numPixels = width * height;
+	RGBQUAD color = {0};
+
+	// Normalize the colours
+	for(int p = 0; p < numPixels; ++p)
+	{
+		pixels[p].x = Utils::Clamp(pixels[p].x, 0.0f, 1.0f);
+		pixels[p].y = Utils::Clamp(pixels[p].y, 0.0f, 1.0f);
+		pixels[p].z = Utils::Clamp(pixels[p].z, 0.0f, 1.0f);
+
+		color.rgbRed = static_cast<BYTE>(255 * pixels[p].x);
+		color.rgbGreen = static_cast<BYTE>(255 * pixels[p].y);
+		color.rgbBlue = static_cast<BYTE>(255 * pixels[p].z);
+		FreeImage_SetPixelColor(dib, p % width, height - p / width, &color);
+	}
+
+	Utils::SafeDeleteArr(pixels);
 
 	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
