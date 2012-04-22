@@ -1,5 +1,5 @@
-width 640
-height 480
+width 160
+height 120
 num_scenes 8
 data_folder0 v0
 data_folder1 v1

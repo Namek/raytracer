@@ -16,10 +16,17 @@ Plane::Plane(float A, float B, float C, float D)
 
 Plane::Plane(const Point3d& p1, const Point3d& p2, const Point3d& p3)
 {
-	Point3d tmp = (p2-p1).crossProduct(p3-p1, false);
-	float D = -(tmp.x * p1.x + tmp.y * p1.y + tmp.z * p1.z);
+	Point3d N = (p2-p1).crossProduct(p3-p1, true);
+	float D = -(N.x * p1.x + N.y * p1.y + N.z * p1.z);
 
-	setGeneral(tmp.x, tmp.y, tmp.z, D);
+	setGeneral(N.x, N.y, N.z, D);
+}
+
+Plane::Plane(const Point3d& point, const Vector3d& normal)
+{
+	const Vector3d& N = normal;
+	float D = -(N.x * point.x + N.y * point.y + N.z * point.z);
+	setGeneral(N.x, N.y, N.z, D);
 }
 
 void Plane::setGeneral(float A, float B, float C, float D)
@@ -48,8 +55,10 @@ float Plane::distance(const Point3d& point) const
 	return abs(alfa*point.x + beta*point.y + gamma*point.z + delta);
 }
 
-Point3d Plane::intersectLine(const Point3d& origin, const Vector3d& dir) const
+Point3d Plane::intersectLine(const Point3d& origin, const Point3d& direction) const
 {
-	// TODO
-	return Point3d();
+	float u = A * origin.x + B * origin.y + C * origin.z + D;
+	u /= -A * direction.x - B * direction.y - C * direction.z;
+
+	return origin + direction*u;
 }

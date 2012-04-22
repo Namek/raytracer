@@ -15,9 +15,10 @@ namespace nprt
 		Plane();
 		Plane(float A, float B, float C, float D);
 		Plane(const Point3d& p1, const Point3d& p2, const Point3d& p3);
+		Plane(const Point3d& point, const Vector3d& normal);
 
 		void setGeneral(float A, float B, float C, float D);
 		float distance(const Point3d& point) const;
-		Point3d intersectLine(const Point3d& origin, const Vector3d& dir) const;
+		Point3d intersectLine(const Point3d& origin, const Point3d& direction) const;
 	};
 }

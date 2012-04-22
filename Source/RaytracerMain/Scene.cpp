@@ -93,7 +93,7 @@ void Scene::LoadGeometry(const char* filename)
 						lineStream.clear();
 						lineStream.str(line);
 
-						while (lineStream >> ind) 
+						while (i < numTriangles && lineStream >> ind)
 						{
 							m_Triangles[i].setMaterialIndex(ind);
 							i++;
@@ -207,9 +207,9 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	const int numLights = m_Lights.size();
 	Vector3d* pixels = new Vector3d[width * height];
 	
-	Vector3d rayDir;
 	const Point3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
-	m_Octree.setObserverPoint(observerPos);
+	//m_Octree.setObserverPoint(observerPos);
+
 
 	for (int y = 0; y < height; y++)
 	{
@@ -222,42 +222,24 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 			Point3d ul = m_Camera.topLeft;
 			Point3d P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
 
-			rayDir = P_ij - observerPos;
-			rayDir.normalize();
+			Vector3d rayDirection = P_ij - observerPos;
+			rayDirection.normalize();
 
 			// Trace the ray in Octree
-			Triangle triangle;
-			m_Octree.castRayForTriangle(rayDir, triangle);
+			vector<pair<Triangle, Point3d>> intersectedTriangles;
+			m_Octree.traceRayForTriangles(observerPos, rayDirection, intersectedTriangles);
+			const int intersectedTrianglesCount = intersectedTriangles.size();
 
-			///////////////////////////////////////////////////////
-			// Deprecated: octree will be used 
-			// Select the triangle that has the smallest intersection distance
-			///////////////////////////////////////////////////////
-			float minDist = numeric_limits<float>::max();
-			int idx = -1;
-			for(int t = 0; t < numTriangles; ++t)
+			for (int i = 0; i < intersectedTrianglesCount; ++i)
 			{
-				float intersectionDist = m_Triangles[t].intersection(observerPos, rayDir);
-				if(intersectionDist > -1.0f && intersectionDist < minDist)
-				{
-					idx = t;
-					minDist = intersectionDist;
-				}
-			}
-			///////////////////////////////////////////////////////
-			// End Deprecated
-			///////////////////////////////////////////////////////
-
-			// Get the colour only if a triangle has been hit
-			if(idx != -1)
-			{
-				const Vector3d intersectionPt = observerPos + rayDir * minDist;
-				const Triangle& hitTriangle = m_Triangles[idx];
+				const Triangle& hitTriangle = intersectedTriangles[i].first;
+				const Vector3d intersectionPt = intersectedTriangles[i].second;
 				const Material& material = m_Materials[hitTriangle.materialIndex];
 				floatColor.x = 1.0f * material.r;
 				floatColor.y = 1.0f * material.g;
 				floatColor.z = 1.0f * material.b;
 
+				// TODO make that light working properly
 				for(int lgt = 0; lgt < numLights; ++lgt)
 				{
 					const LightSource& light = m_Lights[lgt];
@@ -267,20 +249,25 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 					float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
 
 					// Value clamping is being done after the rendering
-					float valRed = material.kdcR * intensityDiffuse * light.r;
+					float valRed = material.kdcR * intensityDiffuse * light.r * 0.1f;
 					floatColor.x += valRed;
 
-					float valGreen = material.kdcG * intensityDiffuse * light.g;
+					float valGreen = material.kdcG * intensityDiffuse * light.g * 0.1f;
 					floatColor.y += valGreen;
 
-					float valBlue = material.kdcB * intensityDiffuse * light.b;
+					float valBlue = material.kdcB * intensityDiffuse * light.b * 0.1f;
 					floatColor.z += valBlue;
 				}
+
+				pixels[y * width + x].x += floatColor.x;// / static_cast<float>(intersectedTrianglesCount);
+				pixels[y * width + x].y += floatColor.y;// / intersectedTrianglesCount;
+				pixels[y * width + x].z += floatColor.z;// / intersectedTrianglesCount;
 			}
 
-			pixels[y * width + x].x = floatColor.x;
-			pixels[y * width + x].y = floatColor.y;
-			pixels[y * width + x].z = floatColor.z;
+			if (intersectedTrianglesCount == 0)
+			{
+				// TODO use some background color
+			}
 		}
 	}
 

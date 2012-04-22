@@ -12,7 +12,7 @@ namespace nprt
 			float flux;
 			float r, g, b;
 			LightSource(void) {		};
-			LightSource(float, float, float, float, float, float, float);
+			LightSource(float x, float y, float z, float flux, float r, float g, float b);
 			~LightSource(void) {	};
 
 			friend std::ostream& operator<<(std::ostream& os, const LightSource& l) 

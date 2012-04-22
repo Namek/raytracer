@@ -13,11 +13,10 @@ namespace nprt
 		{
 		public:
 			OctreeNode();
-			OctreeNode(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int divideDepth = 1);
+			OctreeNode(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int divideDepth = 0);
 
-			OctreeNode* findNode(const Vector3d& point, const Vector3d& rayDir);		
-			OctreeNode* findNode(const Vector3d& point);
-
+			bool containsPoint(const Point3d& point) const;
+			
 			bool m_isLeaf;
 			int m_TrianglesInclusiveCount;
 			std::unique_ptr<OctreeNode*[]> m_NearNodes;
@@ -55,23 +54,36 @@ namespace nprt
 			static const int AXIS_PLANE_XOZ = 2;
 			static const int AXIS_PLANE_YOZ = 3;
 
-			static const int MAX_DIVIDE_DEPTH = 1;
+			static const int DOMAIN_PLANE_BOTTOM = 0;
+			static const int DOMAIN_PLANE_TOP = 1;
+			static const int DOMAIN_PLANE_LEFT = 2;
+			static const int DOMAIN_PLANE_RIGHT = 3;
+			static const int DOMAIN_PLANE_NEAR = 4;
+			static const int DOMAIN_PLANE_FAR = 5;
+
+			static const int MAX_DIVIDE_DEPTH = 0;
 		};
 
 	public:
 		Octree();
 
 		void buildTree(const std::vector<Triangle>& triangles, const Point3d& minDomain, const Point3d& maxDomain);
-		void setObserverPoint(const Point3d& point) const;
-		bool castRayForTriangle(const Vector3d& rayDir, Triangle& out_triangle) const;
+		void setObserverPoint(const Point3d& point) const;//may be deprecated
+
+		void traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& out_intersectedTriangles) const;
+
 
 	private:
+		bool castRayForTriangle(const Vector3d& rayDir, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;
+		bool procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node, int indexSwapper,
+			const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;
 		inline int firstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm) const;
 		inline int nextNode(float tx, float ty, float tz, int ix, int iy, int iz) const;
-		void procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node) const;
+		float distanceToNearestPlane(const Point3d& point, Plane& out_nearestPlane) const;
+
 
 	private:
-		std::vector<Triangle> m_Triangles;
+		//std::vector<Triangle> m_Triangles;
 		std::unique_ptr<OctreeNode> m_pRoot;
 		
 		Point3d m_MaxDomain;
@@ -80,6 +92,9 @@ namespace nprt
 		Point3d m_SmallestNodeDivide;
 
 		mutable Point3d m_ObserverPoint;
-		mutable int indexSwapper;
+		mutable Plane m_NearestPlane;
+		mutable float m_DistanceToNearestPlane;
+
+		static const int MAX_SECONDARY_RAYS_NUMBER = 3;
 	};
 }

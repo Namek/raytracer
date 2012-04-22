@@ -498,7 +498,7 @@ bool planeBoxOverlap(const Vector3d& normal, const Vector3d& vert, const Vector3
 	if (normal.dotProduct(vMin) > 0)
 		return false;
 
-	if (normal.dotProduct(vMax) >= 0)
+	if (normal.dotProduct(vMax) > 0)
 		return true;
 	
 	return false;
