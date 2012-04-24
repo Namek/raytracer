@@ -57,3 +57,11 @@ const char* Params::GetString(const char* name, const char* defaultStr)
 	else
 		return defaultStr;
 }
+
+float Params::GetFloat(const char* name, float defaultValue)
+{
+	if (m_Values.find(name) != m_Values.end())
+		return static_cast<float>(atof(m_Values[name].c_str()));
+	else
+		return defaultValue;
+}

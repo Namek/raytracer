@@ -12,6 +12,7 @@ class Params
 		Params(const char* filename);
 
 		int GetInt(const char* name, int defaultValue = 0);
+		float GetFloat(const char* name, float defaultValue = 0);
 		const char* GetString(const char* name, const char* defaultStr = "");
 		
 	private:

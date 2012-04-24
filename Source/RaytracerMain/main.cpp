@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 	unsigned totalTime = 0;
 
 	Scene scene;
+	scene.SetToneMappingKey(params.GetFloat("tone_mapping_key"));
 	scene.LoadGeometry((std::string("data/") + params.GetString("geometry_name") + ".brs").c_str());
 	cout << "Scene geometry loaded successfully." << endl << endl;
 

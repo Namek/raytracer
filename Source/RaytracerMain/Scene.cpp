@@ -5,7 +5,7 @@ using namespace nprt;
 using namespace std;
 
 
-Scene::Scene() : m_Triangles()
+Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f)
 { }
 
 
@@ -208,8 +208,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	Vector3d* pixels = new Vector3d[width * height];
 	
 	const Point3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
-	//m_Octree.setObserverPoint(observerPos);
-
+	m_Octree.setObserverPoint(observerPos);
 
 	for (int y = 0; y < height; y++)
 	{
@@ -239,7 +238,6 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 				floatColor.y = 1.0f * material.g;
 				floatColor.z = 1.0f * material.b;
 
-				// TODO make that light working properly
 				for(int lgt = 0; lgt < numLights; ++lgt)
 				{
 					const LightSource& light = m_Lights[lgt];
@@ -249,19 +247,19 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 					float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
 
 					// Value clamping is being done after the rendering
-					float valRed = material.kdcR * intensityDiffuse * light.r * 0.1f;
+					float valRed = material.kdcR * intensityDiffuse * light.r;
 					floatColor.x += valRed;
 
-					float valGreen = material.kdcG * intensityDiffuse * light.g * 0.1f;
+					float valGreen = material.kdcG * intensityDiffuse * light.g;
 					floatColor.y += valGreen;
 
-					float valBlue = material.kdcB * intensityDiffuse * light.b * 0.1f;
+					float valBlue = material.kdcB * intensityDiffuse * light.b;
 					floatColor.z += valBlue;
 				}
 
-				pixels[y * width + x].x += floatColor.x;// / static_cast<float>(intersectedTrianglesCount);
-				pixels[y * width + x].y += floatColor.y;// / intersectedTrianglesCount;
-				pixels[y * width + x].z += floatColor.z;// / intersectedTrianglesCount;
+				pixels[y * width + x].x += floatColor.x;
+				pixels[y * width + x].y += floatColor.y;
+				pixels[y * width + x].z += floatColor.z;
 			}
 
 			if (intersectedTrianglesCount == 0)
@@ -271,8 +269,11 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 		}
 	}
 
-	//Determine the maximum colour value
+	// Do some tone mapping
 	const int numPixels = width * height;
+	PerformToneMapping(pixels, numPixels);
+
+	//Determine the maximum colour value	
 	RGBQUAD color = {0};
 
 	// Normalize the colours
@@ -292,6 +293,49 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
+}
+
+void Scene::PerformToneMapping(Vector3d* pixels, const int numPixels) const
+{
+	// HDR logarithm scaling
+	// Calculate the low average luminance
+	const float rgbToLum[] = {0.27f, 0.67f, 0.06f};
+	const float delta = 0.01f;
+	float lw = 0.0f;
+	float lsum = 0.0f;
+	float pixelLum = 0.0f;
+	for(int p = 0; p < numPixels; ++p)
+	{
+		pixels[p].x = Utils::Clamp(pixels[p].x, 0.0f, std::numeric_limits<float>::max());
+		pixels[p].y = Utils::Clamp(pixels[p].y, 0.0f, std::numeric_limits<float>::max());
+		pixels[p].z = Utils::Clamp(pixels[p].z, 0.0f, std::numeric_limits<float>::max());
+
+		pixelLum = rgbToLum[0] * pixels[p].x 
+				 + rgbToLum[1] * pixels[p].y 
+				 + rgbToLum[2] * pixels[p].z;
+
+		lsum += log(delta + pixelLum);
+	}
+	
+	lw = 1.0f / numPixels * lsum;
+
+	// Apply the luminance scaling operator
+	float* luminance = new float[numPixels];	
+	for(int p = 0; p < numPixels; ++p)
+	{
+		pixelLum = rgbToLum[0] * pixels[p].x 
+				 + rgbToLum[1] * pixels[p].y 
+				 + rgbToLum[2] * pixels[p].z;
+		luminance[p] = m_ToneMappingKey * pixelLum / lw;
+	}
+
+	// Apply the tone mapping operator
+	for(int p = 0; p < numPixels; ++p)
+	{		
+		pixels[p] = pixels[p] * (luminance[p] / (1.0f + luminance[p]));
+	}
+
+	Utils::SafeDeleteArr(luminance);
 }
 
 void Scene::LoadLights(const char* filename)

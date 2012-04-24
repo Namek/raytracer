@@ -23,13 +23,19 @@ class Scene
 		void BuildOctree();
 		void RenderToFile(const char* filename, int width, int height) const;
 
+		inline void SetToneMappingKey(float key) {m_ToneMappingKey = key; }
+
 	private:
+		void PerformToneMapping(Vector3d* pixels, const int numPixels) const;
+
 		std::vector<Triangle> m_Triangles;//deprecated: Octree will build it's own list of triangles (they will be cut)
 		std::vector<Material> m_Materials;
 		std::vector<LightSource> m_Lights;
 
 		Octree m_Octree;
 		Camera m_Camera;
+
+		float m_ToneMappingKey;
 };
 
 
