@@ -201,92 +201,41 @@ void Scene::LoadAttributes(const char* filePath)
 
 void Scene::RenderToFile(const char* filename, int width, int height) const
 {
-	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);	
 	Vector3d floatColor(0, 0, 0);
-	const int numTriangles = m_Triangles.size();
-	const int numLights = m_Lights.size();
-	Vector3d* pixels = new Vector3d[width * height];
+	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
+	const int numPixels = width * height;
+	Vector3d* pixels = new Vector3d[numPixels];
 	
 	const Point3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
 	m_Octree.setObserverPoint(observerPos);
 
+	Point3d U, V, ul, P_ij;
 	for (int y = 0; y < height; y++)
 	{
 		cout << "Completed: " << (100 * (y + 1) / height) << "%\r";
 		for (int x = 0; x < width; x++)
 		{
 			// Calculate the ray direction based on the magic equations from the lecture
-			Point3d U = m_Camera.topRight - m_Camera.topLeft;
-			Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
-			Point3d ul = m_Camera.topLeft;
-			Point3d P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
+			U = m_Camera.topRight - m_Camera.topLeft;
+			V = m_Camera.bottomLeft - m_Camera.topLeft;
+			ul = m_Camera.topLeft;
+			P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
 
 			Vector3d rayDirection = P_ij - observerPos;
 			rayDirection.normalize();
+			CalculateColor(rayDirection, observerPos, floatColor);
 
-			// Trace the ray in Octree
-			vector<pair<Triangle, Point3d>> intersectedTriangles;
-			m_Octree.traceRayForTriangles(observerPos, rayDirection, intersectedTriangles);
-			const int intersectedTrianglesCount = intersectedTriangles.size();
-
-			for (int i = 0; i < intersectedTrianglesCount; ++i)
-			{
-				const Triangle& hitTriangle = intersectedTriangles[i].first;
-				const Vector3d intersectionPt = intersectedTriangles[i].second;
-				const Material& material = m_Materials[hitTriangle.materialIndex];
-				floatColor.x = 1.0f * material.r;
-				floatColor.y = 1.0f * material.g;
-				floatColor.z = 1.0f * material.b;
-
-				for(int lgt = 0; lgt < numLights; ++lgt)
-				{
-					const LightSource& light = m_Lights[lgt];
-					Vector3d lgtDir = (intersectionPt - light.position);
-					Vector3d observerDir = (intersectionPt - observerPos);
-					Vector3d hVec = (lgtDir + observerDir) * 0.5f;
-					lgtDir.normalize();
-					observerDir.normalize();
-					hVec.normalize();
-
-					// Calculate the diffuse component
-					float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
-
-					// Value clamping is being done after the rendering
-					float valRed = material.kdcR * intensityDiffuse * light.r;
-					floatColor.x += valRed;
-
-					float valGreen = material.kdcG * intensityDiffuse * light.g;
-					floatColor.y += valGreen;
-
-					float valBlue = material.kdcB * intensityDiffuse * light.b;
-					floatColor.z += valBlue;
-
-					// Calculate the specular component
-					float intensitySpecular = hitTriangle.norm.dotProduct(hVec);
-
-					valRed = material.kscR * intensitySpecular;
-					floatColor.x += valRed;
-					valGreen = material.kscG * intensitySpecular;
-					floatColor.y += valGreen;
-					valBlue = material.kscB * intensitySpecular;
-					floatColor.z += valBlue;
-				}
-
-				pixels[y * width + x].x += floatColor.x;
-				pixels[y * width + x].y += floatColor.y;
-				pixels[y * width + x].z += floatColor.z;
-			}
-
-			if (intersectedTrianglesCount == 0)
-			{
-				// TODO use some background color
-			}
+			pixels[y * width + x].x = floatColor.x;
+			pixels[y * width + x].y = floatColor.y;
+			pixels[y * width + x].z = floatColor.z;
 		}
 	}
 
 	// Do some tone mapping
-	const int numPixels = width * height;
-	PerformToneMapping(pixels, numPixels);
+	if(m_ToneMappingKey > FLT_EPSILON)
+	{
+		PerformToneMapping(pixels, numPixels);
+	}
 
 	//Determine the maximum colour value	
 	RGBQUAD color = {0};
@@ -308,6 +257,79 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
+}
+
+void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observerPos, Vector3d& in_color) const
+{
+	const int numLights = m_Lights.size();
+	in_color.x = in_color.y = in_color.z = 0.0f;
+
+	// Trace the ray in Octree
+	vector<pair<Triangle, Point3d>> intersectedTriangles;
+	vector<pair<Triangle, Point3d>> lightIntTriangles;
+	m_Octree.traceRayForTriangles(observerPos, rayDirection, intersectedTriangles);
+
+	if(intersectedTriangles.size() > 0)
+	{
+		const Triangle& hitTriangle = intersectedTriangles[0].first;
+		const Vector3d intersectionPt = intersectedTriangles[0].second;
+		const Material& material = m_Materials[hitTriangle.materialIndex];
+		in_color.x = material.r;
+		in_color.y = material.g;
+		in_color.z = material.b;
+
+		float valRed, valGreen, valBlue;
+		for(int lgt = 0; lgt < numLights; ++lgt)
+		{
+			std::pair<Triangle, Point3d> intPair;		// shadow intersection pair
+			const LightSource& light = m_Lights[lgt];
+			Vector3d lgtDir = (intersectionPt - light.position);			
+			lgtDir.normalize();			
+
+			// Perform a shadow cast from the intersection point
+			m_Octree.traceRayForTriangles(intersectionPt, lgtDir, lightIntTriangles);
+			for(int tri = 0; tri < lightIntTriangles.size(); ++tri)
+			{
+				if(hitTriangle.ind == lightIntTriangles[tri].first.ind)
+				{
+					lightIntTriangles.erase(lightIntTriangles.begin() + tri);
+					--tri;
+				}
+			}
+
+			// If there are no intersections, add the light
+			if(lightIntTriangles.size() == 0)
+			{
+				Vector3d hVec = (lgtDir + rayDirection) * 0.5f;
+				hVec.normalize();
+
+				// Calculate the diffuse component
+				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
+
+				// Value clamping is being done after the rendering
+				valRed = material.kdcR * intensityDiffuse * light.r;
+				in_color.x += valRed;
+				valGreen = material.kdcG * intensityDiffuse * light.g;
+				in_color.y += valGreen;
+				valBlue = material.kdcB * intensityDiffuse * light.b;
+				in_color.z += valBlue;
+
+				// Calculate the specular component
+				float intensitySpecular = hitTriangle.norm.dotProduct(hVec);
+
+				valRed = material.kscR * intensitySpecular;
+				in_color.x += valRed;
+				valGreen = material.kscG * intensitySpecular;
+				in_color.y += valGreen;
+				valBlue = material.kscB * intensitySpecular;
+				in_color.z += valBlue;	
+			}
+		}
+	}
+	else
+	{
+		in_color *= 0.97f;
+	}
 }
 
 void Scene::PerformToneMapping(Vector3d* pixels, const int numPixels) const
@@ -342,12 +364,13 @@ void Scene::PerformToneMapping(Vector3d* pixels, const int numPixels) const
 				 + rgbToLum[1] * pixels[p].y 
 				 + rgbToLum[2] * pixels[p].z;
 		luminance[p] = m_ToneMappingKey * pixelLum / lw;
-	}
-
-	// Apply the tone mapping operator
-	for(int p = 0; p < numPixels; ++p)
-	{		
-		pixels[p] = pixels[p] * (luminance[p] / (1.0f + luminance[p]));
+		luminance[p] /= (1.0f + luminance[p]);
+		
+		pixels[p] *= luminance[p];
+		
+		pixels[p].x /= (1.0f + pixels[p].x);
+		pixels[p].y /= (1.0f + pixels[p].y);
+		pixels[p].z /= (1.0f + pixels[p].z);
 	}
 
 	Utils::SafeDeleteArr(luminance);
@@ -473,3 +496,4 @@ void Scene::LoadCamera(const char* filePath)
 	file.close();
 	m_Camera = Camera(cameraCenter, topLeft, bottomLeft, topRight, xRes, yRes);
 }
+

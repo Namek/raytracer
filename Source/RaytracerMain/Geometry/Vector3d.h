@@ -38,6 +38,17 @@ namespace nprt
 			y /= factor;
 			z /= factor;
 		}
+		inline void operator*=(float factor)
+		{
+			x *= factor;
+			y *= factor;
+			z *= factor;
+		}
+		inline Vector3d operator-() const
+		{
+			return Vector3d(-x, -y, -z);
+		}
+
 
 		friend std::ostream& operator<<(std::ostream& os, const Vector3d& v) 
 		{

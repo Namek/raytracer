@@ -225,10 +225,11 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 	{
 		out_intersectedTriangles.push_back(triangleWithIntersectionPoint);
 
-		currentRayOrigin = triangleWithIntersectionPoint.second;
 		// TODO !!!!!1111 calculate reflection ====> currentRayDirection = ...
-		
-		break;//TODO REmove that so bad thing!
+		// I don't neet reflection at the moment, so the current ray dir will be the same as before
+		currentRayOrigin = triangleWithIntersectionPoint.second;
+		currentRayDirection = rayDirection;
+		break;
 	}
 }
 

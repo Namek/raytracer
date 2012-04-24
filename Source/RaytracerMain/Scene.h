@@ -27,8 +27,10 @@ class Scene
 
 	private:
 		void PerformToneMapping(Vector3d* pixels, const int numPixels) const;
+		void CalculateColor(const Vector3d& rayDirection, const Vector3d& observerPos, Vector3d& in_color) const;
 
 		std::vector<Triangle> m_Triangles;//deprecated: Octree will build it's own list of triangles (they will be cut)
+		std::vector<Triangle> m_ShadowTriangles;
 		std::vector<Material> m_Materials;
 		std::vector<LightSource> m_Lights;
 

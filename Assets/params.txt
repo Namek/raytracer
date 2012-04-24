@@ -1,6 +1,6 @@
 width 320
 height 240
-tone_mapping_key 0.06
+tone_mapping_key 0.6
 num_scenes 1
 data_folder0 v0
 data_folder1 v1

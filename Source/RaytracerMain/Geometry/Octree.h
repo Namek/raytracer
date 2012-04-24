@@ -71,10 +71,9 @@ namespace nprt
 		void setObserverPoint(const Point3d& point) const;//may be deprecated
 
 		void traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& out_intersectedTriangles) const;
+		bool castRayForTriangle(const Vector3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;
 
-
-	private:
-		bool castRayForTriangle(const Vector3d& rayDir, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;
+	private:		
 		bool procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node, int indexSwapper,
 			const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;
 		inline int firstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm) const;
