@@ -242,8 +242,13 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 				{
 					const LightSource& light = m_Lights[lgt];
 					Vector3d lgtDir = (intersectionPt - light.position);
+					Vector3d observerDir = (intersectionPt - observerPos);
+					Vector3d hVec = (lgtDir + observerDir) * 0.5f;
 					lgtDir.normalize();
+					observerDir.normalize();
+					hVec.normalize();
 
+					// Calculate the diffuse component
 					float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
 
 					// Value clamping is being done after the rendering
@@ -254,6 +259,16 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 					floatColor.y += valGreen;
 
 					float valBlue = material.kdcB * intensityDiffuse * light.b;
+					floatColor.z += valBlue;
+
+					// Calculate the specular component
+					float intensitySpecular = hitTriangle.norm.dotProduct(hVec);
+
+					valRed = material.kscR * intensitySpecular;
+					floatColor.x += valRed;
+					valGreen = material.kscG * intensitySpecular;
+					floatColor.y += valGreen;
+					valBlue = material.kscB * intensitySpecular;
 					floatColor.z += valBlue;
 				}
 
