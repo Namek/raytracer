@@ -26,9 +26,18 @@ Params::Params(const char* filename)
 			{
 				val.clear();
 				if (!lineStream.eof() && lineStream >> val)
+				{					
+					if (val == "True" || val == "true")
+						val = "1";
+					else if (val == "False" || val == "false")
+						val = "0";
+
 					m_Values[key] = val;
+				}
 				else
+				{
 					m_Values[key] = "";
+				}
 
 				cout << "  " << key << " = " << "\"" << val << "\"" << endl;
 				key.clear();
@@ -42,7 +51,7 @@ Params::Params(const char* filename)
 	file.close();
 }
 
-int Params::GetInt(const char* name, int defaultValue)
+int Params::GetInt(const char* name, int defaultValue) const
 {
 	if (m_Values.find(name) != m_Values.end())
 		return atoi(m_Values[name].c_str());
@@ -50,7 +59,7 @@ int Params::GetInt(const char* name, int defaultValue)
 		return defaultValue;
 }
 		
-const char* Params::GetString(const char* name, const char* defaultStr)
+const char* Params::GetString(const char* name, const char* defaultStr) const
 {
 	if (m_Values.find(name) != m_Values.end())
 		return m_Values[name].c_str();
@@ -58,10 +67,18 @@ const char* Params::GetString(const char* name, const char* defaultStr)
 		return defaultStr;
 }
 
-float Params::GetFloat(const char* name, float defaultValue)
+bool Params::GetBool(const char* name, bool defaultValue) const
 {
 	if (m_Values.find(name) != m_Values.end())
-		return static_cast<float>(atof(m_Values[name].c_str()));
+		return m_Values[name] == "1";
+	else
+		return defaultValue;
+}
+
+float Params::GetFloat(const char* name, float defaultValue) const
+{
+	if (m_Values.find(name) != m_Values.end())
+		return (float)atof(m_Values[name].c_str());
 	else
 		return defaultValue;
 }
