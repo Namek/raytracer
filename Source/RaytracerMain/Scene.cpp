@@ -232,9 +232,14 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	}
 
 	// Do some tone mapping
-	if(m_ToneMappingKey > FLT_EPSILON)
+	if(m_EnableToneMapping)
 	{
 		PerformToneMapping(pixels, numPixels);
+	}
+
+	if(m_EnableGamma)
+	{
+		PerformGammaCorrection(pixels, numPixels);
 	}
 
 	//Determine the maximum colour value	
@@ -278,7 +283,8 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		in_color.y = material.g;
 		in_color.z = material.b;
 
-		float valRed, valGreen, valBlue;
+		Vector3d diffuseComponent(0, 0, 0);
+		Vector3d specularComponent(0, 0, 0);
 		for(int lgt = 0; lgt < numLights; ++lgt)
 		{
 			std::pair<Triangle, Point3d> intPair;		// shadow intersection pair
@@ -287,13 +293,16 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			lgtDir.normalize();			
 
 			// Perform a shadow cast from the intersection point
-			m_Octree.traceRayForTriangles(intersectionPt, lgtDir, lightIntTriangles);
-			for(int tri = 0; tri < lightIntTriangles.size(); ++tri)
+			if(m_EnableShadows)
 			{
-				if(hitTriangle.ind == lightIntTriangles[tri].first.ind)
+				m_Octree.traceRayForTriangles(intersectionPt, lgtDir, lightIntTriangles);
+				for(int tri = 0; tri < (int)lightIntTriangles.size(); ++tri)
 				{
-					lightIntTriangles.erase(lightIntTriangles.begin() + tri);
-					--tri;
+					if(hitTriangle.ind == lightIntTriangles[tri].first.ind)
+					{
+						lightIntTriangles.erase(lightIntTriangles.begin() + tri);
+						--tri;
+					}
 				}
 			}
 
@@ -307,28 +316,42 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
 
 				// Value clamping is being done after the rendering
-				valRed = material.kdcR * intensityDiffuse * light.r;
-				in_color.x += valRed;
-				valGreen = material.kdcG * intensityDiffuse * light.g;
-				in_color.y += valGreen;
-				valBlue = material.kdcB * intensityDiffuse * light.b;
-				in_color.z += valBlue;
+				diffuseComponent.x += intensityDiffuse * light.r;
+				diffuseComponent.y += intensityDiffuse * light.g;
+				diffuseComponent.z += intensityDiffuse * light.b;
 
 				// Calculate the specular component
 				float intensitySpecular = hitTriangle.norm.dotProduct(hVec);
 
-				valRed = material.kscR * intensitySpecular;
-				in_color.x += valRed;
-				valGreen = material.kscG * intensitySpecular;
-				in_color.y += valGreen;
-				valBlue = material.kscB * intensitySpecular;
-				in_color.z += valBlue;	
+				specularComponent.x += intensitySpecular;
+				specularComponent.y += intensitySpecular;
+				specularComponent.z += intensitySpecular;	
 			}
 		}
+		
+		diffuseComponent.x *= material.kdcR;
+		diffuseComponent.y *= material.kdcG;
+		diffuseComponent.z *= material.kdcB;
+
+		specularComponent.x *= material.kscR;
+		specularComponent.y *= material.kscG;
+		specularComponent.z *= material.kscB;
+
+		in_color += diffuseComponent + specularComponent;
 	}
-	else
+}
+
+void Scene::PerformGammaCorrection(Vector3d* pixels, const int numPixels) const
+{
+	for(int p = 0; p < numPixels; ++p)
 	{
-		in_color *= 0.97f;
+		pixels[p].x = powf(pixels[p].x, m_Gamma);
+		pixels[p].y = powf(pixels[p].y, m_Gamma);
+		pixels[p].z = powf(pixels[p].z, m_Gamma);
+
+		pixels[p].x /= (1.0f + pixels[p].x);
+		pixels[p].y /= (1.0f + pixels[p].y);
+		pixels[p].z /= (1.0f + pixels[p].z);
 	}
 }
 
@@ -356,7 +379,7 @@ void Scene::PerformToneMapping(Vector3d* pixels, const int numPixels) const
 	
 	lw = 1.0f / numPixels * lsum;
 
-	// Apply the luminance scaling operator
+	//// Apply the luminance scaling operator
 	float* luminance = new float[numPixels];	
 	for(int p = 0; p < numPixels; ++p)
 	{
@@ -367,12 +390,11 @@ void Scene::PerformToneMapping(Vector3d* pixels, const int numPixels) const
 		luminance[p] /= (1.0f + luminance[p]);
 		
 		pixels[p] *= luminance[p];
-		
+
 		pixels[p].x /= (1.0f + pixels[p].x);
 		pixels[p].y /= (1.0f + pixels[p].y);
 		pixels[p].z /= (1.0f + pixels[p].z);
 	}
-
 	Utils::SafeDeleteArr(luminance);
 }
 

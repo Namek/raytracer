@@ -28,6 +28,12 @@ namespace nprt
 		{
 			return Vector3d(x + vec.x, y + vec.y, z + vec.z);
 		}
+		inline void operator+=(const Vector3d& vec)
+		{
+			x += vec.x;
+			y += vec.y;
+			z += vec.z;
+		}
 		inline Vector3d operator-(const Vector3d& vec) const
 		{
 			return Vector3d(x - vec.x, y - vec.y, z - vec.z);

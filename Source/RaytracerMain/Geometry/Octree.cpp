@@ -293,11 +293,10 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 		float minDistance = numeric_limits<float>::max();
 
 		// Check ray's collision with triangles in the leaf node
-		for (int i = 0; i < node->m_Triangles.size(); ++i)
+		for (int i = 0; i < (int)node->m_Triangles.size(); ++i)
 		{
 			// Test ray-triangle intersection.
 			// Note: it may be optimized by using  't' parameter.
-			
 			const Triangle& triangle = node->m_Triangles[i];
 
 			float intersectionDist = triangle.intersection(rayOrigin, rayDirection);

@@ -14,12 +14,13 @@ Vector3d::Vector3d(float x1, float y1, float z1, bool nor)
 	x = x1;
 	y = y1;
 	z = z1;	
+
 	if (nor)
 	{
 		float len = this->length();
-		x/=len;
-		y/=len;
-		z/=len;
+		x /= len;
+		y /= len;
+		z /= len;
 	}
 }
 

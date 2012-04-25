@@ -1,6 +1,10 @@
-width 320
-height 240
-tone_mapping_key 0.6
+width 640
+height 480
+enable_tone_mapping 0
+tone_mapping_key 0.5
+enable_shadows 0
+enable_gamma 1
+gamma 2.8
 num_scenes 1
 data_folder0 v0
 data_folder1 v1

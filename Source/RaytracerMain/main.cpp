@@ -18,6 +18,10 @@ int main(int argc, char* argv[])
 
 	Scene scene;
 	scene.SetToneMappingKey(params.GetFloat("tone_mapping_key"));
+	scene.SetGamma(params.GetFloat("gamma"));
+	scene.SetEnableGamma(params.GetInt("enable_gamma") ? true : false);
+	scene.SetEnableShadows(params.GetInt("enable_shadows") ? true : false);
+	scene.SetEnableToneMapping(params.GetInt("enable_tone_mapping") ? true : false);
 	scene.LoadGeometry((std::string("data/") + params.GetString("geometry_name") + ".brs").c_str());
 	cout << "Scene geometry loaded successfully." << endl << endl;
 
