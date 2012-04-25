@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <string>
 
 //////////////////////////////////////////////////////////////////////////
 // Wspó³czynniki oznaczaj¹:
@@ -19,6 +20,7 @@ namespace nprt
 	class Material
 	{
 		public:
+			std::string name;
 			float kdcR, kdcG, kdcB;
 			float kscR, kscG, kscB;
 			float krcR, krcG, krcB;
@@ -26,6 +28,7 @@ namespace nprt
 			float r, g, b;
 			float wg, eta;
 			float kr;
+			int G, N;
 
 			Material() {	}
 			Material(float _kd, float _ks, float _wg, float _ka, float _r, float _g, float _b, float _kt, float _eta, float _kr) 

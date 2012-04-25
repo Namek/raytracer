@@ -16,6 +16,7 @@ class Scene
 	public:
 		Scene();
 
+		void LoadScene(const char* filename);
 		void LoadGeometry(const char* filename);
 		void LoadAttributes(const char* filePath);
 		void LoadCamera(const char* filename);
@@ -40,7 +41,7 @@ class Scene
 		std::vector<LightSource> m_Lights;
 
 		Octree m_Octree;
-		Camera m_Camera;
+		mutable Camera m_Camera;
 
 		float m_ToneMappingKey;
 		float m_Gamma;

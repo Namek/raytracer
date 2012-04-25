@@ -13,29 +13,43 @@ using namespace nprt;
 int main(int argc, char* argv[])
 {
 	Params params(argc > 1 ? argv[1] : "params.txt");
-	int numScenes = params.GetInt("num_scenes");
+	int numScenes = params.GetInt("num_scenes", 0);
+	bool newDataFormat = params.GetBool("use_new_format", false);
 	unsigned totalTime = 0;
-
+	
 	Scene scene;
 	scene.SetToneMappingKey(params.GetFloat("tone_mapping_key"));
 	scene.SetGamma(params.GetFloat("gamma"));
-	scene.SetEnableGamma(params.GetInt("enable_gamma") ? true : false);
-	scene.SetEnableShadows(params.GetInt("enable_shadows") ? true : false);
-	scene.SetEnableToneMapping(params.GetInt("enable_tone_mapping") ? true : false);
-	scene.LoadGeometry((std::string("data/") + params.GetString("geometry_name") + ".brs").c_str());
-	cout << "Scene geometry loaded successfully." << endl << endl;
+	scene.SetEnableGamma(params.GetBool("enable_gamma", true));
+	scene.SetEnableShadows(params.GetBool("enable_shadows", false));
+	scene.SetEnableToneMapping(params.GetBool("enable_tone_mapping", true));
+
+	if (!newDataFormat)
+	{
+		scene.LoadGeometry((std::string("data/") + params.GetString("geometry_name") + ".brs").c_str());
+		cout << "Scene geometry loaded successfully." << endl << endl;
+	}
 
 	for(int i = 0; i < numScenes; ++i)
 	{
 		cout << "Loading scene " << (i + 1) << "..." << endl;
 		std::string dataFolderFilename = params.GetString(("data_folder" + NumToStr(i)).c_str());
 
-		scene.LoadAttributes(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".atr").c_str());
-		cout << "Geometry attributes loaded successfully." << endl;
-		scene.LoadCamera(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".cam").c_str());
-		cout << "Camera loaded successfully." << endl;
-		scene.LoadLights(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".lgt").c_str());
-		cout << "Lights loaded successfully." << endl;
+		if (!newDataFormat)
+		{
+			scene.LoadAttributes(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".atr").c_str());
+			cout << "Geometry attributes loaded successfully." << endl;
+			scene.LoadCamera(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".cam").c_str());
+			cout << "Camera loaded successfully." << endl;
+			scene.LoadLights(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".lgt").c_str());
+			cout << "Lights loaded successfully." << endl;
+		}
+		else
+		{
+			std::string geometryName = params.GetString("geometry_name");
+			std::string filename = geometryName + "/" + geometryName + "-" + dataFolderFilename + ".scn";
+			scene.LoadScene((std::string("data_new/") + filename).c_str());
+		}
 
 		unsigned start_tm = timeGetTime();
 
@@ -46,6 +60,7 @@ int main(int argc, char* argv[])
 		totalTime += timeGetTime() - start_tm;
 		cout << "Rendering time: " << (timeGetTime() - start_tm) / 1000.0f << " seconds." << endl << endl;
 	}
+	
 
 	cout << "Rendered " << numScenes << " scenes in " << totalTime / 1000.0f << " seconds" << endl;
 	_getch();

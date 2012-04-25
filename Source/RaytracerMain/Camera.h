@@ -24,13 +24,10 @@ namespace nprt
 		}
 		Camera(Point3d, Point3d, Point3d, Point3d, int, int);
 		~Camera(void);
-		Point3d getCameraCenter();
-		void setCameraCenter(Point3d);
-		void setTopLeft(Point3d);
-		void setBottomLeft(Point3d);
-		void setTopRight(Point3d);
-		void setXResolution(int);
-		void setYResolution(int);
+
+		void initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, float fovX);
+		void setResolution(int width, int height);
+
 		friend std::ostream& operator<<(std::ostream& os, const Camera& c) 
 		{
 			return os << c.cameraCenter << " " << c.topLeft << " " << c.bottomLeft << " " << c.topRight

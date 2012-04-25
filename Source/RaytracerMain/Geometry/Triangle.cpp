@@ -8,7 +8,8 @@ using namespace nprt;
 float Triangle::MaxDistance = 100000.0f;
 
 
-Triangle::Triangle() {
+Triangle::Triangle()
+{
 	p1 = Point3d();
 	p2 = Point3d();
 	p3 = Point3d();	
@@ -21,7 +22,8 @@ Triangle::Triangle() {
 	plane = -1;
 }
 
-Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind) {
+Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind)
+{
 	this->p1 = p1;
 	this->p2 = p2;
 	this->p3 = p3;
@@ -35,7 +37,8 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind) {
 	preprocess();
 }
 
-Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind) {
+Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind)
+{
 	this->p1 = p1;
 	this->p2 = p2;
 	this->p3 = p3;

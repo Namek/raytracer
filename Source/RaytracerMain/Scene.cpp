@@ -8,6 +8,248 @@ using namespace std;
 Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f)
 { }
 
+void Scene::LoadScene(const char* filename)
+{
+	ifstream file;
+	string line, token;
+	stringstream lineStream;
+
+	vector<Point3d> vertices;
+	Point3d minDomain, maxDomain;
+
+	maxDomain.x = maxDomain.y = maxDomain.z = -numeric_limits<float>::infinity();
+	minDomain.x = minDomain.y = minDomain.z = numeric_limits<float>::infinity();
+	
+
+	file.open(filename);
+
+	if (file.is_open())
+	{
+		while (!file.eof())
+		{	
+			getline(file, line);
+			lineStream.clear();
+			lineStream.str(line);
+
+			while (lineStream >> token)
+			{
+				if (token == "points_count" && !lineStream.eof())
+				{
+					int verticesCount;
+					lineStream >> verticesCount;
+					vertices = vector<Point3d>(verticesCount);
+
+					for (int i = 0; i < verticesCount; ++i)
+					{
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+						
+						float t1, t2, t3;
+						lineStream >> t1;
+						lineStream >> t2;
+						lineStream >> t3;
+
+						minDomain.x = t1 < minDomain.x ? t1 : minDomain.x;
+						minDomain.y = t2 < minDomain.y ? t2 : minDomain.y;
+						minDomain.z = t3 < minDomain.z ? t3 : minDomain.z;
+
+						maxDomain.x = t1 > maxDomain.x ? t1 : maxDomain.x;
+						maxDomain.y = t2 > maxDomain.y ? t2 : maxDomain.y;
+						maxDomain.z = t3 > maxDomain.z ? t3 : maxDomain.z;
+						
+						vertices[i] = Point3d(t1, t2, t3);
+					}
+				}
+				else if (token == "triangles_count" && !lineStream.eof())
+				{
+					int trianglesCount;
+					lineStream >> trianglesCount;
+					m_Triangles.reserve(trianglesCount);
+					
+					for (int i = 0; i < trianglesCount; ++i) 
+					{
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+
+						int v1, v2, v3;
+						lineStream >> v1;
+						lineStream >> v2;
+						lineStream >> v3;
+						
+						m_Triangles.push_back(Triangle(vertices[v1], vertices[v2], vertices[v3], i));
+					}
+				}
+				else if (token == "parts_count" && !lineStream.eof())
+				{
+					int i=0;
+					int ind;
+					const int numTriangles = m_Triangles.size();
+
+					while (i < numTriangles) 
+					{
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+
+						while (lineStream >> ind) 
+						{
+							m_Triangles[i].setMaterialIndex(ind);
+							i++;
+						}
+					}
+				}
+				else if (token == "materials_count" && !lineStream.eof())
+				{
+					int materialsCount;
+					lineStream >> materialsCount;
+					m_Materials.reserve(materialsCount);
+
+					for (int i = 0; i < materialsCount; ++i)
+					{
+						Material material;
+
+						int params = 0;
+						while (params++ < 15 && lineStream >> token)
+						{
+							getline(file, line);
+							lineStream.clear();
+							lineStream.str(line);
+
+							if (token == "mat_name")
+							{
+								lineStream >> material.name;
+							}
+							else if (token == "rgb")
+							{
+								lineStream >> material.r;
+								lineStream >> material.g;
+								lineStream >> material.b;
+							}
+							else if (token == "kdCr")
+								lineStream >> material.kdcR;
+							else if (token == "kdCg")
+								lineStream >> material.kdcG;
+							else if (token == "kdCb")
+								lineStream >> material.kdcB;
+							else if (token == "ksCr")
+								lineStream >> material.kscR;
+							else if (token == "ksCg")
+								lineStream >> material.kscG;
+							else if (token == "ksCb")
+								lineStream >> material.kscB;
+							else if (token == "kaCr")
+								lineStream >> material.kacR;
+							else if (token == "kaCg")
+								lineStream >> material.kacG;
+							else if (token == "kaCb")
+								lineStream >> material.kacB;
+							else if (token == "krCr")
+								lineStream >> material.krcR;
+							else if (token == "krCg")
+								lineStream >> material.krcG;
+							else if (token == "krCb")
+								lineStream >> material.krcB;
+							else if (token == "g")
+								lineStream >> material.G;
+							else if (token == "n")
+								lineStream >> material.N;
+						}
+
+						m_Materials.push_back(material);
+					}
+				}
+				else if (token == "lights_count" && !lineStream.eof())
+				{
+					int lightsCount;
+					lineStream >> lightsCount;
+
+					for (int i = 0; i < lightsCount; ++i)
+					{
+						LightSource lightSource;
+
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+
+						while (lineStream >> token)
+						{
+							if (token == "rgb" && !lineStream.eof())
+							{
+								lineStream >> lightSource.r;
+								lineStream >> lightSource.g;
+								lineStream >> lightSource.b;
+							}
+							else if (token == "pos" && !lineStream.eof())
+							{
+								lineStream >> lightSource.position.x;
+								lineStream >> lightSource.position.y;
+								lineStream >> lightSource.position.z;
+							}
+							else if (token == "power" && !lineStream.eof())
+							{
+								lineStream >> lightSource.flux;
+							}
+						}
+
+						m_Lights.push_back(lightSource);
+					}
+				}
+				else if (token == "cam_name" && !lineStream.eof())
+				{					
+					Vector3d pos, lookAt;
+					float fov, rotation;
+					int resX, resY;
+
+					int params = 0;
+					while (params++ < 5)
+					{
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+
+
+						lineStream >> token;
+						{
+							params++;
+
+							if (token == "pos")
+							{
+								lineStream >> pos.x;
+								lineStream >> pos.y;
+								lineStream >> pos.z;
+							}
+							else if (token == "lookAt")
+							{
+								lineStream >> lookAt.x;
+								lineStream >> lookAt.y;
+								lineStream >> lookAt.z;
+							}
+							else if (token == "resolution")
+							{
+								lineStream >> resX;
+								lineStream >> resY;
+							}
+							else if (token == "rotation")
+								lineStream >> rotation;
+							else if (token == "fov")
+								lineStream >> fov;
+							else
+								params--;
+						}
+					}
+
+					m_Camera.initialize(pos, lookAt, fov);
+					m_Camera.setResolution(resX, resY);
+				}
+			}
+		}
+	}
+	file.close();
+
+	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
+}
 
 void Scene::LoadGeometry(const char* filename)
 {
@@ -206,8 +448,10 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	const int numPixels = width * height;
 	Vector3d* pixels = new Vector3d[numPixels];
 	
-	const Point3d observerPos(m_Camera.cameraCenter.x, m_Camera.cameraCenter.y, m_Camera.cameraCenter.z);
+	const Point3d observerPos(m_Camera.cameraCenter);
+	//m_Camera.setResolution(width, height);
 	m_Octree.setObserverPoint(observerPos);
+		
 
 	Point3d U, V, ul, P_ij;
 	for (int y = 0; y < height; y++)
