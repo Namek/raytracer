@@ -221,15 +221,17 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 	Vector3d currentRayDirection = rayDirection;
 	int rayNumber = 1;
 
-	while (castRayForTriangle(currentRayOrigin, currentRayDirection, triangleWithIntersectionPoint) && ++rayNumber <= MAX_SECONDARY_RAYS_NUMBER)
+	while (rayNumber++ <= MAX_SECONDARY_RAYS_NUMBER && castRayForTriangle(currentRayOrigin, currentRayDirection, triangleWithIntersectionPoint))
 	{
+		// Store found triangle and ray-triangle intersection point
 		out_intersectedTriangles.push_back(triangleWithIntersectionPoint);
 
-		// TODO !!!!!1111 calculate reflection ====> currentRayDirection = ...
-		// I don't neet reflection at the moment, so the current ray dir will be the same as before
+		// New ray's origin is the intersection point of old ray and some triangle
 		currentRayOrigin = triangleWithIntersectionPoint.second;
-		currentRayDirection = rayDirection;
-		break;
+		
+		// Calcule new ray's direction
+		const Triangle& triangle = triangleWithIntersectionPoint.first;
+		Vector3d currentRayDirection = triangle.norm * 2 * triangle.norm.dotProduct(currentRayDirection) - currentRayDirection;
 	}
 }
 
