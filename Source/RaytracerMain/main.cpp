@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
 	scene.SetEnableGamma(params.GetBool("enable_gamma", true));
 	scene.SetEnableShadows(params.GetBool("enable_shadows", false));
 	scene.SetEnableToneMapping(params.GetBool("enable_tone_mapping", true));
+	scene.SetNumReflections(params.GetInt("num_reflections", 0));
 
 	if (!newDataFormat)
 	{
@@ -60,7 +61,6 @@ int main(int argc, char* argv[])
 		totalTime += timeGetTime() - start_tm;
 		cout << "Rendering time: " << (timeGetTime() - start_tm) / 1000.0f << " seconds." << endl << endl;
 	}
-	
 
 	cout << "Rendered " << numScenes << " scenes in " << totalTime / 1000.0f << " seconds" << endl;
 	_getch();

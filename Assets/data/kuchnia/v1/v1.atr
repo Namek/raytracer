@@ -1,0 +1,969 @@
+42
+;; kitchen3.atr
+
+Attr A000001
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 112
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000002
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000003
+  kd 0.1042
+  ks 0.4097
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 141
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000004
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 159 132 113
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000005
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 130 53 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000006
+  kd 0.0972
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 28 26 23
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000007
+  kd 0.5000
+  ks 0.2153
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 200
+  gm 1
+  eta 1.0000
+  highlight light
+  color 204 202 202
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000008
+  kd 0.2014
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 75 78 75
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000009
+  kd 0.0347
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 44 44 45
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000010
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 137 137 137
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000011
+  kd 0.2014
+  ks 0.0972
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 200
+  gm 1
+  eta 1.0000
+  highlight light
+  color 72 72 72
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000012
+  kd 0.5000
+  ks 0.3611
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 200
+  gm 1
+  eta 1.0000
+  highlight light
+  color 12 12 12
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000013
+  kd 0.2014
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 15 15 15
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000014
+  kd 0.5000
+  ks 0.1181
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 168
+  gm 1
+  eta 1.0000
+  highlight light
+  color 187 187 187
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000015
+  kd 0.2639
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 132
+  gm 1
+  eta 1.0000
+  highlight light
+  color 254 254 255
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000016
+  kd 0.2847
+  ks 0.4097
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 195
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000017
+  kd 0.3681
+  ks 0.1042
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 200
+  gm 1
+  eta 1.0000
+  highlight light
+  color 169 100 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000018
+  kd 0.3681
+  ks 0.1042
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 200
+  gm 1
+  eta 1.0000
+  highlight light
+  color 169 100 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000019
+  kd 0.5000
+  ks 0.0764
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 104
+  gm 1
+  eta 1.0000
+  highlight light
+  color 24 14 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000020
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 255 255
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000021
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 41 41 41
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000022
+  kd 0.2847
+  ks 0.4097
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 195
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000023
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 239 228
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000024
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 64 64 64
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000025
+  kd 0.4000
+  ks 0.1000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 245 216 216
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000026
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 208 170 121
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000027
+  kd 0.0278
+  ks 0.2000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 20000
+  gm 1
+  eta 1.0000
+  highlight light
+  color 205 255 248
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+
+Attr A000028
+  kd 0.2222
+  ks 0.1458
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 97
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000029
+  kd 0.3403
+  ks 0.0208
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 107
+  gm 1
+  eta 1.0000
+  highlight light
+  color 164 0 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000030
+  kd 0.0833
+  ks 0.5000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 110
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000031
+  kd 0.1458
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 17 20 17
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000032
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 247 238 223
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000033
+  kd 0.2500
+  ks 0.2153
+  kts 0.6944
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 200
+  gm 1
+  eta 1.0000
+  highlight light
+  color 152 209 255
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000034
+  kd 0.7153
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 255 255
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000035
+  kd 0.2847
+  ks 0.0208
+  kts 0.1736
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 180
+  gm 1
+  eta 1.0000
+  highlight light
+  color 0 126 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000036
+  kd 0.0833
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 255 255
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000037
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 27 27 27
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000038
+  kd 0.5903
+  ks 0.0000
+  kts 0.0000
+  ka 0.0500
+  Ft 1.0000
+  ktd 0.1944
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 235 234 234
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000039
+  kd 0.5000
+  ks 0.0000
+  kts 0.0000
+  ka 0.5556
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 254 254
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000040
+  kd 0.2778
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 94 61 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000041
+  kd 0.3750
+  ks 0.0000
+  kts 0.0000
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 1
+  gm 1
+  eta 1.0000
+  highlight light
+  color 255 255 239
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading smooth
+enddef
+
+Attr A000042
+  kd 0.5000
+  ks 0.0000
+  kts 0.0139
+  ka 0.0000
+  Ft 1.0000
+  ktd 0.0000
+  kf 0.0000
+  SelfLuminance 0.0000
+  SelfLumDirection Pos
+  gs 200
+  gm 1
+  eta 1.0000
+  highlight light
+  color 0 255 0
+  reflection on
+  indirect on
+  mirror on
+  shadowcast on
+  shadowfall on
+  shading flat
+enddef
+

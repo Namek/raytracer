@@ -1,0 +1,178 @@
+16
+;; night
+
+Attr A001
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 175 175 75
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+Attr A002
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 100 100 100
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.0549
+  ks 0.8415
+  gs 40
+  ka 1.0000
+  color 200 200 200
+  kts 0.8598
+  eta 1.3000
+  kf 0.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 200 200 200
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 158 85 24
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 27 14 11
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+  
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 158 85 24
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 194 197 204
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 194 197 204
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 75 255 75
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 175 255 75
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 252 122 122
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.8000
+  ks 0.0000
+  gs 10
+  ka 0.0000
+  color 100 100 100
+  kts 0.0000
+  eta 1.0000
+  kf 1.0000
+enddef
+
+
+  kd 0.3000
+  ks 0.8000
+  gs 30
+  ka 0.0000
+  color 200 200 200
+  kts 0.0000
+  eta 1.0000
+  kf 0.0000
+enddef
+
+
+  kd 0.3000
+  ks 0.5000
+  gs 40
+  ka 0.0000
+  color 200 200 200
+  kts 0.8000
+  eta 1.0000
+  kf 0.0000
+enddef
+
+
+  kd 0.3000
+  ks 0.8000
+  gs 30
+  ka 0.0000
+  color 200 200 200
+  kts 0.0000
+  eta 1.0000
+  kf 0.0000
+enddef

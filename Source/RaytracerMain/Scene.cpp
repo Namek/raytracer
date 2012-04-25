@@ -467,7 +467,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 			Vector3d rayDirection = P_ij - observerPos;
 			rayDirection.normalize();
-			CalculateColor(rayDirection, observerPos, floatColor);
+			CalculateColor(rayDirection, observerPos, m_NumReflections, floatColor);
 
 			pixels[y * width + x].x = floatColor.x;
 			pixels[y * width + x].y = floatColor.y;
@@ -508,7 +508,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	FreeImage_Unload(dib);
 }
 
-void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observerPos, Vector3d& in_color) const
+void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observerPos, int numReflections, Vector3d& in_color) const
 {
 	const int numLights = m_Lights.size();
 	in_color.x = in_color.y = in_color.z = 0.0f;
@@ -523,6 +523,9 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		const Triangle& hitTriangle = intersectedTriangles[0].first;
 		const Vector3d intersectionPt = intersectedTriangles[0].second;
 		const Material& material = m_Materials[hitTriangle.materialIndex];
+		Vector3d reflectedRay = hitTriangle.norm * 2 * rayDirection.dotProduct(hitTriangle.norm) - rayDirection;
+		reflectedRay.normalize();
+
 		in_color.x = material.r;
 		in_color.y = material.g;
 		in_color.z = material.b;
@@ -565,7 +568,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 				diffuseComponent.z += intensityDiffuse * light.b;
 
 				// Calculate the specular component
-				float intensitySpecular = hitTriangle.norm.dotProduct(hVec);
+				float intensitySpecular = lgtDir.dotProduct(reflectedRay);
 
 				specularComponent.x += intensitySpecular;
 				specularComponent.y += intensitySpecular;
@@ -582,6 +585,16 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		specularComponent.z *= material.kscB;
 
 		in_color += diffuseComponent + specularComponent;
+
+		// Mirror reflection component
+		Vector3d mirrorReflectionComponent(0, 0, 0);
+		if(material.kscR > 0 && numReflections > 0)
+		{
+			Vector3d in_refl_color(0, 0, 0);
+			CalculateColor(reflectedRay, intersectionPt, numReflections - 1, in_refl_color);
+			in_color += in_refl_color * material.kdcR;
+		}
+		 //...
 	}
 }
 
