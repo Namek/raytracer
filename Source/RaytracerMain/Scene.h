@@ -29,6 +29,8 @@ class Scene
 		inline void SetGamma(float gamma) {m_Gamma = gamma; }
 		inline void SetEnableGamma(bool enable) {m_EnableGamma = enable; }
 		inline void SetEnableShadows(bool enable) {m_EnableShadows = enable; }
+		inline void SetEnableRefraction(bool enable) {m_EnableRefraction = enable; }
+		inline void SetEnableReflection(bool enable) {m_EnableReflection = enable; }
 		inline void SetNumReflections(int reflections) {m_NumReflections = reflections; }
 
 	private:
@@ -50,6 +52,8 @@ class Scene
 		bool m_EnableGamma;
 		bool m_EnableShadows;
 		bool m_EnableToneMapping;
+		bool m_EnableRefraction;
+		bool m_EnableReflection;
 };
 
 
