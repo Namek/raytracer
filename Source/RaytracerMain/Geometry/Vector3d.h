@@ -13,12 +13,17 @@ namespace nprt
 		float x, y, z;
 		Vector3d(void);
 		Vector3d(Point3d&, Point3d&, bool);
-		Vector3d(float, float, float, bool norm = false);
+		Vector3d(float x, float y, float z, bool norm = false);
+		Vector3d(float yaw, float pitch);
 		~Vector3d(void) { };
 		void set(float x, float y, float z);
+		void set(float yaw, float pitch);
 		float dotProduct(const Vector3d&) const;
 		Vector3d crossProduct(const Vector3d&, bool) const;
-		bool isInAABB(const Point3d& minDomain, const Point3d& maxDomain) const;
+		void rotateX(float pitch);
+		void rotateY(float yaw);
+		void rotateZ(float roll);
+		bool isInAABB(const Point3d& minDomain, const Point3d& maxDomain, float epsilon = 0.00002f) const;		
 		
 		inline Vector3d operator*(float scalar) const
 		{

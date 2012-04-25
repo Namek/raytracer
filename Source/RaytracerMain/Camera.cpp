@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include <cmath>
 
 using namespace nprt;
 
@@ -38,23 +39,34 @@ void Camera::initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, fl
 	this->cameraCenter = cameraCenter;
 	this->lookAt = lookAt;
 	this->fovX = fovX;
-
-	Vector3d dir = lookAt - cameraCenter;
-	dir.normalize();
+	this->forwardDir = lookAt - cameraCenter;
+	this->forwardDir.normalize();
 	
-	Vector3d axisY(0, 1, 0);
-	float angle = acosf(axisY.dotProduct(dir));
+	/*Vector3d axisY(0, 1, 0);
+	float angle = acosf(axisY.dotProduct(lookDir));*/
 
-	// TODO policzyc topLeft, topRight, bottomLeft na podstawie dir i fovX
+	
 }
 
 void Camera::setResolution(int width, int height)
 {
+	const double PI = 3.14159265358979323846;
+	const float RAD = PI / 180.0f;
+
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 	this->fovY = this->fovX / aspectRatio;
-		
-	Vector3d centerRayDirection = lookAt - cameraCenter;
-	centerRayDirection.normalize();
+	
+	// Determine pitch and yaw of look vector
+	float pitch = atan(sqrt(forwardDir.x*forwardDir.x + forwardDir.y*forwardDir.y) / forwardDir.z);
+	float yaw = atan(-forwardDir.x / forwardDir.y);
 
-	//Vector3d rightDirection
+	this->upDir = Vector3d(0, 1, 0);
+	upDir.rotateX(-pitch);
+	upDir.rotateY(-yaw);
+
+	this->rightDir = Vector3d(1, 0, 0);
+	rightDir.rotateX(pitch);
+	rightDir.rotateY(yaw);
+
+	// TODO policzyc topLeft, topRight, bottomLeft na podstawie dir i fovX
 }

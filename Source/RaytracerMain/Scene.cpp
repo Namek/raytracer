@@ -203,7 +203,7 @@ void Scene::LoadScene(const char* filename)
 					int resX, resY;
 
 					int params = 0;
-					while (params++ < 5)
+					while (params < 5)
 					{
 						getline(file, line);
 						lineStream.clear();
@@ -449,7 +449,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	Vector3d* pixels = new Vector3d[numPixels];
 	
 	const Point3d observerPos(m_Camera.cameraCenter);
-	//m_Camera.setResolution(width, height);
+	m_Camera.setResolution(width, height);
 	m_Octree.setObserverPoint(observerPos);
 		
 

@@ -14,6 +14,7 @@ namespace nprt
 		Point3d topLeft;
 		Point3d bottomLeft;
 		Point3d topRight;
+		Vector3d upDir, rightDir, forwardDir;
 		int xResolution, yResolution;
 		Camera(void);
 		Camera(const Camera& copy) {

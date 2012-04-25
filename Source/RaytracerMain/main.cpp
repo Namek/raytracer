@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
 	scene.SetEnableShadows(params.GetBool("enable_shadows", false));
 	scene.SetEnableToneMapping(params.GetBool("enable_tone_mapping", true));
 	scene.SetNumReflections(params.GetInt("num_reflections", 0));
+	scene.SetMaxDivideDepth(params.GetInt("max_divide_depth", 0));
 
 	if (!newDataFormat)
 	{

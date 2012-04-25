@@ -21,7 +21,7 @@ class Scene
 		void LoadAttributes(const char* filePath);
 		void LoadCamera(const char* filename);
 		void LoadLights(const char* filename);
-		void BuildOctree();
+		void SetMaxDivideDepth(int maxDivideDepth) { m_Octree.setMaxDivideDepth(maxDivideDepth); }
 		void RenderToFile(const char* filename, int width, int height) const;
 
 		inline void SetEnableToneMapping(bool enable) {m_EnableToneMapping = enable; }

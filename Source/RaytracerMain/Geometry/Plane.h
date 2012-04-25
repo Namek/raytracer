@@ -19,6 +19,6 @@ namespace nprt
 
 		void setGeneral(float A, float B, float C, float D);
 		float distance(const Point3d& point) const;
-		Point3d intersectLine(const Point3d& origin, const Point3d& direction) const;
+		bool intersectLine(const Point3d& origin, const Point3d& direction, Point3d& out_intersectionPoint) const;
 	};
 }

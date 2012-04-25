@@ -13,9 +13,9 @@ namespace nprt
 		{
 		public:
 			OctreeNode();
-			OctreeNode(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int divideDepth = 0);
+			OctreeNode(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int maxDivideDepth, int currentDivideDepth = 0);
 
-			bool containsPoint(const Point3d& point) const;
+			bool containsPoint(const Point3d& point, float epsilon = 0.000005f) const;
 			
 			bool m_isLeaf;
 			int m_TrianglesInclusiveCount;
@@ -26,9 +26,10 @@ namespace nprt
 			Point3d m_MaxDomain;
 			Point3d m_MinDomain;
 			Point3d m_DomainSize;
+			int m_MaxDivideDepth;
 
 		private:
-			void divide(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int depth);
+			void divide(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int maxDivideDepth, int currentDepth);
 			void updateNearNodes(bool isRoot);
 
 			static const int NEAR_NODE_ABOVE_INDEX = 0;
@@ -60,13 +61,12 @@ namespace nprt
 			static const int DOMAIN_PLANE_RIGHT = 3;
 			static const int DOMAIN_PLANE_NEAR = 4;
 			static const int DOMAIN_PLANE_FAR = 5;
-
-			static const int MAX_DIVIDE_DEPTH = 0;
 		};
 
 	public:
 		Octree();
 
+		void setMaxDivideDepth(int maxDivideDepth) { m_MaxDivideDepth = maxDivideDepth; }
 		void buildTree(const std::vector<Triangle>& triangles, const Point3d& minDomain, const Point3d& maxDomain);
 		void setObserverPoint(const Point3d& point) const;//may be deprecated
 
@@ -82,8 +82,8 @@ namespace nprt
 
 
 	private:
-		//std::vector<Triangle> m_Triangles;
 		std::unique_ptr<OctreeNode> m_pRoot;
+		int m_MaxDivideDepth;
 		
 		Point3d m_MaxDomain;
 		Point3d m_MinDomain;

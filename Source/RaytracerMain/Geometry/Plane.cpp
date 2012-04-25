@@ -55,10 +55,17 @@ float Plane::distance(const Point3d& point) const
 	return abs(alfa*point.x + beta*point.y + gamma*point.z + delta);
 }
 
-Point3d Plane::intersectLine(const Point3d& origin, const Point3d& direction) const
+bool Plane::intersectLine(const Point3d& origin, const Point3d& direction, Point3d& out_intersectionPoint) const
 {
 	float u = A * origin.x + B * origin.y + C * origin.z + D;
-	u /= -A * direction.x - B * direction.y - C * direction.z;
+	float den = -A * direction.x - B * direction.y - C * direction.z;
 
-	return origin + direction*u;
+	if (den != 0)
+	{
+		u /= den;
+		out_intersectionPoint = origin + direction*u;
+		return true;
+	}
+
+	return false;
 }
