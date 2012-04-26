@@ -229,7 +229,7 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 		}
 
 		// The point with the shortest distance to ray origin is the point lying on the boundary of the domain
-		currentRayOrigin = rayOrigin + rayDirection * smallestDist;
+		//currentRayOrigin = rayOrigin + rayDirection * smallestDist;
 
 		// If point still is outside of the domain then there's no ray-triangle intersection
 		if (currentRayOrigin.x < m_MinDomain.x || currentRayOrigin.x > m_MaxDomain.x ||
@@ -258,6 +258,7 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 	}
 }
 
+std::vector<std::pair<Triangle, Point3d>> foundTriangles;
 // Returns true if there's an ray-triangle intersection.
 bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const
 {
@@ -298,7 +299,27 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 	// Don't check ray-triangle intersections until the starting node isn't found
 	if (max(tx0, max(ty0, tz0)) < min(tx1, min(ty1, tz1)))
 	{
-		return procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get(), indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint);
+		foundTriangles.clear();
+		procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get(), indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint);
+
+		if (foundTriangles.size() > 0)
+		{
+			float smallestDist = numeric_limits<float>::max();
+			int retIndex = 0;
+
+			for (int i = 0; i < foundTriangles.size(); ++i)
+			{
+				float dist = (foundTriangles[i].second - rayOrigin).length();
+				if (dist < smallestDist)
+				{
+					smallestDist = dist;
+					retIndex = i;
+				}
+			}
+
+			triangleWithIntersectionPoint = foundTriangles[retIndex];
+			return true;
+		}
 	}
 
 	return false;
@@ -334,8 +355,10 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 				minDistance = intersectionDist;
 			}
 		}
+		if (foundTriangle)
+			foundTriangles.push_back(triangleWithIntersectionPoint);
 
-		return foundTriangle;
+		return false;
 	}
 
 	// Calculate center of current node
@@ -344,8 +367,7 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 	float tzm = 0.5f * (tz0 + tz1);
 
 	int currNode = firstNode(tx0, ty0, tz0, txm, tym, tzm); 
-
-	std::vector<std::pair<Triangle, Point3d>> triangles;
+	
 	do
 	{
 		switch(currNode)
@@ -364,6 +386,7 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 						return true;				
 					currNode = nextNode(txm,ty1,tzm,6,8,3);
 					break;
+
 			case 3: if (procSubtree(tx0,tym,tzm, txm,ty1,tz1, node->m_Subnodes[3^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
 						return true;
 					currNode = nextNode(txm,ty1,tz1,7,8,8);
@@ -425,26 +448,26 @@ int Octree::firstNode(float tx0, float ty0, float tz0, float txm, float tym, flo
 	//{
 	//	if (tx0 > tz0) {
 	//		// max(tx0, ty0, tz0) is tx0. Entry plane is YZ.
-	//		nodeIndex |= (tym < tx0) << 2;
-	//		nodeIndex |= (tzm < tx0) << 1;
+	//		nodeIndex |= (tym < tx0) << 1;
+	//		nodeIndex |= (tzm < tx0) << 0;
 	//	}
 	//	else {
 	//		// max(tx0, ty0, tz0) is tz0. Entry plane is XY
-	//		nodeIndex |= (txm < tz0) << 4;
-	//		nodeIndex |= (tym < tz0) << 2;
+	//		nodeIndex |= (txm < tz0) << 2;
+	//		nodeIndex |= (tym < tz0) << 1;
 	//	}
 	//}
 	//else
 	//{
 	//	if (ty0 > tz0) {
 	//		// max(tx0, ty0, tz0) is ty0. Entry plane is XZ.
-	//		nodeIndex |= (txm < ty0) << 4;
-	//		nodeIndex |= (tzm < ty0) << 1;
+	//		nodeIndex |= (txm < ty0) << 2;
+	//		nodeIndex |= (tzm < ty0) << 0;
 	//	}
 	//	else {
 	//		// max(tx0, ty0, tz0) is tz0. Entry plane is XY.
-	//		nodeIndex |= (txm < tz0) << 4;
-	//		nodeIndex |= (tym < tz0) << 2;
+	//		nodeIndex |= (txm < tz0) << 2;
+	//		nodeIndex |= (tym < tz0) << 1;
 	//	}
 	//}
 
