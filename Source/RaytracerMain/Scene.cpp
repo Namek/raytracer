@@ -526,12 +526,12 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			// Perform a shadow cast from the intersection point
 			if(m_EnableShadows)
 			{
-				m_Octree.traceRayForTriangles(intersectionPt + lgtDir * 0.05f, lgtDir, lightIntTriangles);
+				m_Octree.traceRayForTriangles(intersectionPt, lgtDir, lightIntTriangles);
 				for(int tri = 0; tri < (int)lightIntTriangles.size(); ++tri)
 				{
 					if(hitTriangle.ind == lightIntTriangles[tri].first.ind)
 					{
-						lightIntTriangles.erase(lightIntTriangles.begin() + tri, lightIntTriangles.begin() + tri + 1);
+						lightIntTriangles.erase(lightIntTriangles.begin() + tri);
 						--tri;
 					}
 				}
@@ -540,6 +540,9 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			// If there are no intersections, add the light
 			if(lightIntTriangles.size() == 0)
 			{
+				Vector3d hVec = (lgtDir + observerDir) * 0.5f;
+				hVec.normalize();
+
 				// Calculate the diffuse component
 				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
 
