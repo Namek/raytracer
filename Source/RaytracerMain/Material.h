@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 
@@ -13,7 +14,6 @@
 // b   - sk³adowa niebieska
 // kt  - wspó³czynnik przeŸroczystoœci
 // eta - stosunek prêdkoœci œwiatla w pró¿ni do prêdkoœci œwiat³a w danym oœrodku
-// kr  - ?
 //////////////////////////////////////////////////////////////////////////
 namespace nprt
 {
@@ -21,18 +21,16 @@ namespace nprt
 	{
 		public:
 			std::string name;
-			float kdcR, kdcG, kdcB;
-			float kscR, kscG, kscB;
-			float krcR, krcG, krcB;
-			float kacR, kacG, kacB;
+			float kdc;
+			float ksc;
+			float kt;
+			float kac;
 			float r, g, b;
 			float wg, eta;
-			float kr;
-			int G, N;
 
 			Material() {	}
-			Material(float _kd, float _ks, float _wg, float _ka, float _r, float _g, float _b, float _kt, float _eta, float _kr) 
-				: kdcR(_kd), kscR(_ks), wg(_wg), kdcG(_ka), r(_r), g(_g), b(_b), krcR(_kt), eta(_eta), kr(_kr)
+			Material(float _kd, float _ks, float _wg, float _ka, float _r, float _g, float _b, float _kt, float _eta)
+				: kdc(_kd), ksc(_ks), wg(_wg), kac(_ka), r(_r), g(_g), b(_b), kt(_kt), eta(_eta)
 			{
 			}
 	};

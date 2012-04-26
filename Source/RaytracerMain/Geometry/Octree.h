@@ -93,6 +93,6 @@ namespace nprt
 		mutable Plane m_NearestPlane;
 		mutable float m_DistanceToNearestPlane;
 
-		static const int MAX_SECONDARY_RAYS_NUMBER = 3;
+		static const int MAX_SECONDARY_RAYS_NUMBER = 1;
 	};
 }

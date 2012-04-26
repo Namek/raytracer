@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
 	scene.SetGamma(params.GetFloat("gamma"));
 	scene.SetEnableGamma(params.GetBool("enable_gamma", true));
 	scene.SetEnableShadows(params.GetBool("enable_shadows", false));
+	scene.SetEnableRefraction(params.GetBool("enable_refraction", false));
+	scene.SetEnableReflection(params.GetBool("enable_reflection", false));
 	scene.SetEnableToneMapping(params.GetBool("enable_tone_mapping", true));
 	scene.SetNumReflections(params.GetInt("num_reflections", 0));
 	scene.SetMaxDivideDepth(params.GetInt("max_divide_depth", 0));

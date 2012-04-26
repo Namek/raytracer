@@ -128,33 +128,23 @@ void Scene::LoadScene(const char* filename)
 								lineStream >> material.b;
 							}
 							else if (token == "kdCr")
-								lineStream >> material.kdcR;
+								lineStream >> material.kdc;
 							else if (token == "kdCg")
-								lineStream >> material.kdcG;
+								lineStream >> material.kdc;
 							else if (token == "kdCb")
-								lineStream >> material.kdcB;
+								lineStream >> material.kdc;
 							else if (token == "ksCr")
-								lineStream >> material.kscR;
+								lineStream >> material.ksc;
 							else if (token == "ksCg")
-								lineStream >> material.kscG;
+								lineStream >> material.ksc;
 							else if (token == "ksCb")
-								lineStream >> material.kscB;
+								lineStream >> material.ksc;
 							else if (token == "kaCr")
-								lineStream >> material.kacR;
+								lineStream >> material.kac;
 							else if (token == "kaCg")
-								lineStream >> material.kacG;
+								lineStream >> material.kac;
 							else if (token == "kaCb")
-								lineStream >> material.kacB;
-							else if (token == "krCr")
-								lineStream >> material.krcR;
-							else if (token == "krCg")
-								lineStream >> material.krcG;
-							else if (token == "krCb")
-								lineStream >> material.krcB;
-							else if (token == "g")
-								lineStream >> material.G;
-							else if (token == "n")
-								lineStream >> material.N;
+								lineStream >> material.kac;
 						}
 
 						m_Materials.push_back(material);
@@ -186,11 +176,7 @@ void Scene::LoadScene(const char* filename)
 								lineStream >> lightSource.position.x;
 								lineStream >> lightSource.position.y;
 								lineStream >> lightSource.position.z;
-							}
-							else if (token == "power" && !lineStream.eof())
-							{
-								lineStream >> lightSource.flux;
-							}
+							}							
 						}
 
 						m_Lights.push_back(lightSource);
@@ -199,8 +185,8 @@ void Scene::LoadScene(const char* filename)
 				else if (token == "cam_name" && !lineStream.eof())
 				{					
 					Vector3d pos, lookAt;
-					float fov, rotation;
-					int resX, resY;
+					float fov = 0, rotation = 0;
+					int resX = 0, resY = 0;
 
 					int params = 0;
 					while (params < 5)
@@ -407,24 +393,13 @@ void Scene::LoadAttributes(const char* filePath)
 					{
 						lineStream >> eta;
 					}
-					else if (token=="kf")		
-					{
-						lineStream >> kr;
-					}
 					else if (token=="ka")		
 					{
 						lineStream >> ka;
 					}
 					else if (token=="enddef") 
 					{
-						Material m(kd, ks, wg, ka, r / 255.0f, g / 255.0f, b / 255.0f, kt, eta, kr);
-						m.kdcG = kd;
-						m.kdcB = kd;
-						m.kscG = ks;
-						m.kscB = ks;
-						m.krcG = kt;
-						m.krcB = kt;
-						m.kacR = m.kacG = m.kacB = ka;
+						Material m(kd, ks, wg, ka, r / 255.0f, g / 255.0f, b / 255.0f, kt, eta);
 						m_Materials.push_back(m);
 
 						break;
@@ -455,8 +430,9 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 	Point3d U, V, ul, P_ij;
 	for (int y = 0; y < height; y++)
-	{
+	{	
 		cout << "Completed: " << (100 * (y + 1) / height) << "%\r";
+
 		for (int x = 0; x < width; x++)
 		{
 			// Calculate the ray direction based on the magic equations from the lecture
@@ -472,6 +448,10 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 			pixels[y * width + x].x = floatColor.x;
 			pixels[y * width + x].y = floatColor.y;
 			pixels[y * width + x].z = floatColor.z;
+
+			floatColor.x = 0;
+			floatColor.y = 0;
+			floatColor.z = 0;
 		}
 	}
 
@@ -511,24 +491,28 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observerPos, int numReflections, Vector3d& in_color) const
 {
 	const int numLights = m_Lights.size();
-	in_color.x = in_color.y = in_color.z = 0.0f;
 
 	// Trace the ray in Octree
 	vector<pair<Triangle, Point3d>> intersectedTriangles;
+	pair<Triangle, Point3d> intersectedTriangle;
 	vector<pair<Triangle, Point3d>> lightIntTriangles;
-	m_Octree.traceRayForTriangles(observerPos, rayDirection, intersectedTriangles);
-
-	if(intersectedTriangles.size() > 0)
+	
+	if(m_Octree.castRayForTriangle(observerPos, rayDirection, intersectedTriangle))
 	{
-		const Triangle& hitTriangle = intersectedTriangles[0].first;
-		const Vector3d intersectionPt = intersectedTriangles[0].second;
+		const Triangle& hitTriangle = intersectedTriangle.first;
+		const Vector3d intersectionPt = intersectedTriangle.second;
+		const Vector3d observerDir = -rayDirection;
 		const Material& material = m_Materials[hitTriangle.materialIndex];
-		Vector3d reflectedRay = hitTriangle.norm * 2 * rayDirection.dotProduct(hitTriangle.norm) - rayDirection;
+		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
 		reflectedRay.normalize();
 
-		in_color.x = material.r;
-		in_color.y = material.g;
-		in_color.z = material.b;
+		// Check the transparency of the material
+		if(material.kt < std::numeric_limits<float>::epsilon())
+		{
+			in_color.x = material.r;
+			in_color.y = material.g;
+			in_color.z = material.b;
+		}
 
 		Vector3d diffuseComponent(0, 0, 0);
 		Vector3d specularComponent(0, 0, 0);
@@ -542,12 +526,12 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			// Perform a shadow cast from the intersection point
 			if(m_EnableShadows)
 			{
-				m_Octree.traceRayForTriangles(intersectionPt, lgtDir, lightIntTriangles);
+				m_Octree.traceRayForTriangles(intersectionPt + lgtDir * 0.05f, lgtDir, lightIntTriangles);
 				for(int tri = 0; tri < (int)lightIntTriangles.size(); ++tri)
 				{
 					if(hitTriangle.ind == lightIntTriangles[tri].first.ind)
 					{
-						lightIntTriangles.erase(lightIntTriangles.begin() + tri);
+						lightIntTriangles.erase(lightIntTriangles.begin() + tri, lightIntTriangles.begin() + tri + 1);
 						--tri;
 					}
 				}
@@ -556,9 +540,6 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			// If there are no intersections, add the light
 			if(lightIntTriangles.size() == 0)
 			{
-				Vector3d hVec = (lgtDir + rayDirection) * 0.5f;
-				hVec.normalize();
-
 				// Calculate the diffuse component
 				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
 
@@ -568,7 +549,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 				diffuseComponent.z += intensityDiffuse * light.b;
 
 				// Calculate the specular component
-				float intensitySpecular = lgtDir.dotProduct(reflectedRay);
+				float intensitySpecular = material.wg * lgtDir.dotProduct(reflectedRay);
 
 				specularComponent.x += intensitySpecular;
 				specularComponent.y += intensitySpecular;
@@ -576,25 +557,39 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			}
 		}
 		
-		diffuseComponent.x *= material.kdcR;
-		diffuseComponent.y *= material.kdcG;
-		diffuseComponent.z *= material.kdcB;
-
-		specularComponent.x *= material.kscR;
-		specularComponent.y *= material.kscG;
-		specularComponent.z *= material.kscB;
+		// Apply the specular and diffuse components
+		diffuseComponent *= material.kdc;
+		specularComponent *= material.ksc;
 
 		in_color += diffuseComponent + specularComponent;
 
 		// Mirror reflection component
 		Vector3d mirrorReflectionComponent(0, 0, 0);
-		if(material.kscR > 0 && numReflections > 0)
+		if(m_EnableReflection
+			&& material.ksc > 0 
+			&& numReflections > 0)
 		{
 			Vector3d in_refl_color(0, 0, 0);
 			CalculateColor(reflectedRay, intersectionPt, numReflections - 1, in_refl_color);
-			in_color += in_refl_color * material.kdcR;
+			in_color += in_refl_color * material.ksc;
 		}
-		 //...
+		 
+		// Refraction component
+		if(m_EnableRefraction  
+			&& material.kt > std::numeric_limits<float>::epsilon() 
+			&& numReflections > 0)
+		{
+			Vector3d in_refr_color(0, 0, 0);
+			Vector3d horz_vec = (observerDir - hitTriangle.norm * observerDir.dotProduct(hitTriangle.norm)) * (-material.eta);
+			float ndo = hitTriangle.norm.dotProduct(observerDir);
+			float vert_vec_scale = -sqrt(1 - material.eta * material.eta * (1 - ndo * ndo));
+			Vector3d vert_vec = hitTriangle.norm * vert_vec_scale;
+			Vector3d refractedRay = horz_vec + vert_vec;
+			refractedRay.normalize();
+
+			CalculateColor(refractedRay, intersectionPt, numReflections - 1, in_refr_color);
+			in_color += in_refr_color * material.kt;
+		}
 	}
 }
 
@@ -614,7 +609,7 @@ void Scene::PerformGammaCorrection(Vector3d* pixels, const int numPixels) const
 
 void Scene::PerformToneMapping(Vector3d* pixels, const int numPixels) const
 {
-	// HDR logarithm scaling
+	// Logarithmic luminance scaling
 	// Calculate the low average luminance
 	const float rgbToLum[] = {0.27f, 0.67f, 0.06f};
 	const float delta = 0.01f;
@@ -660,7 +655,7 @@ void Scene::LoadLights(const char* filename)
 	ifstream file;
 	string line, token;
 	stringstream lineStream;
-	float x, y, z, flux, r, g, b;
+	float x, y, z, r, g, b, flux;
 	int lightCount = 0;
 
 	file.open(filename);
@@ -699,7 +694,7 @@ void Scene::LoadLights(const char* filename)
 						lineStream >> g;
 						lineStream >> b;
 
-						m_Lights.push_back(LightSource(x, y, z, flux, r, g, b));
+						m_Lights.push_back(LightSource(x, y, z, r, g, b));
 					}
 				}
 			}

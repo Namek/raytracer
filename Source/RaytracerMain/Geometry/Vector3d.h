@@ -60,7 +60,6 @@ namespace nprt
 			return Vector3d(-x, -y, -z);
 		}
 
-
 		friend std::ostream& operator<<(std::ostream& os, const Vector3d& v) 
 		{
 			return os << v.x << " " << v.y << " " << v.z << "\n";
