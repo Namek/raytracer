@@ -78,7 +78,6 @@ namespace nprt
 			const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;
 		inline int firstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm) const;
 		inline int nextNode(float tx, float ty, float tz, int ix, int iy, int iz) const;
-		float distanceToNearestPlane(const Point3d& point, Plane& out_nearestPlane) const;
 
 
 	private:
