@@ -333,7 +333,6 @@ void Scene::LoadGeometry(const char* filename)
 	}
 	file.close();
 	
-	m_Octree.setMaxDivideDepth(5);
 	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
 }
 
@@ -659,7 +658,7 @@ void Scene::LoadLights(const char* filename)
 	ifstream file;
 	string line, token;
 	stringstream lineStream;
-	float x, y, z, r, g, b;
+	float x, y, z, r, g, b, flux;
 	int lightCount = 0;
 
 	file.open(filename);
@@ -693,6 +692,7 @@ void Scene::LoadLights(const char* filename)
 						lineStream >> x;
 						lineStream >> y;
 						lineStream >> z;
+						lineStream >> flux;
 						lineStream >> r;
 						lineStream >> g;
 						lineStream >> b;
