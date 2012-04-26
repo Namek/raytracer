@@ -208,11 +208,11 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 		const Plane* planes = m_pRoot->m_DomainPlanes.get();
 		float smallestDist = numeric_limits<float>::max();
 		Point3d nearestIntersectionPoint;
+		Point3d intersectionPoint;
 
 		for (int i = 0; i < 6; ++i)
 		{
 			const Plane& plane = planes[i];
-			Point3d intersectionPoint;
 
 			if (plane.intersectLine(rayOrigin, rayDirection, intersectionPoint))
 			{
@@ -238,7 +238,7 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 			currentRayOrigin.y < m_MinDomain.y || currentRayOrigin.y > m_MaxDomain.y ||
 			currentRayOrigin.z < m_MinDomain.z || currentRayOrigin.z > m_MaxDomain.z)
 		{
-			//return;
+			return;
 		}
 	}
 
@@ -271,7 +271,7 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 
 	if (rayDirection.x < 0)
 	{
-		correctedRayOrigin.x =  m_MinDomain.x - rayOrigin.x + m_MaxDomain.x;
+		correctedRayOrigin.x = m_MinDomain.x - rayOrigin.x + m_MaxDomain.x;
 		correctedRayDirection.x = - rayDirection.x;
 		indexSwapper |= 4;
 	}
