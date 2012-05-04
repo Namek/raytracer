@@ -301,7 +301,7 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 	float tz1 = (m_MaxDomain.z - correctedRayOrigin.z) / correctedRayDirection.z;
 
 	// Don't check ray-triangle intersections until the starting node isn't found
-	//if (max(tx0, max(ty0, tz0)) < min(tx1, min(ty1, tz1)))
+	if (max(tx0, max(ty0, tz0)) < min(tx1, min(ty1, tz1)))
 	{
 		foundTriangles.clear();
 		procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get(), indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint);

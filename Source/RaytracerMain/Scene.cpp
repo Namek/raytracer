@@ -436,10 +436,10 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 		for (int x = 0; x < width; x++)
 		{
 			// Calculate the ray direction based on the magic equations from the lecture
-			U = m_Camera.topRight - m_Camera.topLeft;
-			V = m_Camera.bottomLeft - m_Camera.topLeft;
-			ul = m_Camera.topLeft;
-			P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
+			Point3d U = m_Camera.topRight - m_Camera.topLeft;
+			Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
+			Point3d ul = m_Camera.topLeft;
+			Point3d P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
 
 			Vector3d rayDirection = P_ij - observerPos;
 			rayDirection.normalize();
@@ -495,7 +495,6 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 	// Trace the ray in Octree
 	vector<pair<Triangle, Point3d>> intersectedTriangles;
 	pair<Triangle, Point3d> intersectedTriangle;
-	vector<pair<Triangle, Point3d>> lightIntTriangles;
 	
 	if(m_Octree.castRayForTriangle(observerPos, rayDirection, intersectedTriangle))
 	{
@@ -518,33 +517,29 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		Vector3d specularComponent(0, 0, 0);
 		for(int lgt = 0; lgt < numLights; ++lgt)
 		{
-			std::pair<Triangle, Point3d> intPair;		// shadow intersection pair
 			const LightSource& light = m_Lights[lgt];
-			Vector3d lgtDir = (intersectionPt - light.position);			
+			Vector3d lgtDir = (light.position - intersectionPt);
 			lgtDir.normalize();			
 
 			// Perform a shadow cast from the intersection point
+			bool shadow = true;
+			float lightIntensity = 0;
+			float lightIntensityPart = 1.0f / static_cast<float>(numLights);
 			if(m_EnableShadows)
 			{
-				m_Octree.traceRayForTriangles(intersectionPt, lgtDir, lightIntTriangles);
-				for(int tri = 0; tri < (int)lightIntTriangles.size(); ++tri)
+				pair<Triangle, Point3d> t;
+				if (m_Octree.castRayForTriangle(intersectionPt+lgtDir*0.01f, lgtDir, t))
 				{
-					if(hitTriangle.ind == lightIntTriangles[tri].first.ind)
-					{
-						lightIntTriangles.erase(lightIntTriangles.begin() + tri);
-						--tri;
-					}
+					shadow = false;
+					lightIntensity += lightIntensityPart;
 				}
 			}
 
 			// If there are no intersections, add the light
-			if(lightIntTriangles.size() == 0)
+			if (!shadow)
 			{
-				Vector3d hVec = (lgtDir + observerDir) * 0.5f;
-				hVec.normalize();
-
 				// Calculate the diffuse component
-				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir);
+				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir) * lightIntensity;
 
 				// Value clamping is being done after the rendering
 				diffuseComponent.x += intensityDiffuse * light.r;
@@ -552,7 +547,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 				diffuseComponent.z += intensityDiffuse * light.b;
 
 				// Calculate the specular component
-				float intensitySpecular = material.wg * lgtDir.dotProduct(reflectedRay);
+				float intensitySpecular = material.wg * lgtDir.dotProduct(reflectedRay) * lightIntensity;
 
 				specularComponent.x += intensitySpecular;
 				specularComponent.y += intensitySpecular;
@@ -573,7 +568,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			&& numReflections > 0)
 		{
 			Vector3d in_refl_color(0, 0, 0);
-			CalculateColor(reflectedRay, intersectionPt, numReflections - 1, in_refl_color);
+			CalculateColor(reflectedRay, intersectionPt+reflectedRay*0.01f, numReflections - 1, in_refl_color);
 			in_color += in_refl_color * material.ksc;
 		}
 		 

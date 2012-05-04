@@ -57,7 +57,7 @@ void Camera::setResolution(int width, int height)
 	this->fovY = this->fovX / aspectRatio;
 	
 	// Determine pitch and yaw of look vector
-	float pitch = atan(sqrt(forwardDir.x*forwardDir.x + forwardDir.y*forwardDir.y) / forwardDir.z);
+	/*float pitch = atan(sqrt(forwardDir.x*forwardDir.x + forwardDir.y*forwardDir.y) / forwardDir.z);
 	float yaw = atan(-forwardDir.x / forwardDir.y);
 
 	this->upDir = Vector3d(0, 1, 0);
@@ -66,7 +66,10 @@ void Camera::setResolution(int width, int height)
 
 	this->rightDir = Vector3d(1, 0, 0);
 	rightDir.rotateX(pitch);
-	rightDir.rotateY(yaw);
+	rightDir.rotateY(yaw);*/
+
+	Vector3d left(forwardDir);
+	//left.rotateY
 
 	// TODO policzyc topLeft, topRight, bottomLeft na podstawie dir i fovX
 }
