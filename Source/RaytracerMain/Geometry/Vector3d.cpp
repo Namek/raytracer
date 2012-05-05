@@ -9,11 +9,9 @@ Vector3d::Vector3d(void)
 	x = y = z = 0;
 }
 
-Vector3d::Vector3d(float x1, float y1, float z1, bool nor)
+Vector3d::Vector3d(float x, float y, float z, bool nor)
 {
-	x = x1;
-	y = y1;
-	z = z1;	
+	set(x, y, z);
 
 	if (nor)
 	{
@@ -58,6 +56,13 @@ void Vector3d::set(float yaw, float pitch)
 	normalize();
 }
 
+void Vector3d::set(const Vector3d& v)
+{
+	this->x = v.x;
+	this->y = v.y;
+	this->z = v.z;
+}
+
 float Vector3d::dotProduct(const Vector3d& vector) const
 {
 	return x*vector.x + y*vector.y + z*vector.z;
@@ -82,7 +87,7 @@ void Vector3d::rotateX(float pitch)
 void Vector3d::rotateY(float yaw)
 {
 	float X = x * cos(yaw) + z * sin(yaw);
-	this->z =-y * sin(yaw) + z * cos(yaw);
+	this->z =-x * sin(yaw) + z * cos(yaw);
 	this->x = X;
 }
 

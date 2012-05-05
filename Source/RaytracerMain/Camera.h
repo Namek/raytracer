@@ -9,7 +9,7 @@ namespace nprt
 	public:
 		Point3d cameraCenter;
 		Point3d lookAt;
-		float fovX, fovY;
+		float fovHorizontal, fovVertical;
 		float rotation;
 		Point3d topLeft;
 		Point3d bottomLeft;
@@ -18,15 +18,15 @@ namespace nprt
 		int xResolution, yResolution;
 		Camera(void);
 		Camera(const Camera& copy) {
-			fovX = copy.fovX;
-			fovY = copy.fovY;
+			fovHorizontal = copy.fovHorizontal;
+			fovVertical = copy.fovVertical;
 			cameraCenter = copy.cameraCenter;
 			lookAt = copy.lookAt;
 		}
 		Camera(Point3d, Point3d, Point3d, Point3d, int, int);
 		~Camera(void);
 
-		void initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, float fovX);
+		void initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, float fovHorizontal);
 		void setResolution(int width, int height);
 
 		friend std::ostream& operator<<(std::ostream& os, const Camera& c) 

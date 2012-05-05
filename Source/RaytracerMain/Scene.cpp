@@ -46,9 +46,9 @@ void Scene::LoadScene(const char* filename)
 						lineStream.str(line);
 						
 						float t1, t2, t3;
-						lineStream >> t1;
-						lineStream >> t2;
 						lineStream >> t3;
+						lineStream >> t2;
+						lineStream >> t1;
 
 						minDomain.x = t1 < minDomain.x ? t1 : minDomain.x;
 						minDomain.y = t2 < minDomain.y ? t2 : minDomain.y;
@@ -106,49 +106,50 @@ void Scene::LoadScene(const char* filename)
 					lineStream >> materialsCount;
 					m_Materials.reserve(materialsCount);
 
-					for (int i = 0; i < materialsCount; ++i)
+					int i = 0;
+					Material material;
+
+					while (i < materialsCount)
 					{
-						Material material;
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+						lineStream >> token;
 
-						int params = 0;
-						while (params++ < 15 && lineStream >> token)
+						if (token == "mat_name")
 						{
-							getline(file, line);
-							lineStream.clear();
-							lineStream.str(line);
+							if (i > 0)
+								m_Materials.push_back(material);
 
-							if (token == "mat_name")
-							{
-								lineStream >> material.name;
-							}
-							else if (token == "rgb")
-							{
-								lineStream >> material.r;
-								lineStream >> material.g;
-								lineStream >> material.b;
-							}
-							else if (token == "kdCr")
-								lineStream >> material.kdc;
-							else if (token == "kdCg")
-								lineStream >> material.kdc;
-							else if (token == "kdCb")
-								lineStream >> material.kdc;
-							else if (token == "ksCr")
-								lineStream >> material.ksc;
-							else if (token == "ksCg")
-								lineStream >> material.ksc;
-							else if (token == "ksCb")
-								lineStream >> material.ksc;
-							else if (token == "kaCr")
-								lineStream >> material.kac;
-							else if (token == "kaCg")
-								lineStream >> material.kac;
-							else if (token == "kaCb")
-								lineStream >> material.kac;
+							lineStream >> material.name;
+							i++;
 						}
-
-						m_Materials.push_back(material);
+						else if (token == "rgb")
+						{
+							lineStream >> material.r;
+							lineStream >> material.g;
+							lineStream >> material.b;
+						}
+						else if (token == "kdCr")
+							lineStream >> material.kdc;
+						else if (token == "kdCg")
+							lineStream >> material.kdc;
+						else if (token == "kdCb")
+							lineStream >> material.kdc;
+						else if (token == "ksCr")
+							lineStream >> material.ksc;
+						else if (token == "ksCg")
+							lineStream >> material.ksc;
+						else if (token == "ksCb")
+							lineStream >> material.ksc;
+						else if (token == "kaCr")
+							lineStream >> material.kac;
+						else if (token == "kaCg")
+							lineStream >> material.kac;
+						else if (token == "kaCb")
+							lineStream >> material.kac;
 					}
+					m_Materials.push_back(material);
 				}
 				else if (token == "lights_count" && !lineStream.eof())
 				{
@@ -173,9 +174,9 @@ void Scene::LoadScene(const char* filename)
 							}
 							else if (token == "pos" && !lineStream.eof())
 							{
-								lineStream >> lightSource.position.x;
-								lineStream >> lightSource.position.y;
 								lineStream >> lightSource.position.z;
+								lineStream >> lightSource.position.y;
+								lineStream >> lightSource.position.x;
 							}							
 						}
 
@@ -202,15 +203,15 @@ void Scene::LoadScene(const char* filename)
 
 							if (token == "pos")
 							{
-								lineStream >> pos.x;
-								lineStream >> pos.y;
 								lineStream >> pos.z;
+								lineStream >> pos.y;
+								lineStream >> pos.x;
 							}
 							else if (token == "lookAt")
 							{
-								lineStream >> lookAt.x;
-								lineStream >> lookAt.y;
 								lineStream >> lookAt.z;
+								lineStream >> lookAt.y;
+								lineStream >> lookAt.x;
 							}
 							else if (token == "resolution")
 							{
@@ -428,20 +429,21 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	m_Octree.setObserverPoint(observerPos);
 		
 
-	Point3d U, V, ul, P_ij;
+	Vector3d rayDirection;
+	Point3d U = m_Camera.topRight - m_Camera.topLeft;
+	Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
+
 	for (int y = 0; y < height; y++)
 	{	
 		cout << "Completed: " << (100 * (y + 1) / height) << "%\r";
 
 		for (int x = 0; x < width; x++)
 		{
-			// Calculate the ray direction based on the magic equations from the lecture
-			Point3d U = m_Camera.topRight - m_Camera.topLeft;
-			Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
-			Point3d ul = m_Camera.topLeft;
+			// Calculate the ray direction based on the magic equations from the lecture		
+			const Point3d& ul = m_Camera.topLeft;
 			Point3d P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
 
-			Vector3d rayDirection = P_ij - observerPos;
+			rayDirection = P_ij - observerPos;
 			rayDirection.normalize();
 			CalculateColor(rayDirection, observerPos, m_NumReflections, floatColor);
 

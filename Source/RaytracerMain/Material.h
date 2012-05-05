@@ -28,7 +28,11 @@ namespace nprt
 			float r, g, b;
 			float wg, eta;
 
-			Material() {	}
+			Material()
+				: kdc(0), ksc(0), kt(0), kac(0), r(0), g(0), b(0), wg(0), eta(0)
+			{
+			}
+
 			Material(float _kd, float _ks, float _wg, float _ka, float _r, float _g, float _b, float _kt, float _eta)
 				: kdc(_kd), ksc(_ks), wg(_wg), kac(_ka), r(_r), g(_g), b(_b), kt(_kt), eta(_eta)
 			{

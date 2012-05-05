@@ -18,6 +18,7 @@ namespace nprt
 		~Vector3d(void) { };
 		void set(float x, float y, float z);
 		void set(float yaw, float pitch);
+		void set(const Vector3d& v);
 		float dotProduct(const Vector3d&) const;
 		Vector3d crossProduct(const Vector3d&, bool) const;
 		void rotateX(float pitch);

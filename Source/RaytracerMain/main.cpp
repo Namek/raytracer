@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 {
 	Params params(argc > 1 ? argv[1] : "params.txt");
 	int numScenes = params.GetInt("num_scenes", 0);
-	bool newDataFormat = params.GetBool("use_new_format", false);
+	bool newDataFormat = params.GetBool("use_new_format", true);
 	unsigned totalTime = 0;
 	
 	Scene scene;
