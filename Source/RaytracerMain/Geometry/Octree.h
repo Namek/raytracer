@@ -75,7 +75,7 @@ namespace nprt
 
 	private:		
 		bool procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node, int indexSwapper,
-			const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;
+			const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& foundTriangles) const;
 		inline int firstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm) const;
 		inline int nextNode(float tx, float ty, float tz, int ix, int iy, int iz) const;
 

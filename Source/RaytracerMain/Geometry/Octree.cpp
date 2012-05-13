@@ -260,7 +260,6 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 	}
 }
 
-std::vector<std::pair<Triangle, Point3d>> foundTriangles;
 // Returns true if there's an ray-triangle intersection.
 bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const
 {
@@ -303,8 +302,8 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 	// Don't check ray-triangle intersections until the starting node isn't found
 	if (max(tx0, max(ty0, tz0)) < min(tx1, min(ty1, tz1)))
 	{
-		foundTriangles.clear();
-		procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get(), indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint);
+		std::vector<std::pair<Triangle, Point3d>> foundTriangles;
+		procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get(), indexSwapper, rayOrigin, rayDirection, foundTriangles);
 
 		if (foundTriangles.size() > 0)
 		{
@@ -331,7 +330,7 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 
 // Returns true if there's an ray-triangle intersection.
 bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node,
-	int indexSwapper, const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const
+	int indexSwapper, const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& foundTriangles) const
 {
 	if (tx1 < 0 || ty1 < 0 || tz1 < 0)
 		return false;
@@ -341,6 +340,7 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 	{
 		bool foundTriangle = false;
 		float minDistance = numeric_limits<float>::max();
+		std::pair<Triangle, Point3d> triangleWithIntersectionPoint;
 
 		// Check ray's collision with triangles in the leaf node
 		for (int i = 0; i < (int)node->m_Triangles.size(); ++i)
@@ -375,42 +375,42 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 	{
 		switch(currNode)
 		{
-			case 0: if (procSubtree(tx0,ty0,tz0, txm,tym,tzm, node->m_Subnodes[0^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 0: if (procSubtree(tx0,ty0,tz0, txm,tym,tzm, node->m_Subnodes[0^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(txm,tym,tzm,4,2,1);
 					break;
 
-			case 1: if (procSubtree(tx0,ty0,tzm, txm,tym,tz1, node->m_Subnodes[1^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 1: if (procSubtree(tx0,ty0,tzm, txm,tym,tz1, node->m_Subnodes[1^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(txm,tym,tz1,5,3,8);
 					break;
 
-			case 2: if (procSubtree(tx0,tym,tz0, txm,ty1,tzm, node->m_Subnodes[2^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 2: if (procSubtree(tx0,tym,tz0, txm,ty1,tzm, node->m_Subnodes[2^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;				
 					currNode = nextNode(txm,ty1,tzm,6,8,3);
 					break;
 
-			case 3: if (procSubtree(tx0,tym,tzm, txm,ty1,tz1, node->m_Subnodes[3^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 3: if (procSubtree(tx0,tym,tzm, txm,ty1,tz1, node->m_Subnodes[3^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(txm,ty1,tz1,7,8,8);
 					break;
 
-			case 4: if (procSubtree(txm,ty0,tz0, tx1,tym,tzm, node->m_Subnodes[4^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 4: if (procSubtree(txm,ty0,tz0, tx1,tym,tzm, node->m_Subnodes[4^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(tx1,tym,tzm,8,6,5);
 					break;
 
-			case 5: if (procSubtree(txm,ty0,tzm, tx1,tym,tz1, node->m_Subnodes[5^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 5: if (procSubtree(txm,ty0,tzm, tx1,tym,tz1, node->m_Subnodes[5^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(tx1,tym,tz1,8,7,8);
 					break;
 
-			case 6: if (procSubtree(txm,tym,tz0, tx1,ty1,tzm, node->m_Subnodes[6^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 6: if (procSubtree(txm,tym,tz0, tx1,ty1,tzm, node->m_Subnodes[6^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(tx1,ty1,tzm,8,8,7);
 					break;
 
-			case 7: if (procSubtree(txm,tym,tzm, tx1,ty1,tz1, node->m_Subnodes[7^indexSwapper], indexSwapper, rayOrigin, rayDirection, triangleWithIntersectionPoint))
+			case 7: if (procSubtree(txm,tym,tzm, tx1,ty1,tz1, node->m_Subnodes[7^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = 8;
 					break;
