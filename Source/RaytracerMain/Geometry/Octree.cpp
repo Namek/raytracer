@@ -167,10 +167,7 @@ Octree::Octree() :
 	m_MaxDomain(-numeric_limits<float>::infinity(), -numeric_limits<float>::infinity(), -numeric_limits<float>::infinity()),
 	m_MinDomain(numeric_limits<float>::infinity(), numeric_limits<float>::infinity(), numeric_limits<float>::infinity()),
 	m_DomainSize(0, 0, 0),
-	m_SmallestNodeDivide(numeric_limits<float>::infinity(), numeric_limits<float>::infinity(), numeric_limits<float>::infinity()),
-	m_ObserverPoint(),
-	m_NearestPlane(),
-	m_DistanceToNearestPlane(0)
+	m_SmallestNodeDivide(numeric_limits<float>::infinity(), numeric_limits<float>::infinity(), numeric_limits<float>::infinity())
 {
 }
 
@@ -183,15 +180,6 @@ void Octree::buildTree(const std::vector<Triangle>& triangles, const Point3d& mi
 
 	// Create root node. Save domain boundaries and build whole tree!
 	m_pRoot.reset(new OctreeNode(minDomain, maxDomain, triangles, m_MaxDivideDepth));
-}
-
-// may be deprecated
-void Octree::setObserverPoint(const Point3d& point) const
-{
-	m_ObserverPoint = point;
-
-	// Find plane nearest to the observer point
-	//m_DistanceToNearestPlane = distanceToNearestPlane(m_ObserverPoint);
 }
 
 void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& out_intersectedTriangles) const
@@ -231,7 +219,7 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 		}
 
 		// The point with the shortest distance to ray origin is the point lying on the boundary of the domain
-		currentRayOrigin = rayOrigin + rayDirection * smallestDist*1.00001f;
+		currentRayOrigin = rayOrigin + rayDirection * smallestDist*1.000001f;
 
 		// If point still is outside of the domain then there's no ray-triangle intersection
 		if (currentRayOrigin.x < m_MinDomain.x || currentRayOrigin.x > m_MaxDomain.x ||

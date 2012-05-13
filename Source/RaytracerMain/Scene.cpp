@@ -1,5 +1,7 @@
 #include "Scene.h"
 #include "BaseUtils\BaseCore.h"
+#include <Windows.h>
+#include <omp.h>
 
 using namespace nprt;
 using namespace std;
@@ -419,32 +421,38 @@ void Scene::LoadAttributes(const char* filePath)
 
 void Scene::RenderToFile(const char* filename, int width, int height) const
 {
-	Vector3d floatColor(0, 0, 0);
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
 	const int numPixels = width * height;
 	Vector3d* pixels = new Vector3d[numPixels];
 	
 	const Point3d observerPos(m_Camera.cameraCenter);
-	m_Camera.setResolution(width, height);
-	m_Octree.setObserverPoint(observerPos);
-		
-
-	Vector3d rayDirection;
 	Point3d U = m_Camera.topRight - m_Camera.topLeft;
 	Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
 
+	if (width > 0 && height > 0)
+	{
+		m_Camera.setResolution(width, height);
+	}
+		
+
+	volatile long rowsDoneCount = 0;
+
+	#pragma omp parallel for
 	for (int y = 0; y < height; y++)
 	{	
-		cout << "Completed: " << (100 * (y + 1) / height) << "%\r";
+		cout << "Completed: " << (100 * (static_cast<int>(rowsDoneCount) + 1) / height) << "%\r";
+
+		Vector3d rayDirection;
+		Vector3d floatColor(0, 0, 0);
 
 		for (int x = 0; x < width; x++)
 		{
-			// Calculate the ray direction based on the magic equations from the lecture		
-			const Point3d& ul = m_Camera.topLeft;
-			Point3d P_ij = ul + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
-
+			// Calculate the ray direction based on the magic equations from the lecture
+			Point3d P_ij = m_Camera.topLeft + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
+			
 			rayDirection = P_ij - observerPos;
 			rayDirection.normalize();
+
 			CalculateColor(rayDirection, observerPos, m_NumReflections, floatColor);
 
 			pixels[y * width + x].x = floatColor.x;
@@ -455,7 +463,10 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 			floatColor.y = 0;
 			floatColor.z = 0;
 		}
+
+		_InterlockedIncrement(&rowsDoneCount);
 	}
+
 
 	// Do some tone mapping
 	if(m_EnableToneMapping)

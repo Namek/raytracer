@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
 		const std::string filename((dataFolderFilename + ".png").c_str());
 		cout << "Rendering scene to file " << filename << "..." << endl;
-		scene.RenderToFile(filename.c_str(), params.GetInt("width", 320), params.GetInt("height", 240));
+		scene.RenderToFile(filename.c_str(), params.GetInt("width", 0), params.GetInt("height", 0));
 	
 		totalTime += timeGetTime() - start_tm;
 		cout << "Rendering time: " << (timeGetTime() - start_tm) / 1000.0f << " seconds." << endl << endl;
