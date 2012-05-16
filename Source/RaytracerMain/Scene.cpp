@@ -12,6 +12,10 @@ Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f)
 
 void Scene::LoadScene(const char* filename)
 {
+	m_Triangles.clear();
+	m_Materials.clear();
+	m_Lights.clear();
+
 	ifstream file;
 	string line, token;
 	stringstream lineStream;
@@ -21,7 +25,6 @@ void Scene::LoadScene(const char* filename)
 
 	maxDomain.x = maxDomain.y = maxDomain.z = -numeric_limits<float>::infinity();
 	minDomain.x = minDomain.y = minDomain.z = numeric_limits<float>::infinity();
-	
 
 	file.open(filename);
 
@@ -197,7 +200,6 @@ void Scene::LoadScene(const char* filename)
 						getline(file, line);
 						lineStream.clear();
 						lineStream.str(line);
-
 
 						lineStream >> token;
 						{
@@ -440,7 +442,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	#pragma omp parallel for
 	for (int y = 0; y < height; y++)
 	{	
-		cout << "Completed: " << (100 * (static_cast<int>(rowsDoneCount) + 1) / height) << "%\r";
+		cout << "Completed: " << (100 * (static_cast<int>(rowsDoneCount) + 1) / height) << "%\t\t\t\t\t\r";
 
 		Vector3d rayDirection;
 		Vector3d floatColor(0, 0, 0);
@@ -535,21 +537,21 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			lgtDir.normalize();			
 
 			// Perform a shadow cast from the intersection point
-			bool shadow = true;
+			bool shadow = false;
 			float lightIntensity = 0;
 			float lightIntensityPart = 1.0f / static_cast<float>(numLights);
 			if(m_EnableShadows)
 			{
 				pair<Triangle, Point3d> t;
-				if (m_Octree.castRayForTriangle(intersectionPt+lgtDir*0.01f, lgtDir, t))
+				if (!m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.01f, lgtDir, t))
 				{
-					shadow = false;
+					shadow = true;
 					lightIntensity += lightIntensityPart;
 				}
 			}
 
 			// If there are no intersections, add the light
-			if (!shadow)
+			if (shadow)
 			{
 				// Calculate the diffuse component
 				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir) * lightIntensity;
@@ -575,18 +577,32 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		in_color += diffuseComponent + specularComponent;
 
 		// Mirror reflection component
-		Vector3d mirrorReflectionComponent(0, 0, 0);
-		if(m_EnableReflection
-			&& material.ksc > 0 
-			&& numReflections > 0)
-		{
-			Vector3d in_refl_color(0, 0, 0);
-			CalculateColor(reflectedRay, intersectionPt+reflectedRay*0.01f, numReflections - 1, in_refl_color);
-			in_color += in_refl_color * material.ksc;
-		}
+		CalculateReflectionComponent(in_color, intersectionPt, material, reflectedRay, numReflections - 1);
 		 
 		// Refraction component
-		if(m_EnableRefraction  
+		CalculateRefractionComponent(in_color, intersectionPt, observerDir, hitTriangle, material, numReflections - 1);
+	}
+}
+
+void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color, const nprt::Vector3d& intersectionPt, const nprt::Material& material,
+										const nprt::Vector3d& reflectedRay, int numReflections) const 
+{
+	Vector3d mirrorReflectionComponent(0, 0, 0);
+	if(m_EnableReflection
+		&& material.ksc > 0 
+		&& numReflections > 0)
+	{
+		Vector3d in_refl_color(0, 0, 0);
+		CalculateColor(reflectedRay, intersectionPt + reflectedRay * 0.01f, numReflections - 1, in_refl_color);
+		in_color += in_refl_color * material.ksc;
+	}
+}
+
+void Scene::CalculateRefractionComponent(nprt::Vector3d& in_color, const nprt::Vector3d& intersectionPt, 
+										const nprt::Vector3d& observerDir, const nprt::Triangle& hitTriangle, 
+										const nprt::Material& material, int numReflections) const 
+{
+	if(m_EnableRefraction  
 			&& material.kt > std::numeric_limits<float>::epsilon() 
 			&& numReflections > 0)
 		{
@@ -601,7 +617,6 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			CalculateColor(refractedRay, intersectionPt, numReflections - 1, in_refr_color);
 			in_color += in_refr_color * material.kt;
 		}
-	}
 }
 
 void Scene::PerformGammaCorrection(Vector3d* pixels, const int numPixels) const

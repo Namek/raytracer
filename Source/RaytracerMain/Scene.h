@@ -37,6 +37,11 @@ class Scene
 		void PerformToneMapping(Vector3d* pixels, const int numPixels) const;
 		void PerformGammaCorrection(Vector3d* pixels, const int numPixels) const;
 		void CalculateColor(const Vector3d& rayDirection, const Vector3d& observerPos, int numReflections, Vector3d& in_color) const;
+		void CalculateRefractionComponent(nprt::Vector3d& in_Color, const nprt::Vector3d& intersectionPt, 
+										const nprt::Vector3d& observerDir, const nprt::Triangle& hitTriangle, 
+										const nprt::Material& material, int numReflections) const;
+		void CalculateReflectionComponent(nprt::Vector3d& in_color, const nprt::Vector3d& intersectionPt, const nprt::Material& material,
+										const nprt::Vector3d& reflectedRay, int numReflections) const;
 
 		std::vector<Triangle> m_Triangles;	//deprecated: Octree will build it's own list of triangles (they will be cut)
 		std::vector<Triangle> m_ShadowTriangles;
