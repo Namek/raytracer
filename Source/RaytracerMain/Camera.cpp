@@ -53,13 +53,13 @@ void Camera::initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, fl
 	this->forwardDir.normalize();
 	
 	// Assume aspect ratio 4:3
-	this->fovVertical = this->fovHorizontal / (4.0/3.0f);
+	this->fovVertical = this->fovHorizontal / 1;//(4.0/3.0f);
 }
 
 void Camera::setResolution(int width, int height)
 {
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-	this->fovVertical = this->fovHorizontal / aspectRatio;
+	this->fovVertical = this->fovHorizontal / 1;//aspectRatio;
 	
 	Vector3d bottomLeftDir(forwardDir);
 	bottomLeftDir.rotateX(fovVertical/2);

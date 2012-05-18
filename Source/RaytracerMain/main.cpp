@@ -30,7 +30,8 @@ int main(int argc, char* argv[])
 
 	if (!newDataFormat)
 	{
-		scene.LoadGeometry((std::string("data/") + params.GetString("geometry_name") + ".brs").c_str());
+		std::string geomPath = std::string("data/") + params.GetString("geometry_name") + "/" + params.GetString("geometry_name");
+		scene.LoadGeometry((geomPath + ".brs").c_str());
 		cout << "Scene geometry loaded successfully." << endl << endl;
 	}
 
@@ -38,14 +39,15 @@ int main(int argc, char* argv[])
 	{
 		cout << "Loading scene " << (i + 1) << "..." << endl;
 		std::string dataFolderFilename = params.GetString(("data_folder" + NumToStr(i)).c_str());
+		std::string resourcePath = std::string("data/") + params.GetString("geometry_name") + "/" + dataFolderFilename + "/" + dataFolderFilename;
 
 		if (!newDataFormat)
 		{
-			scene.LoadAttributes(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".atr").c_str());
+			scene.LoadAttributes((resourcePath + ".atr").c_str());
 			cout << "Geometry attributes loaded successfully." << endl;
-			scene.LoadCamera(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".cam").c_str());
+			scene.LoadCamera((resourcePath + ".cam").c_str());
 			cout << "Camera loaded successfully." << endl;
-			scene.LoadLights(("data/" + dataFolderFilename + "/" + dataFolderFilename + ".lgt").c_str());
+			scene.LoadLights((resourcePath + ".lgt").c_str());
 			cout << "Lights loaded successfully." << endl;
 		}
 		else

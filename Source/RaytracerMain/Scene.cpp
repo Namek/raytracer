@@ -161,16 +161,32 @@ void Scene::LoadScene(const char* filename)
 					int lightsCount;
 					lineStream >> lightsCount;
 
-					for (int i = 0; i < lightsCount; ++i)
+					// Move the reader to the first light name
+					while (token != "light_name")
 					{
-						LightSource lightSource;
-
 						getline(file, line);
 						lineStream.clear();
 						lineStream.str(line);
+						lineStream >> token;
+					}
 
-						while (lineStream >> token)
+					for (int i = 0; i < lightsCount; ++i)
+					{
+						LightSource lightSource;
+						
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+						lineStream >> token;
+
+						// Read light data
+						while (token != "gonio_count")
 						{
+							getline(file, line);
+							lineStream.clear();
+							lineStream.str(line);
+							lineStream >> token;
+
 							if (token == "rgb" && !lineStream.eof())
 							{
 								lineStream >> lightSource.r;
@@ -179,9 +195,9 @@ void Scene::LoadScene(const char* filename)
 							}
 							else if (token == "pos" && !lineStream.eof())
 							{
-								lineStream >> lightSource.position.z;
-								lineStream >> lightSource.position.y;
 								lineStream >> lightSource.position.x;
+								lineStream >> lightSource.position.y;
+								lineStream >> lightSource.position.z;
 							}							
 						}
 
@@ -189,7 +205,7 @@ void Scene::LoadScene(const char* filename)
 					}
 				}
 				else if (token == "cam_name" && !lineStream.eof())
-				{					
+				{
 					Vector3d pos, lookAt;
 					float fov = 0, rotation = 0;
 					int resX = 0, resY = 0;
@@ -435,7 +451,6 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	{
 		m_Camera.setResolution(width, height);
 	}
-		
 
 	volatile long rowsDoneCount = 0;
 
@@ -521,12 +536,15 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		reflectedRay.normalize();
 
 		// Check the transparency of the material
-		if(material.kt < std::numeric_limits<float>::epsilon())
-		{
-			in_color.x = material.r;
-			in_color.y = material.g;
-			in_color.z = material.b;
-		}
+		in_color.x = material.r * (1.0f - material.kt);
+		in_color.y = material.g * (1.0f - material.kt);
+		in_color.z = material.b * (1.0f - material.kt);
+
+		// Mirror reflection component
+		CalculateReflectionComponent(in_color, intersectionPt, material, reflectedRay, numReflections - 1);
+		 
+		// Refraction component
+		CalculateRefractionComponent(in_color, intersectionPt, observerDir, hitTriangle, material, numReflections - 1);
 
 		Vector3d diffuseComponent(0, 0, 0);
 		Vector3d specularComponent(0, 0, 0);
@@ -538,36 +556,34 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 
 			// Perform a shadow cast from the intersection point
 			bool shadow = false;
-			float lightIntensity = 0;
-			float lightIntensityPart = 1.0f / static_cast<float>(numLights);
 			if(m_EnableShadows)
 			{
 				pair<Triangle, Point3d> t;
-				if (!m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.01f, lgtDir, t))
-				{
-					shadow = true;
-					lightIntensity += lightIntensityPart;
-				}
+				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.01f, lgtDir, t);
 			}
 
-			// If there are no intersections, add the light
+			// If there are no intersections, add the light			
+			// Calculate the diffuse component
+			float id = hitTriangle.norm.dotProduct(lgtDir);
+			float intensityDiffuse = id * id / (float)numLights;
+
 			if (shadow)
 			{
-				// Calculate the diffuse component
-				float intensityDiffuse = hitTriangle.norm.dotProduct(lgtDir) * lightIntensity;
-
-				// Value clamping is being done after the rendering
-				diffuseComponent.x += intensityDiffuse * light.r;
-				diffuseComponent.y += intensityDiffuse * light.g;
-				diffuseComponent.z += intensityDiffuse * light.b;
-
-				// Calculate the specular component
-				float intensitySpecular = material.wg * lgtDir.dotProduct(reflectedRay) * lightIntensity;
-
-				specularComponent.x += intensitySpecular;
-				specularComponent.y += intensitySpecular;
-				specularComponent.z += intensitySpecular;	
+				intensityDiffuse *= 0.8;
 			}
+
+			// Value clamping is being done after the rendering
+			diffuseComponent.x += intensityDiffuse * light.r;
+			diffuseComponent.y += intensityDiffuse * light.g;
+			diffuseComponent.z += intensityDiffuse * light.b;
+
+			// Calculate the specular component
+			float is = material.wg * lgtDir.dotProduct(reflectedRay);
+			float intensitySpecular = is * is / (float)numLights;
+
+			specularComponent.x += intensitySpecular;
+			specularComponent.y += intensitySpecular;
+			specularComponent.z += intensitySpecular;
 		}
 		
 		// Apply the specular and diffuse components
@@ -575,19 +591,12 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		specularComponent *= material.ksc;
 
 		in_color += diffuseComponent + specularComponent;
-
-		// Mirror reflection component
-		CalculateReflectionComponent(in_color, intersectionPt, material, reflectedRay, numReflections - 1);
-		 
-		// Refraction component
-		CalculateRefractionComponent(in_color, intersectionPt, observerDir, hitTriangle, material, numReflections - 1);
 	}
 }
 
 void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color, const nprt::Vector3d& intersectionPt, const nprt::Material& material,
 										const nprt::Vector3d& reflectedRay, int numReflections) const 
 {
-	Vector3d mirrorReflectionComponent(0, 0, 0);
 	if(m_EnableReflection
 		&& material.ksc > 0 
 		&& numReflections > 0)
@@ -603,18 +612,19 @@ void Scene::CalculateRefractionComponent(nprt::Vector3d& in_color, const nprt::V
 										const nprt::Material& material, int numReflections) const 
 {
 	if(m_EnableRefraction  
-			&& material.kt > std::numeric_limits<float>::epsilon() 
+			&& material.kt > 0
 			&& numReflections > 0)
 		{
 			Vector3d in_refr_color(0, 0, 0);
 			Vector3d horz_vec = (observerDir - hitTriangle.norm * observerDir.dotProduct(hitTriangle.norm)) * (-material.eta);
+
 			float ndo = hitTriangle.norm.dotProduct(observerDir);
 			float vert_vec_scale = -sqrt(1 - material.eta * material.eta * (1 - ndo * ndo));
 			Vector3d vert_vec = hitTriangle.norm * vert_vec_scale;
 			Vector3d refractedRay = horz_vec + vert_vec;
 			refractedRay.normalize();
 
-			CalculateColor(refractedRay, intersectionPt, numReflections - 1, in_refr_color);
+			CalculateColor(refractedRay, intersectionPt + refractedRay * 0.01f, numReflections - 1, in_refr_color);
 			in_color += in_refr_color * material.kt;
 		}
 }

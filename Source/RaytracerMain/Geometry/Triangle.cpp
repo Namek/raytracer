@@ -33,6 +33,7 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind)
 	Vector3d p1p2(p1, p2, false);
 	Vector3d p1p3(p1, p3, false);
 	norm = p1p2.crossProduct(p1p3, true);
+	norm.normalize();
 	d = -(norm.x*p1.x + norm.y*p1.y + norm.z*p1.z);
 	preprocess();
 }
@@ -48,6 +49,7 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind)
 	Vector3d p1p2(p1, p2, false);
 	Vector3d p1p3(p1, p3, false);
 	norm = p1p2.crossProduct(p1p3, true);
+	norm.normalize();
 	d = -(norm.x*p1.x + norm.y*p1.y + norm.z*p1.z);
 	preprocess();
 }
