@@ -1,6 +1,7 @@
 #include "Triangle.h"
 
 #include <algorithm>
+#include <limits>
 
 using namespace nprt;
 
@@ -372,10 +373,26 @@ float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 	Vector3d intersectionPt = origin + dir * dist;
 
 	// Check if the point is inside the triangle (barycentric method)
+	float u, v;
+	getUV(intersectionPt, u, v);
+
+	// Check if point is in triangle
+	if((u >= std::numeric_limits<float>::epsilon()) && (v >= std::numeric_limits<float>::epsilon()) && (u + v < 1))
+	{
+		return dist;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+void Triangle::getUV(const Point3d& pointInTriangle, float& out_u, float& out_v) const
+{
 	// Compute vectors        
 	Vector3d v0 = p3 - p1;
 	Vector3d v1 = p2 - p1;
-	Vector3d v2 = intersectionPt - p1;
+	Vector3d v2 = pointInTriangle - p1;
 
 	// Compute dot products
 	float dot00 = v0.dotProduct(v0);
@@ -386,18 +403,8 @@ float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 
 	// Compute barycentric coordinates
 	float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-	float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-	float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-	// Check if point is in triangle
-	if((u >= 0) && (v >= 0) && (u + v < 1))
-	{
-		return dist;
-	}
-	else
-	{
-		return -1;
-	}
+	out_u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+	out_v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 }
 
 /********************************************************/

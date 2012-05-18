@@ -17,6 +17,8 @@ namespace nprt
 
 			// Returns the intersection distance or -1
 			float intersection(const Vector3d& observer_pos, const Vector3d& ray) const;
+
+			void getUV(const Point3d& pointInTriangle, float& u, float& v) const;
 			
 			// Checks if Axis-Aligned Bounding Box contains (minimum partly containment) this triangle.
 			bool overlapsWithAABB(const Point3d& minDomain, const Point3d& maxDomain) const;
