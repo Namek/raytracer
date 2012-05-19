@@ -195,9 +195,9 @@ void Scene::LoadScene(const char* filename)
 							}
 							else if (token == "pos" && !lineStream.eof())
 							{
-								lineStream >> lightSource.position.x;
-								lineStream >> lightSource.position.y;
 								lineStream >> lightSource.position.z;
+								lineStream >> lightSource.position.y;
+								lineStream >> lightSource.position.x;
 							}							
 						}
 
@@ -466,10 +466,8 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 		{
 			// Calculate the ray direction based on the magic equations from the lecture
 			Point3d P_ij = m_Camera.topLeft + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
-			
 			rayDirection = P_ij - observerPos;
 			rayDirection.normalize();
-
 			CalculateColor(rayDirection, observerPos, m_NumReflections, floatColor);
 
 			pixels[y * width + x].x = floatColor.x;
@@ -513,7 +511,6 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	}
 
 	Utils::SafeDeleteArr(pixels);
-
 	FreeImage_Save(FIF_PNG, dib, filename, PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
 }
@@ -560,17 +557,18 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			{
 				pair<Triangle, Point3d> t;
 				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.01f, lgtDir, t);
+
+				if(shadow)
+				{
+					//in_color *= 0.95f;
+					continue;
+				}
 			}
 
 			// If there are no intersections, add the light			
 			// Calculate the diffuse component
 			float id = hitTriangle.norm.dotProduct(lgtDir);
-			float intensityDiffuse = id * id / (float)numLights;
-
-			if (shadow)
-			{
-				intensityDiffuse *= 0.8;
-			}
+			float intensityDiffuse = fabsf(id) / (float)numLights;			
 
 			// Value clamping is being done after the rendering
 			diffuseComponent.x += intensityDiffuse * light.r;
@@ -579,7 +577,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 
 			// Calculate the specular component
 			float is = material.wg * lgtDir.dotProduct(reflectedRay);
-			float intensitySpecular = is * is / (float)numLights;
+			float intensitySpecular = fabsf(is) / (float)numLights;
 
 			specularComponent.x += intensitySpecular;
 			specularComponent.y += intensitySpecular;

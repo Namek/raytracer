@@ -10,20 +10,6 @@ Camera::Camera(void)
 	yResolution = -1;
 }
 
-
-Camera::~Camera(void)
-{
-	cameraCenter = Point3d();
-	topLeft = Point3d();
-	topRight = Point3d();
-	bottomLeft = Point3d();
-	fovHorizontal = 0;
-	fovVertical = 0;
-	rotation = 0;
-	xResolution = 0;
-	yResolution = 0;
-}
-
 Camera::Camera(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3d topRight, int xResolution, int yResolution)
 {
 	this->cameraCenter = cameraCenter;
@@ -44,7 +30,7 @@ Camera::Camera(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3
 void Camera::initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, float fovHorizontal)
 {	
 	const double PI = 3.14159265358979323846;
-	const float RAD = PI / 180.0f;
+	const double RAD = PI / 180.0f;
 
 	this->cameraCenter = cameraCenter;
 	this->lookAt = lookAt;

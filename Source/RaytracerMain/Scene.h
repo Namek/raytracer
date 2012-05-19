@@ -7,6 +7,7 @@
 #include "LightSource.h"
 #include "Camera.h"
 #include "Geometry\Octree.h"
+#include "Texture.h"
 
 namespace nprt
 {

@@ -24,7 +24,6 @@ namespace nprt
 			lookAt = copy.lookAt;
 		}
 		Camera(Point3d, Point3d, Point3d, Point3d, int, int);
-		~Camera(void);
 
 		void initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, float fovHorizontal);
 		void setResolution(int width, int height);
