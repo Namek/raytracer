@@ -49,7 +49,7 @@ double Texture::Ramp(double v, double min, double max) const
 double Texture::Noise1D(int x) const
 {
 	x = (x<<13) ^ x;
-    return ( ( (x * (x * x * 15731 + 789221) + 1376312589) & 0x7fffffff) / 2147483648.0); 
+	return ( ( (x * (x * x * 15731 + 789221) + 1376312589) & 0x7fffffff) / 2147483648.0); 
 }
 
 double Texture::Noise3D(int ix, int iy, int iz) const		 

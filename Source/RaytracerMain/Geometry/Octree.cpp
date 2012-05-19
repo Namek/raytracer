@@ -331,21 +331,44 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 		std::pair<Triangle, Point3d> triangleWithIntersectionPoint;
 
 		// Check ray's collision with triangles in the leaf node
-		for (int i = 0; i < (int)node->m_Triangles.size(); ++i)
+		for (int i = 0, n = node->m_Triangles.size(); i < n; ++i)
 		{
 			// Test ray-triangle intersection.
 			const Triangle& triangle = node->m_Triangles[i];
 
-			float intersectionDist = triangle.intersection(rayOrigin, rayDirection);
-			Point3d intersectionPoint = rayOrigin + rayDirection*intersectionDist;
-
-			if (intersectionDist > 0 && intersectionDist < minDistance)// && node->containsPoint(intersectionPoint, 0.000001f))
+			if (!triangle.hasDisplacement)
 			{
-				foundTriangle = true;
-				triangleWithIntersectionPoint = std::pair<Triangle, Point3d>(triangle, intersectionPoint);
-				minDistance = intersectionDist;
+				float intersectionDist = triangle.intersection(rayOrigin, rayDirection);
+				Point3d intersectionPoint = rayOrigin + rayDirection*intersectionDist;
+
+				if (intersectionDist > 0 && intersectionDist < minDistance)// && node->containsPoint(intersectionPoint, 0.000001f))
+				{
+					foundTriangle = true;
+					triangleWithIntersectionPoint = std::pair<Triangle, Point3d>(triangle, intersectionPoint);
+					minDistance = intersectionDist;
+				}
+			}
+			else
+			{
+				// TODO check plane
+
+				for (int dt = 0, dtN = triangle.displacementTriangles.size(); dt < dtN; ++dt)
+				{
+					const Triangle& triangle = triangle.displacementTriangles[dt];
+
+					float intersectionDist = triangle.intersection(rayOrigin, rayDirection);
+					Point3d intersectionPoint = rayOrigin + rayDirection*intersectionDist;
+
+					if (intersectionDist > 0 && intersectionDist < minDistance)// && node->containsPoint(intersectionPoint, 0.000001f))
+					{
+						foundTriangle = true;
+						triangleWithIntersectionPoint = std::pair<Triangle, Point3d>(triangle, intersectionPoint);
+						minDistance = intersectionDist;
+					}
+				}
 			}
 		}
+
 		if (foundTriangle)
 			foundTriangles.push_back(triangleWithIntersectionPoint);
 
