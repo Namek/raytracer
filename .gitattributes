@@ -127,14 +127,6 @@ Assets/temple_tests/v2.png -text
 Assets/temple_tests/v3.png -text
 Assets/temple_tests/v4.png -text
 Assets/ulica_tests/v1.png -text
-Assets/v0.png -text
-Assets/v1.png -text
-Assets/v2.png -text
-Assets/v3.png -text
-Assets/v4.png -text
-Assets/v5.png -text
-Assets/v6.png -text
-Assets/v7.png -text
 /BaseUtils.vcxproj -text
 /BaseUtils.vcxproj.filters -text
 Dependencies/Include/FreeImage.h -text
