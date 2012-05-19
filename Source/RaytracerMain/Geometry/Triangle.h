@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector3d.h"
+#include <vector>
 
 namespace nprt
 {
@@ -42,6 +43,9 @@ namespace nprt
 			int ind;
 			Vector3d norm;
 			float d;
+
+			bool hasDisplacement;
+			std::vector<Triangle> displacementTriangles;
 
 		private:
 			void preprocess(void);

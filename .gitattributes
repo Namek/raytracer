@@ -168,4 +168,6 @@ Source/RaytracerMain/LightSource.h -text
 Source/RaytracerMain/Material.h -text
 Source/RaytracerMain/Scene.cpp -text
 Source/RaytracerMain/Scene.h -text
+Source/RaytracerMain/Texture.cpp -text
+Source/RaytracerMain/Texture.h -text
 Source/RaytracerMain/main.cpp -text
