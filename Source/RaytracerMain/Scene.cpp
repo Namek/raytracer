@@ -560,7 +560,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 
 				if(shadow)
 				{
-					in_color *= 0.95f;
+					in_color *= 0.9f;
 					continue;
 				}
 			}

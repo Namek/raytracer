@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 		color.rgbBlue = static_cast<BYTE>(texel.z * 255.0f);
 		FreeImage_SetPixelColor(dib, p % width, height - p / width, &color);
 	}
-	FreeImage_Save(FIF_PNG, dib, "output.png", PNG_Z_BEST_SPEED);
+	FreeImage_Save(FIF_PNG, dib, "Output\\proc_tex.png", PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
 	return 0;*/
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
 		unsigned start_tm = timeGetTime();
 
-		const std::string filename((dataFolderFilename + ".png").c_str());
+		const std::string filename(("Output\\" + dataFolderFilename + ".png").c_str());
 		cout << "Rendering scene to file " << filename << "..." << endl;
 		scene.RenderToFile(filename.c_str(), params.GetInt("width", 0), params.GetInt("height", 0));
 	
