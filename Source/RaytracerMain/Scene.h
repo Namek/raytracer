@@ -50,6 +50,7 @@ class Scene
 		std::vector<LightSource> m_Lights;
 
 		Octree m_Octree;
+		Texture m_WallTexture;
 		mutable Camera m_Camera;
 
 		int m_NumReflections;

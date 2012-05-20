@@ -7,7 +7,7 @@ using namespace nprt;
 using namespace std;
 
 
-Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f)
+Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(256, 256, TextureType::Bricks)
 { }
 
 void Scene::LoadScene(const char* filename)
@@ -494,11 +494,6 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	Point3d U = m_Camera.topRight - m_Camera.topLeft;
 	Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
 
-	if (width > 0 && height > 0)
-	{
-		//m_Camera.setResolution(width, height);
-	}
-
 	volatile long rowsDoneCount = 0;
 
 	#pragma omp parallel for
@@ -573,6 +568,9 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 	if(m_Octree.castRayForTriangle(observerPos, rayDirection, intersectedTriangle))
 	{
 		const Triangle& hitTriangle = intersectedTriangle.first;
+		float u, v;
+		hitTriangle.getUV(intersectedTriangle.second,u, v);
+
 		const Vector3d intersectionPt = intersectedTriangle.second;
 		const Vector3d observerDir = -rayDirection;
 		const Material& material = m_Materials[hitTriangle.materialIndex];
