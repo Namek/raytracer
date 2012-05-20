@@ -43,6 +43,8 @@ class Scene
 										const nprt::Material& material, int numReflections) const;
 		void CalculateReflectionComponent(nprt::Vector3d& in_color, const nprt::Vector3d& intersectionPt, const nprt::Material& material,
 										const nprt::Vector3d& reflectedRay, int numReflections) const;
+		void ApplyMaterialColor(const Material& mat, Vector3d& in_color) const;
+		void ApplyTexture(const Triangle& hitTriangle, const Vector3d& hitPoint, Vector3d& in_color) const;
 
 		std::vector<Triangle> m_Triangles;	//deprecated: Octree will build it's own list of triangles (they will be cut)
 		std::vector<Triangle> m_ShadowTriangles;

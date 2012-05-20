@@ -2,6 +2,8 @@
 #include "BaseUtils\BaseCore.h"
 #include <Windows.h>
 #include <omp.h>
+#include <cmath>
+#include <numeric>
 
 using namespace nprt;
 using namespace std;
@@ -568,19 +570,17 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 	if(m_Octree.castRayForTriangle(observerPos, rayDirection, intersectedTriangle))
 	{
 		const Triangle& hitTriangle = intersectedTriangle.first;
-		float u, v;
-		hitTriangle.getUV(intersectedTriangle.second,u, v);
-
 		const Vector3d intersectionPt = intersectedTriangle.second;
 		const Vector3d observerDir = -rayDirection;
 		const Material& material = m_Materials[hitTriangle.materialIndex];
 		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
 		reflectedRay.normalize();
 
-		// Check the transparency of the material
-		in_color.x = material.r * (1.0f - material.kt);
-		in_color.y = material.g * (1.0f - material.kt);
-		in_color.z = material.b * (1.0f - material.kt);
+		// Apply the material
+		ApplyMaterialColor(material, in_color);
+
+		// Apply a texture
+		//ApplyTexture(hitTriangle, intersectedTriangle.second, in_color);
 
 		// Mirror reflection component
 		CalculateReflectionComponent(in_color, intersectionPt, material, reflectedRay, numReflections - 1);
@@ -859,3 +859,22 @@ void Scene::LoadCamera(const char* filePath)
 	m_Camera = Camera(cameraCenter, topLeft, bottomLeft, topRight, xRes, yRes);
 }
 
+void Scene::ApplyMaterialColor(const Material& material, Vector3d& in_color) const
+{
+	in_color.x = material.r * (1.0f - material.kt);
+	in_color.y = material.g * (1.0f - material.kt);
+	in_color.z = material.b * (1.0f - material.kt);
+}
+
+void Scene::ApplyTexture(const Triangle& hitTriangle, const Vector3d& hitPoint, Vector3d& in_color) const
+{
+	float u, v;
+	hitTriangle.getUV(hitPoint, u, v);
+	if( u < 1.0f && v < 1.0f
+		&& u > 0.0f && v > 0.0f)
+	{
+		in_color.x *= m_WallTexture.GetTexel(u, v).x;
+		in_color.y *= m_WallTexture.GetTexel(u, v).y;
+		in_color.z *= m_WallTexture.GetTexel(u, v).z;
+	}
+}
