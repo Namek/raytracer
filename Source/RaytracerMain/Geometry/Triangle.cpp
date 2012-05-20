@@ -21,6 +21,7 @@ Triangle::Triangle()
 	max1 = max2 = min1 = min2 = -666.f;
 	d1 = d2 = d3 = 0.f;
 	plane = -1;
+	hasDisplacement = false;
 }
 
 Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind)
@@ -37,6 +38,8 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind)
 	norm.normalize();
 	d = -(norm.x*p1.x + norm.y*p1.y + norm.z*p1.z);
 	preprocess();
+
+	hasDisplacement = false;
 }
 
 Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind)
@@ -53,6 +56,8 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind)
 	norm.normalize();
 	d = -(norm.x*p1.x + norm.y*p1.y + norm.z*p1.z);
 	preprocess();
+
+	hasDisplacement = false;
 }
 
 void Triangle::setMaterialIndex(int index) 
