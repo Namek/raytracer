@@ -69,6 +69,9 @@ Assets/data_new/kuchnia/kuchnia-v2.scn -text
 Assets/data_new/kuchnia/kuchnia-v2.scn.png -text
 Assets/data_new/kuchnia/kuchnia-v3.scn -text
 Assets/data_new/kuchnia/kuchnia-v3.scn.png -text
+Assets/data_new/kuchnia_brick/kuchnia-v1.scn -text
+Assets/data_new/kuchnia_brick/kuchnia-v2.scn -text
+Assets/data_new/kuchnia_brick/kuchnia-v3.scn -text
 Assets/data_new/night/night-v1.scn -text
 Assets/data_new/night/night-v1.scn.png -text
 Assets/data_new/night/night-v2.scn -text
@@ -81,6 +84,7 @@ Assets/data_new/night/night-v5.scn -text
 Assets/data_new/night/night-v5.scn.png -text
 Assets/data_new/night/night-v6.scn -text
 Assets/data_new/night/night-v6.scn.png -text
+Assets/data_new/night/night-v7.scn -text
 Assets/data_new/room/room-v0.scn -text
 Assets/data_new/room/room-v0.scn.png -text
 Assets/data_new/room/room-v1.scn -text

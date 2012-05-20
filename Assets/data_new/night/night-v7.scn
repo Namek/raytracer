@@ -8406,7 +8406,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 175
 n 1
@@ -8423,7 +8423,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 100
 n 1
@@ -8440,7 +8440,7 @@ krCr 0.8598
 krCg 0.8598
 krCb 0.8598
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 200
 n 1.3
@@ -8457,7 +8457,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 200
 n 1
@@ -8474,7 +8474,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 85
 n 1
@@ -8491,7 +8491,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 14
 n 1
@@ -8508,7 +8508,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 85
 n 1
@@ -8525,7 +8525,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 197
 n 1
@@ -8542,7 +8542,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 197
 n 1
@@ -8559,7 +8559,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 255
 n 1
@@ -8576,7 +8576,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 255
 n 1
@@ -8593,7 +8593,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 122
 n 1
@@ -8610,7 +8610,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 100
 n 1
@@ -8627,7 +8627,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 200
 n 1
@@ -8644,7 +8644,7 @@ krCr 0.8
 krCg 0.8
 krCb 0.8
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 200
 n 1
@@ -8661,7 +8661,7 @@ krCr 0
 krCg 0
 krCb 0
 kaCr 5.78785e+033
-kaCg 2.11222e-039
+kaCg 9.27539e-039
 kaCb 8.5903e+009
 g 200
 n 1
@@ -8774,13 +8774,13 @@ active 0
 
 cam_name cam0
 resolution 899 592
-pos -16.8307 2.1201 -7.6009
-lookAt -8.1682 1.31095 -9.93315
-fov 36.3899
-viewpoint -7.6009 2.1201 -16.8307
-screen_topLeft -12.9080 3.2998 -8.7834
-screen_topRight -7.0516 3.2998 -7.2066
-screen_bottomLeft -12.8147 -0.6779 -9.1298
+pos -8.444 1.0051 -8.3942
+lookAt -7.8549 0.2717 -9.54
+fov 30.1728
+viewpoint -8.3942 1.0051 -8.4440
+screen_topLeft -9.8433 0.5041 -8.1556
+screen_topRight -9.4720 0.5041 -7.4333
+screen_bottomLeft -9.6080 0.0393 -8.2765
 rotation 0
 
 

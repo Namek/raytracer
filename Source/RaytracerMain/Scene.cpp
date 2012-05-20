@@ -209,9 +209,13 @@ void Scene::LoadScene(const char* filename)
 					Vector3d pos, lookAt;
 					float fov = 0, rotation = 0;
 					int resX = 0, resY = 0;
+					
+					bool usingOldFormat = false;
+					Vector3d topLeft, topRight, bottomLeft;
+					float x, y, z;
 
 					int params = 0;
-					while (params < 5)
+					while (params < 9)
 					{
 						getline(file, line);
 						lineStream.clear();
@@ -239,16 +243,59 @@ void Scene::LoadScene(const char* filename)
 								lineStream >> resY;
 							}
 							else if (token == "rotation")
+							{
 								lineStream >> rotation;
+								break;
+							}
 							else if (token == "fov")
 								lineStream >> fov;
+							
+							// old format camera
+							else if (token == "viewpoint")
+							{
+								usingOldFormat = true;
+
+								lineStream >> x;
+								lineStream >> y;
+								lineStream >> z;
+								pos = Point3d(x, y, z);
+							}
+
+							else if (token == "screen_topLeft")
+							{
+								lineStream >> x;
+								lineStream >> y;
+								lineStream >> z;
+								topLeft = Point3d(x, y, z);
+							}
+							else if (token == "screen_topRight")
+							{
+								lineStream >> x;
+								lineStream >> y;
+								lineStream >> z;
+								topRight = Point3d(x, y, z);
+							}
+							else if (token == "screen_bottomLeft")
+							{							
+								lineStream >> x;
+								lineStream >> y;
+								lineStream >> z;
+								bottomLeft = Point3d(x, y, z);
+							}
 							else
 								params--;
 						}
 					}
 
-					m_Camera.initialize(pos, lookAt, fov);
-					m_Camera.setResolution(resX, resY);
+					if (usingOldFormat)
+					{
+						m_Camera.initialize(pos, topLeft, bottomLeft, topRight, resX, resY);
+					}
+					else
+					{
+						m_Camera.initialize(pos, lookAt, fov);
+						m_Camera.setResolution(resX, resY);
+					}
 				}
 			}
 		}
@@ -449,7 +496,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 	if (width > 0 && height > 0)
 	{
-		m_Camera.setResolution(width, height);
+		//m_Camera.setResolution(width, height);
 	}
 
 	volatile long rowsDoneCount = 0;
@@ -545,6 +592,8 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 
 		Vector3d diffuseComponent(0, 0, 0);
 		Vector3d specularComponent(0, 0, 0);
+		float shadowPower = 1.0f;
+		int lightsShadowing = 0;
 		for(int lgt = 0; lgt < numLights; ++lgt)
 		{
 			const LightSource& light = m_Lights[lgt];
@@ -556,12 +605,17 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			if(m_EnableShadows)
 			{
 				pair<Triangle, Point3d> t;
-				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.01f, lgtDir, t);
+				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.0002f, lgtDir, t);
 
 				if(shadow)
 				{
-					in_color *= 0.9f;
-					continue;
+					//in_color *= 0.9f;
+					float a = (t.second-intersectionPt).length()/5.2/1.22f;
+					//float a = (t.second-intersectionPt).length()/m_Octree.getDomainSize().length()/1.22f;
+					//a = (t.second-intersectionPt).length()/(intersectionPt-light.position).length()/2;
+					shadowPower *= a;
+					++lightsShadowing;
+					//continue; 
 				}
 			}
 
@@ -589,6 +643,8 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		specularComponent *= material.ksc;
 
 		in_color += diffuseComponent + specularComponent;
+		in_color *= (1.0f + shadowPower);
+		//in_color *= (1.0f + (shadowPower*log10(static_cast<float>(lightsShadowing*2))));
 	}
 }
 

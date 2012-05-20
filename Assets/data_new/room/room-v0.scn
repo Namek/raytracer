@@ -2309,6 +2309,10 @@ resolution 800 600
 pos -6.7183 1.5 4.4723
 lookAt 1.7 1.5 -0.6
 fov 38.0523
+viewpoint 4.4723 1.5000 -6.7183
+screen_topLeft -3.5768 3.7308 -0.0936
+screen_topRight 2.3768 3.7308 3.4936
+screen_bottomLeft -3.5768 -0.7308 -0.0936
 rotation 0
 
 

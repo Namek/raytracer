@@ -25,6 +25,7 @@ namespace nprt
 		}
 		Camera(Point3d, Point3d, Point3d, Point3d, int, int);
 
+		void initialize(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3d topRight, int xResolution, int yResolution);
 		void initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, float fovHorizontal);
 		void setResolution(int width, int height);
 

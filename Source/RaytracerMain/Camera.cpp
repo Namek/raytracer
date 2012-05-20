@@ -12,6 +12,11 @@ Camera::Camera(void)
 
 Camera::Camera(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3d topRight, int xResolution, int yResolution)
 {
+	initialize(cameraCenter, topLeft, bottomLeft, topRight, xResolution, yResolution);
+}
+
+void Camera::initialize(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3d topRight, int xResolution, int yResolution)
+{
 	this->cameraCenter = cameraCenter;
 	this->topLeft = topLeft;
 	this->bottomLeft = bottomLeft;

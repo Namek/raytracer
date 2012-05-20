@@ -77188,6 +77188,10 @@ resolution 892 629
 pos 48.6 5 24.4
 lookAt 63.3 4 58.2
 fov 52.1531
+viewpoint 24.4000 5.0000 48.6000
+screen_topLeft 50.8695 17.5521 81.0771
+screen_topRight 66.2048 17.5521 45.8162
+screen_bottomLeft 50.1952 -9.5521 80.7838
 rotation 0
 
 

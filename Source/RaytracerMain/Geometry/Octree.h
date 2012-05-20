@@ -68,6 +68,7 @@ namespace nprt
 
 		void setMaxDivideDepth(int maxDivideDepth) { m_MaxDivideDepth = maxDivideDepth; }
 		void buildTree(const std::vector<Triangle>& triangles, const Point3d& minDomain, const Point3d& maxDomain);
+		Point3d getDomainSize() const { return m_DomainSize; }
 
 		void traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& out_intersectedTriangles) const;
 		bool castRayForTriangle(const Vector3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const;

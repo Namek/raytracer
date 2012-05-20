@@ -8777,6 +8777,10 @@ resolution 444 285
 pos -10.5533 2.1201 -7.9815
 lookAt -8.1682 1.31095 -9.93315
 fov 37.2698
+viewpoint -7.9815 2.1201 -10.5533
+screen_topLeft -10.8985 1.9942 -8.7263
+screen_topRight -9.1950 1.9942 -7.3324
+screen_bottomLeft -10.6713 0.6277 -9.0040
 rotation 0
 
 
