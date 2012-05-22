@@ -20,7 +20,8 @@ namespace nprt
 			float intersection(const Vector3d& observer_pos, const Vector3d& ray) const;
 
 			void getUV(const Point3d& pointInTriangle, float& u, float& v) const;
-			
+			void SetTexcoords(float u1, float v1, float u2, float v2, float u3, float v3);
+
 			// Checks if Axis-Aligned Bounding Box contains (minimum partly containment) this triangle.
 			bool overlapsWithAABB(const Point3d& minDomain, const Point3d& maxDomain) const;
 			bool overlapsWithAABB_byDomainCenter(const Point3d& boxCenter, const Point3d& boxHalfSize) const;
@@ -38,6 +39,7 @@ namespace nprt
 			Point3d p3;
 			int materialIndex;
 			float a1, b1, a2, b2, a3, b3, d1, d2, d3;
+			float u1, v1, u2, v2, u3, v3;
 			float max1, max2, min1, min2;
 			int plane;
 			int ind;

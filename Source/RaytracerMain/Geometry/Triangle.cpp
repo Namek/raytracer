@@ -597,3 +597,13 @@ bool Triangle::overlapsWithAABB_byDomainCenter(const Point3d& boxCenter, const P
 /* AABB-triangle overlap test code                      */
 /* by Tomas Akenine-Möller                              */
 /********************************************************/
+
+void Triangle::SetTexcoords(float u1, float v1, float u2, float v2, float u3, float v3)
+{
+	this->u1 = u1;
+	this->v1 = v1;
+	this->u2 = u2;
+	this->v2 = v2;
+	this->u3 = u3;
+	this->v3 = v3;
+}

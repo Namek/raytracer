@@ -126,8 +126,11 @@ void Scene::LoadScene(const char* filename)
 						if (token == "mat_name")
 						{
 							if (i > 0)
+							{
 								m_Materials.push_back(material);
+							}
 
+							material.texture = 0;
 							lineStream >> material.name;
 							i++;
 						}
@@ -155,8 +158,39 @@ void Scene::LoadScene(const char* filename)
 							lineStream >> material.kac;
 						else if (token == "kaCb")
 							lineStream >> material.kac;
+						else if(token == "texture")
+							lineStream >> material.texture;
 					}
 					m_Materials.push_back(material);
+				}
+				else if (token == "texcoord_count" && !lineStream.eof())
+				{
+					int texcoordCount;
+					lineStream >> texcoordCount;
+					
+					getline(file, line);
+					lineStream.clear();
+					lineStream.str(line);
+
+					for (int i = 0; i < texcoordCount; ++i)
+					{
+						int triangle;
+						float u1, v1, u2, v2, u3, v3;
+						lineStream >> triangle;
+						
+						lineStream >> u1;
+						lineStream >> v1;
+						lineStream >> u2;
+						lineStream >> v2;
+						lineStream >> u3;
+						lineStream >> v3;
+
+						m_Triangles[triangle].SetTexcoords(u1, v1, u2, v2, u3, v3);
+
+						getline(file, line);
+						lineStream.clear();
+						lineStream.str(line);
+					}
 				}
 				else if (token == "lights_count" && !lineStream.eof())
 				{
@@ -205,7 +239,7 @@ void Scene::LoadScene(const char* filename)
 
 						m_Lights.push_back(lightSource);
 					}
-				}
+				}				
 				else if (token == "cam_name" && !lineStream.eof())
 				{
 					Vector3d pos, lookAt;
@@ -428,6 +462,7 @@ void Scene::LoadAttributes(const char* filePath)
 		getline(file, line);
 		while(!file.eof())
 		{
+			int tex = 0;
 			for (int i=0; i<attributeNumber; i++) 
 			{
 				getline(file, line);
@@ -467,9 +502,13 @@ void Scene::LoadAttributes(const char* filePath)
 					{
 						lineStream >> ka;
 					}
+					else if(token=="texture")
+					{
+						lineStream >> tex;
+					}
 					else if (token=="enddef") 
 					{
-						Material m(kd, ks, wg, ka, r / 255.0f, g / 255.0f, b / 255.0f, kt, eta);
+						Material m(kd, ks, wg, ka, r / 255.0f, g / 255.0f, b / 255.0f, kt, eta, tex);
 						m_Materials.push_back(m);
 
 						break;
@@ -576,11 +615,22 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
 		reflectedRay.normalize();
 
-		// Apply the material
-		ApplyMaterialColor(material, in_color);
+		// Wireframe mode
+		//float u, v;
+		//hitTriangle.getUV(intersectedTriangle.second, u, v);
+		//if(u * v > 0.01f)
+		//	return;
 
-		// Apply a texture
-		//ApplyTexture(hitTriangle, intersectedTriangle.second, in_color);
+		if(material.texture == 0)
+		{
+			// Apply the material
+			ApplyMaterialColor(material, in_color);
+		}
+		else
+		{
+			// Apply a texture
+			ApplyTexture(hitTriangle, intersectedTriangle.second, in_color);
+		}
 
 		// Mirror reflection component
 		CalculateReflectionComponent(in_color, intersectionPt, material, reflectedRay, numReflections - 1);
@@ -868,13 +918,13 @@ void Scene::ApplyMaterialColor(const Material& material, Vector3d& in_color) con
 
 void Scene::ApplyTexture(const Triangle& hitTriangle, const Vector3d& hitPoint, Vector3d& in_color) const
 {
-	float u, v;
-	hitTriangle.getUV(hitPoint, u, v);
-	if( u < 1.0f && v < 1.0f
-		&& u > 0.0f && v > 0.0f)
-	{
-		in_color.x *= m_WallTexture.GetTexel(u, v).x;
-		in_color.y *= m_WallTexture.GetTexel(u, v).y;
-		in_color.z *= m_WallTexture.GetTexel(u, v).z;
-	}
+	Vector3d barycentric;
+	hitTriangle.getUV(hitPoint, barycentric.x, barycentric.y);
+	barycentric.z = 1.0f - barycentric.x - barycentric.y;
+	
+	float u = barycentric.x * hitTriangle.u1 + barycentric.y * hitTriangle.u2 + barycentric.z * hitTriangle.u3;
+	float v = barycentric.x * hitTriangle.v1 + barycentric.y * hitTriangle.v2 + barycentric.z * hitTriangle.v3;
+	in_color.x = m_WallTexture.GetTexel(u, v).x;
+	in_color.y = m_WallTexture.GetTexel(u, v).y;
+	in_color.z = m_WallTexture.GetTexel(u, v).z;
 }

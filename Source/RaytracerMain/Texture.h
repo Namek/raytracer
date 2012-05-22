@@ -21,7 +21,11 @@ class Texture
 		Texture(int width, int height, TextureType::TextureTypes texTypes);
 
 		inline const Vector3d& GetTexel(int x, int y) const { return m_Texels[x + y * m_Width];}
-		inline const Vector3d& GetTexel(float u, float v) const { return GetTexel((int)(u * m_Width), (int)(v * m_Height));}
+		inline const Vector3d& GetTexel(float u, float v) const 
+		{ 
+			return GetTexel(static_cast<int>((u - floor(u)) * m_Width), 
+							static_cast<int>((v - floor(v)) * m_Height));
+		}
 
 		~Texture();
 

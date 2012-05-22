@@ -9,7 +9,7 @@ enable_gamma 1
 tone_mapping_key 0.5
 num_reflections 3
 gamma 2.45
-num_scenes 8
+num_scenes 1
 data_folder0 v1
 data_folder1 v2
 data_folder2 v3
@@ -18,5 +18,5 @@ data_folder4 v5
 data_folder5 v6
 data_folder6 v7
 data_folder7 v0
-geometry_name night
+geometry_name kuchnia_brick
 use_new_format true
