@@ -17,7 +17,8 @@ namespace nprt
 		Vector3d upDir, rightDir, forwardDir;
 		int xResolution, yResolution;
 		Camera(void);
-		Camera(const Camera& copy) {
+		Camera(const Camera& copy) 
+		{
 			fovHorizontal = copy.fovHorizontal;
 			fovVertical = copy.fovVertical;
 			cameraCenter = copy.cameraCenter;

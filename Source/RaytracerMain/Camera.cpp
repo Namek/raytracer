@@ -39,7 +39,7 @@ void Camera::initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, fl
 
 	this->cameraCenter = cameraCenter;
 	this->lookAt = lookAt;
-	this->fovHorizontal = fovHorizontal * RAD;
+	this->fovHorizontal = static_cast<float>(fovHorizontal * RAD);
 	this->forwardDir = lookAt - cameraCenter;
 	this->forwardDir.normalize();
 	

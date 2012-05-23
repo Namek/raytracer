@@ -1,8 +1,8 @@
-width 640
-height 480
+width 800
+height 600
 max_divide_depth 5
 enable_tone_mapping 0
-enable_shadows 1
+enable_shadows 0
 enable_refraction 1
 enable_reflection 1
 enable_gamma 1

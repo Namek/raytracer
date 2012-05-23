@@ -9,7 +9,7 @@ using namespace nprt;
 using namespace std;
 
 
-Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(256, 256, TextureType::Bricks)
+Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(512, 512, TextureType::Bricks)
 { }
 
 void Scene::LoadScene(const char* filename)
@@ -658,7 +658,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 				if(shadow)
 				{
 					//in_color *= 0.9f;
-					float a = (t.second-intersectionPt).length()/5.2/1.22f;
+					float a = (t.second-intersectionPt).length()/5.2f/1.22f;
 					//float a = (t.second-intersectionPt).length()/m_Octree.getDomainSize().length()/1.22f;
 					//a = (t.second-intersectionPt).length()/(intersectionPt-light.position).length()/2;
 					shadowPower *= a;

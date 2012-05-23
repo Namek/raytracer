@@ -298,7 +298,7 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 			float smallestDist = numeric_limits<float>::max();
 			int retIndex = 0;
 
-			for (int i = 0; i < foundTriangles.size(); ++i)
+			for (int i = 0; i < (int)foundTriangles.size(); ++i)
 			{
 				float dist = (foundTriangles[i].second - rayOrigin).length();
 				if (dist < smallestDist)

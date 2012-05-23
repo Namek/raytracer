@@ -121,7 +121,7 @@ void Texture::GenerateTurbulence()
 		for(int j = 0; j < m_Height; ++j)
 		{
 			const int texel = j * m_Width + i;
-			const float color = TurbulentNoise3D(i, j, 0, amplitudes, 5);
+			const float color = static_cast<float>(TurbulentNoise3D(i, j, 0, amplitudes, 5));
 			m_Texels[texel].x = color;
 			m_Texels[texel].y = color;
 			m_Texels[texel].z = color;
@@ -147,27 +147,27 @@ void Texture::GenerateGradient()
 double Texture::SmoothNoise3D(double x, double y, double z) const
 {
 	double ret = 0;
-	double xv = Noise3D(x, y, z);
-	double x1 = Noise3D(x + 1, y, z);
-	double x2 = Noise3D(x - 1, y, z);
-	double y1 = Noise3D(x, y + 1, z);
-	double y2 = Noise3D(x, y - 1, z);
+	double xv = Noise3D(x		, y		, z);
+	double x1 = Noise3D(x + 1	, y		, z);
+	double x2 = Noise3D(x - 1	, y		, z);
+	double y1 = Noise3D(x		, y + 1	, z);
+	double y2 = Noise3D(x		, y - 1	, z);
 
 	return (x1 + x2 + y1 + y2 + xv) / 5.0;
 }
 
-void Texture::GetColor(double u, Vector3d& in) const
+void Texture::GetColor(float u, Vector3d& in) const
 {
-	double colorStep = 1.0 / m_NumColors;
+	float colorStep = 1.0f / m_NumColors;
 	int color = u / colorStep;
 	int nextColor = (color + 1) % m_NumColors;
 
 	const Vector3d& currColor = m_Colors[color];
 	const Vector3d& destColor = m_Colors[nextColor];
 	
-	double currU = color * colorStep;
-	double destU = nextColor * colorStep;
-	double lerp = fabs((u - currU) / (destU - currU));
+	float currU = color * colorStep;
+	float destU = nextColor * colorStep;
+	float lerp = fabs((u - currU) / (destU - currU));
 
 	in = currColor * (1.0f - lerp) + destColor * lerp;
 }

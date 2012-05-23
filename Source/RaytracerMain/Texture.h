@@ -42,7 +42,7 @@ class Texture
 		double Noise1D(int arg) const;
 		double Noise3D(int ix, int iy, int iz) const;
 		double SmoothNoise3D(double x, double y, double z) const;
-		void GetColor(double u, Vector3d& in) const;
+		void GetColor(float u, Vector3d& in) const;
 		double TurbulentNoise3D(double x, double y, double z, double* amplitudes, int no_of_octaves) const;
 
 		void GenerateBricks();
