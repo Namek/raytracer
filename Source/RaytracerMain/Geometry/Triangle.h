@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Vector3d.h"
-#include <vector>
+#include "../Texture.h"
+#include <map>
 
 namespace nprt
 {
@@ -18,8 +19,12 @@ namespace nprt
 
 			// Returns the intersection distance or -1
 			float intersection(const Vector3d& observer_pos, const Vector3d& ray) const;
+			static float intersection(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& origin, const Vector3d& dir);
+			float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection) const;
 
-			void getUV(const Point3d& pointInTriangle, float& u, float& v) const;
+			inline void getUV(const Point3d& pointInTriangle, float& u, float& v) const;
+			static void getUV(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Point3d& pointInTriangle, float& out_u, float& out_v);
+			
 			void SetTexcoords(float u1, float v1, float u2, float v2, float u3, float v3);
 
 			// Checks if Axis-Aligned Bounding Box contains (minimum partly containment) this triangle.
@@ -46,8 +51,9 @@ namespace nprt
 			Vector3d norm;
 			float d;
 
-			bool hasDisplacement;
-			std::vector<Triangle> displacementTriangles;
+			mutable bool hasDisplacement;
+			mutable Texture* texture;
+			
 
 		private:
 			void preprocess(void);

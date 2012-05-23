@@ -366,6 +366,10 @@ void Triangle::preprocess()
 
 float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 {
+	if (hasDisplacement)
+		return displacedIntersection(origin, dir);
+
+
 	// Check ray-plane intersection
 	float dist = -(origin.dotProduct(norm) + d) / (dir.dotProduct(norm));
 
@@ -392,7 +396,44 @@ float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 	}
 }
 
-void Triangle::getUV(const Point3d& pointInTriangle, float& out_u, float& out_v) const
+float Triangle::intersection(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& origin, const Vector3d& dir)
+{
+	// Check ray-plane intersection
+	Vector3d p1p2 = p2 - p1;
+	Vector3d p1p3 = p3 - p1;
+	Vector3d norm = p1p2.crossProduct(p1p3, true);
+	float d = -(norm.x*p1.x + norm.y*p1.y + norm.z*p1.z);
+	float dist = -(origin.dotProduct(norm) + d) / (dir.dotProduct(norm));
+
+	if(dist > Triangle::MaxDistance)
+	{
+		return -1;
+	}
+	
+	// Calculate the intersection point
+	Vector3d intersectionPt = origin + dir * dist;
+
+	// Check if the point is inside the triangle (barycentric method)
+	float u, v;
+	getUV(p1, p2, p3, intersectionPt, u, v);
+
+	// Check if point is in triangle
+	if((u >= std::numeric_limits<float>::epsilon()) && (v >= std::numeric_limits<float>::epsilon()) && (u + v < 1))
+	{
+		return dist;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+inline void Triangle::getUV(const Point3d& pointInTriangle, float& out_u, float& out_v) const
+{
+	getUV(p1, p2, p3, pointInTriangle, out_u, out_v);
+}
+
+void Triangle::getUV(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Point3d& pointInTriangle, float& out_u, float& out_v)
 {
 	// Compute vectors        
 	Vector3d v0 = p3 - p1;
@@ -606,4 +647,249 @@ void Triangle::SetTexcoords(float u1, float v1, float u2, float v2, float u3, fl
 	this->v2 = v2;
 	this->u3 = u3;
 	this->v3 = v3;
+}
+
+
+/******************************************************************************/
+/*    Ray-triangle intersection where the triangle is displacement mapped.    */
+/*                                                                            */
+/*    Original algorithm comes from the paper by Smits et al. titled          */
+/*         "Direct Ray Tracing of Displacement Mapped Triangles"              */
+/*     available here: http://www.cs.utah.edu/~shirley/papers/disp.pdf        */
+/*                                                                            */
+/*   Paper was partly implemented in RISE project, which can be foudn here:   */
+/* http://www.koders.com/cpp/fid52A652AEE2337998D1866267C44996B287014234.aspx */
+/******************************************************************************/
+float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection) const
+{
+	float M = 0.5f;
+	float m = 0.1f;
+
+	Vector3d normals[3];
+	normals[0] = normals[1] = normals[2] = norm;
+
+	// TODO
+	// Initialization phase:
+	// First check to see if the ray intersects the volume of the displaced triangle
+	// To do this, we need to intersect the ray by the three bilinear patches and the two
+	// end-cap triangles
+
+
+	Point3d top[3];			// The top end-cap
+	top[0] = p1 + normals[0] * M;
+	top[1] = p2 + normals[1] * M ;
+	top[2] = p3 + normals[2] * M;
+
+	Point3d bottom[3];		// The bottom end-cap
+	bottom[0] = p1 + normals[0] * (-m);
+	bottom[1] = p2 + normals[1] * (-m);
+	bottom[2] = p3 + normals[2] * (-m);
+
+	// Then there are the three bilinear patches
+	Point3d patch0_pts[4];
+	patch0_pts[0] = top[1];
+	patch0_pts[1] = bottom[1];
+	patch0_pts[2] = top[0];
+	patch0_pts[3] = bottom[0];
+
+	Point3d patch1_pts[4];
+	patch1_pts[0] = top[2];
+	patch1_pts[1] = bottom[2];
+	patch1_pts[2] = top[1];
+	patch1_pts[3] = bottom[1];
+
+	Point3d patch2_pts[4];
+	patch2_pts[0] = top[0];
+	patch2_pts[1] = bottom[0];
+	patch2_pts[2] = top[2];
+	patch2_pts[3] = bottom[2];
+
+	// Now we need to basically intersect against all of these elements to figure which 
+	// side the ray enters and which side it leaves
+	struct HIT
+	{
+		bool		bHit;
+		float		dRange;
+		float		dRange2;
+
+		HIT() : bHit(false), dRange(std::numeric_limits<float>::max()), dRange2(std::numeric_limits<float>::max()) {}
+	};
+	struct TRIANGLE_HIT : public HIT
+	{
+		float		alpha;
+		float		beta;
+
+		TRIANGLE_HIT() : alpha(0), beta(0) {}
+	};
+
+	TRIANGLE_HIT topcapHit, bottomcapHit;
+/*
+	Triangle::intersection(
+	RayTriangleIntersection( ray, topcapHit, top[0], 
+		top[0] - top[1], top[0] - top[2]);
+
+	RayTriangleIntersection( ray, bottomcapHit, bottom[0], 
+		Vector3Ops::mkVector3(bottom[1],bottom[0]), Vector3Ops::mkVector3(bottom[2],bottom[0]) );
+
+	BILINEAR_HIT bh0, bh1, bh2;
+
+	RayBilinearPatchIntersection( ray, bh0, patch0_pts );
+	RayBilinearPatchIntersection( ray, bh1, patch1_pts );
+	RayBilinearPatchIntersection( ray, bh2, patch2_pts );
+
+	// Now we have to figure out which the closest hits were and which the farthest hits were
+	// Fortunately we can do this seperately
+
+	// See if either of the end-caps are an entry point,
+	char in=-1, out=-1;							// describes which side the ray comes in and which side it goes out
+	Scalar inDist=INFINITY, outDist=0;			// in and out distances
+
+	if( topcap.bHit ) {
+		in = 0; 
+		out = 0;
+		inDist = topcap.dRange;
+		outDist = topcap.dRange;
+	}
+
+	if( bottomcap.bHit ) {
+		if( bottomcap.dRange < inDist ) {
+			inDist = bottomcap.dRange;
+			in = 1;
+		}
+
+		if( bottomcap.dRange > outDist ) {
+			outDist = bottomcap.dRange;
+			out = 1;
+		}
+	}
+
+	// Check the three bi-linear patches
+#define CHECK_BILIN_PATCHES( p, val )	\
+	if( ##p.bHit ) {					\
+		if( ##p.dRange < inDist ) {		\
+			inDist = ##p.dRange;		\
+			in = val;					\
+		}								\
+		if( ##p.dRange > outDist ) {	\
+			outDist = ##p.dRange;		\
+			out = val;					\
+		}								\
+	}
+
+	CHECK_BILIN_PATCHES( bh0, 2 );
+	CHECK_BILIN_PATCHES( bh1, 3 );
+	CHECK_BILIN_PATCHES( bh2, 4 );
+
+#undef CHECK_BILIN_PATCHES
+
+	// Quick sanity check
+	if( in==-1 && out !=-1 ||
+		in!=-1 && out == -1 )
+	{
+		// Something is terribly wrong!
+		_asm int 3h;
+	}
+
+	// Now we check our bailing case
+	if( in==-1 && out==-1 ) {
+		return;	// the volume is never intersected
+	}
+
+	// Another sanity check
+	if( in==out ) {
+		// You can't enter and leave the volume on the same element
+		// Well actually you can, but until I add support for checking twice intersected
+		// bilinear patches, lets keep this here
+		_asm int 3h;
+	}
+
+	// Now we compute i,j,k which is the start co-ordinates and
+	// ie,je,ke which are the end co-ordinates based on in and out
+	float alpha, beta, gamma;
+
+
+
+
+	typedef enum LastChange
+	{
+		iplus = 0,
+		jminus,
+		kplus,
+		iminus,
+		jplus,
+		kminus
+	};
+
+	Vector3d a, b, c;
+	Vector3d uva, uvb, uvc;
+	Vector3d cNormal;
+	int i, j, k, i_end, j_end, k_end;
+	bool rightOfC;
+	LastChange change;
+	const int N = texture->GetWidth() * 3;
+	const float delta = 1.0f / static_cast<float>(N);
+	Vector3d intersectionNormal;
+
+	while (true)
+	{
+		float testIntersection = Triangle::intersection(a, b, c, rayOrigin, rayDirection);
+		if (testIntersection > 0)
+		{
+			intersectionNormal = (b-a).crossProduct(c-a, true);			// is it required?
+			return testIntersection;
+		}
+
+		if (i == i_end && j == j_end && k == k_end)
+		{
+			break;
+		}
+
+		rightOfC = ((cNormal.crossProduct(rayOrigin - c, false)).dotProduct(rayDirection) > 0);
+
+		if (rightOfC)
+		{
+			a = c;
+			uva = uvc;
+		}
+		else
+		{
+			b = c;
+			uvb = uvc;
+		}
+
+		change = static_cast<LastChange>((change + (rightOfC ? 1:5)) % 6);
+		if (change == iminus)
+		{
+			if (--i < 0) break;
+			uvc = Vector3d((j+1)*delta, (k+1)*delta, 0);
+		}
+		else if (change == iplus)
+		{
+			if (++j >= N) break;
+			uvc = Vector3d(j*delta, k*delta, 0);
+		}
+		else if (change == jminus)
+		{
+			if (--j < 0) break;
+			uvc = Vector3d(j*delta, (k+1)*delta, 0);
+		}
+		else if (change == jplus)
+		{
+			if (++j >= N) break;
+			uvc = Vector3d((j+1)*delta, k*delta, 0);
+		}
+		else if (change == kminus)
+		{
+			if (--k < 0) break;
+			uvc = Vector3d((j+1)*delta, k*delta, 0);
+		}
+		else if (change == kplus)
+		{
+			if (++k >= N) break;
+			uvc = Vector3d(j*delta, (k+1)*delta, 0);
+		}
+		//(c,cNormal) = GetPoint(uvc)
+	}*/
+
+	return -1;
 }

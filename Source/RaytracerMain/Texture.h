@@ -20,6 +20,8 @@ class Texture
 	public:
 		Texture(int width, int height, TextureType::TextureTypes texTypes);
 
+		inline const int GetWidth() const { return m_Width; }
+		inline const int GetHeight() const { return m_Height; }
 		inline const Vector3d& GetTexel(int x, int y) const { return m_Texels[x + y * m_Width];}
 		inline const Vector3d& GetTexel(float u, float v) const 
 		{ 

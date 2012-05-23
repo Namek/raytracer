@@ -927,4 +927,7 @@ void Scene::ApplyTexture(const Triangle& hitTriangle, const Vector3d& hitPoint, 
 	in_color.x = m_WallTexture.GetTexel(u, v).x;
 	in_color.y = m_WallTexture.GetTexel(u, v).y;
 	in_color.z = m_WallTexture.GetTexel(u, v).z;
+
+	hitTriangle.texture = &m_WallTexture;
+	hitTriangle.hasDisplacement = true;
 }
