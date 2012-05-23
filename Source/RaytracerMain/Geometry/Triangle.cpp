@@ -727,6 +727,49 @@ struct BilinearPatch
 	Point3d pts[4];
 };
 
+#define FIND_BARY( x )												\
+	switch( ##x )													\
+	{																\
+	case 0:															\
+		/* top cap	*/												\
+		alpha = topcapHit.alpha;										\
+		beta = topcapHit.beta;											\
+		gamma = 1.0 - (topcapHit.alpha+topcapHit.beta);					\
+		/* we set one to zero so that we go right to the end */		\
+		if( alpha < beta && alpha < gamma ) alpha = 0;				\
+		else if( beta < gamma ) beta = 0;							\
+		else gamma = 0;												\
+		break;														\
+	case 1:															\
+		/* bottom cap	*/											\
+		alpha = bottomcapHit.alpha;									\
+		beta = bottomcapHit.beta;										\
+		gamma = 1.0 - (bottomcapHit.alpha+bottomcapHit.beta);				\
+		/* we set one to zero so that we go right to the end */		\
+		if( alpha < beta && alpha < gamma ) alpha = 0;				\
+		else if( beta < gamma ) beta = 0;							\
+		else gamma = 0;												\
+		break;														\
+	case 2:															\
+		/* bilinear 0 - gamma is 0	*/								\
+		gamma = 0;													\
+		alpha = bh0.u;												\
+		beta = 1.0-bh0.u;											\
+		break;														\
+	case 3:															\
+		/* bilinear 1 - alpha is 0	*/								\
+		alpha = 0;													\
+		beta = bh1.u;												\
+		gamma = 1.0-bh0.u;											\
+		break;														\
+	case 4:															\
+		/* bilinear 2 - beta is 0	*/								\
+		beta = 0;													\
+		gamma = bh2.u;												\
+		alpha = 1.0-bh2.u;											\
+		break;														\
+	};
+
 
 // Choose between the best denominator to avoid singularities
 // and to get the most accurate root possible
@@ -866,89 +909,125 @@ void RayBilinearPatchIntersection(
 		BILINEAR_HIT& hit,
 		const BilinearPatch& patch
 		)
-	{
-		hit.bHit = false;
-		hit.dRange = INFINITY;
-		hit.dRange2 = INFINITY;
+{
+	hit.bHit = false;
+	hit.dRange = INFINITY;
+	hit.dRange2 = INFINITY;
 
-		//
-		// Equation of the patch
-		// 
-		// P(u,v) = (1-u)(1-v)*patch.pts[0] + (1-u)v*patch.pts[1] + u(1-v)*patch.pts[2] + uv*patch.pts[3]
-		//
+	//
+	// Equation of the patch
+	// 
+	// P(u,v) = (1-u)(1-v)*patch.pts[0] + (1-u)v*patch.pts[1] + u(1-v)*patch.pts[2] + uv*patch.pts[3]
+	//
 
-		// Variables for substitution
-		// a = pts[3] - pts[2] - pts[1] + pts[0]
-		// b = pts[2] - pts[0]
-		// c = pts[1] - pts[0]
-		// d = pts[0]
+	// Variables for substitution
+	// a = pts[3] - pts[2] - pts[1] + pts[0]
+	// b = pts[2] - pts[0]
+	// c = pts[1] - pts[0]
+	// d = pts[0]
 
-		// Find a w.r.t. x, y, z
-		const float ax = patch.pts[3].x - patch.pts[2].x - patch.pts[1].x + patch.pts[0].x;
-		const float ay = patch.pts[3].y - patch.pts[2].y - patch.pts[1].y + patch.pts[0].y;
-		const float az = patch.pts[3].z - patch.pts[2].z - patch.pts[1].z + patch.pts[0].z;
-
-
-		// Find b w.r.t. x, y, z
-		const float bx = patch.pts[2].x - patch.pts[0].x;
-		const float by = patch.pts[2].y - patch.pts[0].y;
-		const float bz = patch.pts[2].z - patch.pts[0].z;
-
-		// Find c w.r.t. x, y, z
-		const float cx = patch.pts[1].x - patch.pts[0].x;
-		const float cy = patch.pts[1].y - patch.pts[0].y;
-		const float cz = patch.pts[1].z - patch.pts[0].z;
+	// Find a w.r.t. x, y, z
+	const float ax = patch.pts[3].x - patch.pts[2].x - patch.pts[1].x + patch.pts[0].x;
+	const float ay = patch.pts[3].y - patch.pts[2].y - patch.pts[1].y + patch.pts[0].y;
+	const float az = patch.pts[3].z - patch.pts[2].z - patch.pts[1].z + patch.pts[0].z;
 
 
-		const float rx = rayOrigin.x;
-		const float ry = rayOrigin.y;
-		const float rz = rayOrigin.z;
+	// Find b w.r.t. x, y, z
+	const float bx = patch.pts[2].x - patch.pts[0].x;
+	const float by = patch.pts[2].y - patch.pts[0].y;
+	const float bz = patch.pts[2].z - patch.pts[0].z;
 
-		// Retrieve the xyz of the q part of ray
-		const float qx = rayDirection.x;
-		const float qy = rayDirection.y;
-		const float qz = rayDirection.z;
+	// Find c w.r.t. x, y, z
+	const float cx = patch.pts[1].x - patch.pts[0].x;
+	const float cy = patch.pts[1].y - patch.pts[0].y;
+	const float cz = patch.pts[1].z - patch.pts[0].z;
 
-		// Find d w.r.t. x, y, z - subtracting r just after  
-		const float dx = patch.pts[0].x - rx;
-		const float dy = patch.pts[0].y - ry;
-		const float dz = patch.pts[0].z - rz;
 
-		// Find A1 and A2
-		const float A1 = ax*qz - az*qx;
-		const float A2 = ay*qz - az*qy;
+	const float rx = rayOrigin.x;
+	const float ry = rayOrigin.y;
+	const float rz = rayOrigin.z;
 
-		// Find B1 and B2
-		const float B1 = bx*qz - bz*qx;
-		const float B2 = by*qz - bz*qy;
+	// Retrieve the xyz of the q part of ray
+	const float qx = rayDirection.x;
+	const float qy = rayDirection.y;
+	const float qz = rayDirection.z;
 
-		// Find C1 and C2
-		const float C1 = cx*qz - cz*qx;
-		const float C2 = cy*qz - cz*qy;
+	// Find d w.r.t. x, y, z - subtracting r just after  
+	const float dx = patch.pts[0].x - rx;
+	const float dy = patch.pts[0].y - ry;
+	const float dz = patch.pts[0].z - rz;
 
-		// Find D1 and D2
-		const float D1 = dx*qz - dz*qx;
-		const float D2 = dy*qz - dz*qy;
+	// Find A1 and A2
+	const float A1 = ax*qz - az*qx;
+	const float A2 = ay*qz - az*qy;
 
-		float coeff[3] = {0};
-		coeff[0] = A2*C1 - A1*C2;
-		coeff[1] = A2*D1 - A1*D2 + B2*C1 -B1*C2;
-		coeff[2] = B2*D1 - B1*D2;
+	// Find B1 and B2
+	const float B1 = bx*qz - bz*qx;
+	const float B2 = by*qz - bz*qy;
 
-		hit.u = hit.v = hit.dRange = -2;
+	// Find C1 and C2
+	const float C1 = cx*qz - cz*qx;
+	const float C2 = cy*qz - cz*qy;
+
+	// Find D1 and D2
+	const float D1 = dx*qz - dz*qx;
+	const float D2 = dy*qz - dz*qy;
+
+	float coeff[3] = {0};
+	coeff[0] = A2*C1 - A1*C2;
+	coeff[1] = A2*D1 - A1*D2 + B2*C1 -B1*C2;
+	coeff[2] = B2*D1 - B1*D2;
+
+	hit.u = hit.v = hit.dRange = -2;
 		
-		float sol[2] = {0};
-		const int numSol = SolveQuadricWithinRange( coeff, sol, -NEARZERO, 1.0+NEARZERO ); 
+	float sol[2] = {0};
+	const int numSol = SolveQuadricWithinRange( coeff, sol, -NEARZERO, 1.0+NEARZERO ); 
 
-		switch( numSol )
+	switch( numSol )
+	{
+	case 0:
+		break;			 // no solutions found
+	case 1:
 		{
-		case 0:
-			break;			 // no solutions found
-		case 1:
-			{
-				hit.u = getu(sol[0],A2,A1,B2,B1,C2,C1,D2,D1);
-				hit.v = sol[0];
+			hit.u = getu(sol[0],A2,A1,B2,B1,C2,C1,D2,D1);
+			hit.v = sol[0];
 				
+			const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
+			hit.dRange = computet(rayOrigin, rayDirection, pos1);
+
+			if( hit.u < 1+NEARZERO && hit.u > -NEARZERO && hit.dRange > 0 ) {
+				hit.bHit = true;
+			}
+		}
+		break;
+	case 2: // two solutions found
+		{
+			hit.v = sol[0];
+			hit.u = getu(sol[0],A2,A1,B2,B1,C2,C1,D2,D1);
+				
+			const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
+			hit.dRange = computet(rayOrigin, rayDirection, pos1); 
+
+			if( hit.u < 1+NEARZERO && hit.u > -NEARZERO && hit.dRange > 0 ) {
+				hit.bHit = true;
+
+				const float u = getu(sol[1],A2,A1,B2,B1,C2,C1,D2,D1);
+				if( u < 1+NEARZERO && u > NEARZERO ) {
+					const Point3d pos2 = EvaluateBilinearPatchAt( patch, u, sol[1] );
+					const float t2 = computet(rayOrigin, rayDirection, pos2);
+					if(t2 < 0 || hit.dRange < t2) { // t2 is bad or t1 is better
+						return;
+					}
+					// other wise both t2 > 0 and t2 < t1
+					hit.v = sol[1];
+					hit.u = u;
+					hit.dRange = t2;					
+				}
+			}
+			else // doesn't fit in the root - try other one
+			{
+				hit.u = getu(sol[1],A2,A1,B2,B1,C2,C1,D2,D1);
+				hit.v = sol[1];
 				const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
 				hit.dRange = computet(rayOrigin, rayDirection, pos1);
 
@@ -956,46 +1035,10 @@ void RayBilinearPatchIntersection(
 					hit.bHit = true;
 				}
 			}
-			break;
-		case 2: // two solutions found
-			{
-				hit.v = sol[0];
-				hit.u = getu(sol[0],A2,A1,B2,B1,C2,C1,D2,D1);
-				
-				const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
-				hit.dRange = computet(rayOrigin, rayDirection, pos1); 
-
-				if( hit.u < 1+NEARZERO && hit.u > -NEARZERO && hit.dRange > 0 ) {
-					hit.bHit = true;
-
-					const float u = getu(sol[1],A2,A1,B2,B1,C2,C1,D2,D1);
-					if( u < 1+NEARZERO && u > NEARZERO ) {
-						const Point3d pos2 = EvaluateBilinearPatchAt( patch, u, sol[1] );
-						const float t2 = computet(rayOrigin, rayDirection, pos2);
-						if(t2 < 0 || hit.dRange < t2) { // t2 is bad or t1 is better
-							return;
-						}
-						// other wise both t2 > 0 and t2 < t1
-						hit.v = sol[1];
-						hit.u = u;
-						hit.dRange = t2;					
-					}
-				}
-				else // doesn't fit in the root - try other one
-				{
-					hit.u = getu(sol[1],A2,A1,B2,B1,C2,C1,D2,D1);
-					hit.v = sol[1];
-					const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
-					hit.dRange = computet(rayOrigin, rayDirection, pos1);
-
-					if( hit.u < 1+NEARZERO && hit.u > -NEARZERO && hit.dRange > 0 ) {
-						hit.bHit = true;
-					}
-				}
-			}
-			break;
-		};
-	}
+		}
+		break;
+	};
+}
 
 float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection) const
 {
@@ -1005,7 +1048,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	Vector3d normals[3];
 	normals[0] = normals[1] = normals[2] = norm;
 
-	// TODO
+
 	// Initialization phase:
 	// First check to see if the ray intersects the volume of the displaced triangle
 	// To do this, we need to intersect the ray by the three bilinear patches and the two
@@ -1063,14 +1106,16 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	char in=-1, out=-1;							// describes which side the ray comes in and which side it goes out
 	float inDist=INFINITY, outDist=0;			// in and out distances
 
-	if( topcapHit.bHit ) {
+	if( topcapHit.bHit )
+	{
 		in = 0; 
 		out = 0;
 		inDist = topcapHit.dRange;
 		outDist = topcapHit.dRange;
 	}
 
-	if( bottomcapHit.bHit ) {
+	if( bottomcapHit.bHit )
+	{
 		if( bottomcapHit.dRange < inDist ) {
 			inDist = bottomcapHit.dRange;
 			in = 1;
@@ -1124,9 +1169,20 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 
 	// Now we compute i,j,k which is the start co-ordinates and
 	// ie,je,ke which are the end co-ordinates based on in and out
-	float alpha, beta, gamma;
+	float alpha, beta, gamma;	
+	const int N = texture->GetWidth() * 3;
 
+	FIND_BARY( out );
 
+	int ie = int(floor(alpha*N));
+	int je = int(floor(beta*N));
+	int ke = int(floor(gamma*N));
+
+	FIND_BARY( in );
+
+	int i = int(floor(alpha*N));
+	int j = int(floor(beta*N));
+	int k = int(floor(gamma*N));
 
 
 	typedef enum LastChange
@@ -1142,10 +1198,8 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	Vector3d a, b, c;
 	Vector3d uva, uvb, uvc;
 	Vector3d cNormal;
-	int i, j, k, i_end, j_end, k_end;
 	bool rightOfC;
 	LastChange change;
-	const int N = texture->GetWidth() * 3;
 	const float delta = 1.0f / static_cast<float>(N);
 	Vector3d intersectionNormal;
 
@@ -1158,7 +1212,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 			return testIntersection;
 		}
 
-		if (i == i_end && j == j_end && k == k_end)
+		if (i == ie && j == je && k == ke)
 		{
 			break;
 		}
@@ -1214,3 +1268,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 
 	return -1;
 }
+/************************************ CUT *************************************/
+/******************************************************************************/
+/*    Ray-triangle intersection where the triangle is displacement mapped.    */
+/******************************************************************************/
