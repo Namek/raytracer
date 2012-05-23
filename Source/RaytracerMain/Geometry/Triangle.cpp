@@ -1184,7 +1184,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 		}
 		else if (change == iplus)
 		{
-			if (++j >= N) break;
+			if (++i >= N) break;
 			uvc = Vector3d(j*delta, k*delta, 0);
 		}
 		else if (change == jminus)
