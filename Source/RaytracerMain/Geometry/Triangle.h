@@ -18,8 +18,9 @@ namespace nprt
 			void setMaterialIndex(int);
 
 			// Returns the intersection distance or -1
-			float intersection(const Vector3d& observer_pos, const Vector3d& ray) const;
-			static float intersection(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& origin, const Vector3d& dir);
+			float intersection(const Vector3d& observer_pos, const Vector3d& rayDirection) const;
+			static float intersection(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& rayOrigin, const Vector3d& rayDirection);
+			static float intersection(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& rayOrigin, const Vector3d& rayDirection, float& out_u, float& out_v);
 			float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection) const;
 
 			inline void getUV(const Point3d& pointInTriangle, float& u, float& v) const;
