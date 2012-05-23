@@ -30,7 +30,7 @@ namespace nprt
 			float wg, eta;
 
 			Material()
-				: kdc(0), ksc(0), kt(0), kac(0), r(0), g(0), b(0), wg(0), eta(0), texture(0)
+				: kdc(0), ksc(0), kt(0), kac(0), r(0), g(0), b(0), wg(0), eta(1), texture(0)
 			{	}
 
 			Material(float _kd, float _ks, float _wg, float _ka, float _r, float _g, float _b, float _kt, float _eta, int _texture)

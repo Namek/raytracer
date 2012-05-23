@@ -160,6 +160,10 @@ void Scene::LoadScene(const char* filename)
 							lineStream >> material.kac;
 						else if(token == "texture")
 							lineStream >> material.texture;
+						else if(token == "kt")
+							lineStream >> material.kt;
+						else if(token == "eta")
+							lineStream >> material.eta;
 					}
 					m_Materials.push_back(material);
 				}
@@ -621,6 +625,9 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		//if(u * v > 0.01f)
 		//	return;
 
+		/*if(hitTriangle.materialIndex != 32)
+			return;*/
+
 		if(material.texture == 0)
 		{
 			// Apply the material
@@ -705,7 +712,11 @@ void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color, const nprt::V
 	{
 		Vector3d in_refl_color(0, 0, 0);
 		CalculateColor(reflectedRay, intersectionPt + reflectedRay * 0.01f, numReflections - 1, in_refl_color);
-		in_color += in_refl_color * material.ksc;
+		
+		// Scaling of the reflection intensity
+		float div = (m_NumReflections) ? m_NumReflections - 1 : 0;
+		float intensity = (m_NumReflections - numReflections) / div;
+		in_color += in_refl_color * material.ksc * intensity;
 	}
 }
 
