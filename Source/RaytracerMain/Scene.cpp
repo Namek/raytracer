@@ -537,6 +537,11 @@ void Scene::LoadAttributes(const char* filePath)
 	file.close();
 }
 
+void Scene::RenderToFile(const char* filename) const
+{
+	RenderToFile(filename, m_Camera.xResolution, m_Camera.yResolution);
+}
+
 void Scene::RenderToFile(const char* filename, int width, int height) const
 {
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);

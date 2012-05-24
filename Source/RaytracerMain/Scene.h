@@ -24,6 +24,7 @@ class Scene
 		void LoadLights(const char* filename);
 		void SetMaxDivideDepth(int maxDivideDepth) { m_Octree.setMaxDivideDepth(maxDivideDepth); }
 		void RenderToFile(const char* filename, int width, int height) const;
+		void RenderToFile(const char* filename) const;
 
 		inline void SetEnableToneMapping(bool enable) {m_EnableToneMapping = enable; }
 		inline void SetToneMappingKey(float key) {m_ToneMappingKey = key; }
