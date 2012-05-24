@@ -19,7 +19,7 @@ Texture::Texture(int width, int height, TextureType::TextureTypes type) : m_Widt
 		case TextureType::Turbulence:
 			GenerateTurbulence();
 			break;
-	}
+	}currentX = 0;
 }
 
 Texture::~Texture()

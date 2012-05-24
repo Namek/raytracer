@@ -105,7 +105,7 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 					nodesTriangles[subNodeIndex].push_back(triangle);
 				}
 
-				printf("N %d\n", currentDepth);//debug
+				//printf("N %d\n", currentDepth);//debug
 				// TODO If triangle wasn't assigned anywhere,
 				// then probably it's a wall (or floor or ceiling) of a domain.
 

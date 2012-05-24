@@ -342,6 +342,14 @@ void Scene::LoadScene(const char* filename)
 	}
 	file.close();
 
+
+	for (int i = 0, n = m_Triangles.size(); i < n; ++i)
+	{
+		const Triangle& triangle = m_Triangles[i];
+		triangle.hasDisplacement = (triangle.texture != 0);
+		triangle.texture = &m_WallTexture;
+	}
+
 	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
 }
 
@@ -550,7 +558,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 		Vector3d floatColor(0, 0, 0);
 
 		for (int x = 0; x < width; x++)
-		{
+		{m_WallTexture.currentX = x;
 			// Calculate the ray direction based on the magic equations from the lecture
 			Point3d P_ij = m_Camera.topLeft + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
 			rayDirection = P_ij - observerPos;

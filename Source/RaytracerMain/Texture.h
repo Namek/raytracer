@@ -30,7 +30,7 @@ class Texture
 			return GetTexel(static_cast<int>((u - floor(u)) * m_Width), 
 							static_cast<int>((v - floor(v)) * m_Height));
 		}
-
+int currentX;
 		~Texture();
 
 	private:

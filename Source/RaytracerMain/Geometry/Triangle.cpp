@@ -63,8 +63,10 @@ void Triangle::setMaterialIndex(int index)
 
 float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 {
-	if (hasDisplacement)
-		return displacedIntersection(origin, dir);
+	if (hasDisplacement && texture->currentX == 313 && ind == 3270)
+	{
+		//return displacedIntersection(origin, dir);
+	}
 
 
 	// Check ray-plane intersection
@@ -431,7 +433,7 @@ struct BilinearPatch
 		/* top cap	*/												\
 		alpha = topcapHit.alpha;										\
 		beta = topcapHit.beta;											\
-		gamma = 1.0 - (topcapHit.alpha+topcapHit.beta);					\
+		gamma = 1.0f - (topcapHit.alpha + topcapHit.beta);					\
 		/* we set one to zero so that we go right to the end */		\
 		if( alpha < beta && alpha < gamma ) alpha = 0;				\
 		else if( beta < gamma ) beta = 0;							\
@@ -441,7 +443,7 @@ struct BilinearPatch
 		/* bottom cap	*/											\
 		alpha = bottomcapHit.alpha;									\
 		beta = bottomcapHit.beta;										\
-		gamma = 1.0 - (bottomcapHit.alpha+bottomcapHit.beta);				\
+		gamma = 1.0f - (bottomcapHit.alpha + bottomcapHit.beta);				\
 		/* we set one to zero so that we go right to the end */		\
 		if( alpha < beta && alpha < gamma ) alpha = 0;				\
 		else if( beta < gamma ) beta = 0;							\
@@ -451,19 +453,19 @@ struct BilinearPatch
 		/* bilinear 0 - gamma is 0	*/								\
 		gamma = 0;													\
 		alpha = bh0.u;												\
-		beta = 1.0-bh0.u;											\
+		beta = 1.0f-bh0.u;											\
 		break;														\
 	case 3:															\
 		/* bilinear 1 - alpha is 0	*/								\
 		alpha = 0;													\
 		beta = bh1.u;												\
-		gamma = 1.0-bh0.u;											\
+		gamma = 1.0f-bh0.u;											\
 		break;														\
 	case 4:															\
 		/* bilinear 2 - beta is 0	*/								\
 		beta = 0;													\
 		gamma = bh2.u;												\
-		alpha = 1.0-bh2.u;											\
+		alpha = 1.0f-bh2.u;											\
 		break;														\
 	};
 
@@ -737,13 +739,134 @@ void RayBilinearPatchIntersection(
 	};
 }
 
+#define MATRIX_DETERMINANT(M)										\
+	  (M ## _00 * (M ## _11 * M ## _22 - M ## _12 * M ## _21))	\
+	- (M ## _10 * (M ## _01 * M ## _22 - M ## _02 * M ## _21))	\
+	+ (M ## _20 * (M ## _01 * M ## _12 - M ## _02 * M ## _11))
+
+// m1 = m2
+#define COPY_MATRIX(M1, M2)				\
+	M1 ## _00 = M2 ## _00;			\
+	M1 ## _01 = M2 ## _01;			\
+	M1 ## _02 = M2 ## _02;			\
+	M1 ## _10 = M2 ## _10;			\
+	M1 ## _11 = M2 ## _11;			\
+	M1 ## _12 = M2 ## _12;			\
+	M1 ## _20 = M2 ## _20;			\
+	M1 ## _21 = M2 ## _21;			\
+	M1 ## _22 = M2 ## _22;
+	
+
+
+void RayTriangleIntersection( 
+	const Vector3d& rayOrigin,
+	const Vector3d& rayDirection,
+	TRIANGLE_HIT& hit,
+	const Point3d& vPt1,
+	const Vector3d& vEdgeA,
+	const Vector3d& vEdgeB
+	)
+{
+	hit.bHit = false;
+	hit.dRange = INFINITY;
+
+	// Here is my intersection test.  
+	// You can find this in Real-time Rendering 10.5.2
+		
+	// Equation of the ray
+	// X = raybegin + nRange * raydir
+		
+	// Equation of the triangle
+	// X = vPoint1 + X * vPoint2 + Y * vPoint3;
+		
+	float m_00 = rayDirection.x;
+	float m_01 = rayDirection.y;
+	float m_02 = rayDirection.z;
+
+	float m_10 = vEdgeA.x;
+	float m_11 = vEdgeA.y;
+	float m_12 = vEdgeA.z;
+
+	float m_20 = vEdgeB.x;
+	float m_21 = vEdgeB.y;
+	float m_22 = vEdgeB.z;
+
+	const float determinant = MATRIX_DETERMINANT(m);
+
+	if( determinant > -NEARZERO && determinant < NEARZERO )
+	{
+		return;
+	}
+
+	float oodet = 1.0f / determinant;
+		
+	float m2_00;
+	float m2_01;
+	float m2_02;
+			  
+	float m2_10;
+	float m2_11;
+	float m2_12;
+			  
+	float m2_20;
+	float m2_21;
+	float m2_22;
+
+	// The vector v gives the vector from the ray's begining to the first point on the triangle
+	const Vector3d v = vPt1 - rayOrigin;
+
+	COPY_MATRIX(m2, m);
+	m2_10 = v.x;
+	m2_11 = v.y;
+	m2_12 = v.z;
+
+	const float a = -MATRIX_DETERMINANT(m2) * oodet;
+
+	if( (a < 0.0-NEARZERO) || (a > 1.0+NEARZERO) )
+	{
+		return;
+	}
+
+	COPY_MATRIX(m2, m);
+	m2_20 = v.x;
+	m2_21 = v.y;
+	m2_22 = v.z;
+	const float b = -MATRIX_DETERMINANT(m2) * oodet;
+
+	if( (b < 0.0-NEARZERO) || ((a+b) > 1.0+NEARZERO) )
+	{
+		return;
+	}
+
+	COPY_MATRIX(m2, m);
+	m2_00 = v.x;
+	m2_01 = v.y;
+	m2_02 = v.z;
+	hit.dRange = MATRIX_DETERMINANT(m2) * oodet;
+
+	if( hit.dRange >= NEARZERO )
+	{
+		hit.dRange2 = hit.dRange;
+		hit.bHit = true;
+		hit.alpha = a;
+		hit.beta = b;
+	}
+}
+
 float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection) const
 {
 	float M = 0.5f;
-	float m = 0.1f;
+	float m = 0.01f;
 
+	Vector3d p1 = this->p1;
+	Vector3d p2 = this->p2;
+	Vector3d p3 = this->p3;
+	
 	Vector3d normals[3];
-	normals[0] = normals[1] = normals[2] = norm;
+	normals[0] = normals[1] = normals[2] = (p2 - p1).crossProduct(p3 - p1, false);
+	normals[0].normalize();
+	normals[1].normalize();
+	normals[2].normalize();
 
 
 	// Initialization phase:
@@ -754,7 +877,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 
 	Point3d top[3];			// The top end-cap
 	top[0] = p1 + normals[0] * M;
-	top[1] = p2 + normals[1] * M ;
+	top[1] = p2 + normals[1] * M;
 	top[2] = p3 + normals[2] * M;
 
 	Point3d bottom[3];		// The bottom end-cap
@@ -784,17 +907,36 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	// Now we need to basically intersect against all of these elements to figure which 
 	// side the ray enters and which side it leaves
 	TRIANGLE_HIT topcapHit, bottomcapHit;
-	topcapHit.dRange = Triangle::intersection(top[0], top[1], top[2], rayOrigin, rayDirection);
-	topcapHit.bHit = topcapHit.dRange >= 0;		
-	bottomcapHit.dRange = Triangle::intersection(bottom[0], bottom[1], bottom[2], rayOrigin, rayDirection);
-	bottomcapHit.bHit = bottomcapHit.dRange >= 0;
+	float u, v;
+
+	//RayTriangleIntersection(rayOrigin, rayDirection, topcapHit, top[0], top[1] - top[0], top[2] - top[0]);
+	//RayTriangleIntersection(rayOrigin, rayDirection, bottomcapHit, bottom[0], bottom[1] - bottom[0], bottom[2] - bottom[0]);
+
+
+	topcapHit.dRange = Triangle::intersection(top[0], top[1], top[2], rayOrigin, rayDirection, u, v);
+	if (topcapHit.dRange >= 0)
+	{
+		topcapHit.dRange2 = topcapHit.dRange;
+		topcapHit.bHit = true;
+		topcapHit.alpha = u;
+		topcapHit.beta = 1.0f - u - v;
+	}
+
+	bottomcapHit.dRange = Triangle::intersection(bottom[0], bottom[1], bottom[2], rayOrigin, rayDirection, u, v);
+	if (bottomcapHit.dRange >= NEARZERO)
+	{
+		bottomcapHit.dRange2 = bottomcapHit.dRange;
+		bottomcapHit.bHit = true;
+		bottomcapHit.alpha = v;
+		bottomcapHit.beta = 1.0f - u - v;
+	}
 
 
 	BILINEAR_HIT bh0, bh1, bh2;
 
-	RayBilinearPatchIntersection(rayOrigin, rayDirection, bh0, patch0 );
-	RayBilinearPatchIntersection(rayOrigin, rayDirection, bh1, patch1 );
-	RayBilinearPatchIntersection(rayOrigin, rayDirection, bh2, patch2 );
+	RayBilinearPatchIntersection(rayOrigin, rayDirection, bh0, patch0);
+	RayBilinearPatchIntersection(rayOrigin, rayDirection, bh1, patch1);
+	RayBilinearPatchIntersection(rayOrigin, rayDirection, bh2, patch2);
 
 	// Now we have to figure out which the closest hits were and which the farthest hits were
 	// Fortunately we can do this seperately
@@ -813,16 +955,21 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 
 	if( bottomcapHit.bHit )
 	{
-		if( bottomcapHit.dRange < inDist ) {
+		if( bottomcapHit.dRange < inDist )
+		{
 			inDist = bottomcapHit.dRange;
 			in = 1;
 		}
 
-		if( bottomcapHit.dRange > outDist ) {
+		if( bottomcapHit.dRange > outDist )
+		{
 			outDist = bottomcapHit.dRange;
 			out = 1;
 		}
 	}
+
+	if (inDist < 0 || outDist < 0)
+		return -1;
 
 	// Check the three bi-linear patches
 #define CHECK_BILIN_PATCHES( p, val )	\
@@ -853,7 +1000,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 
 	// Now we check our bailing case
 	if( in==-1 && out==-1 ) {
-		return;	// the volume is never intersected
+		return -1;	// the volume is never intersected
 	}
 
 	// Another sanity check
@@ -866,17 +1013,16 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 
 	// Now we compute i,j,k which is the start co-ordinates and
 	// ie,je,ke which are the end co-ordinates based on in and out
-	float alpha, beta, gamma;	
-	const int N = texture->GetWidth() * 3;
+	const int N = texture->GetWidth();
+	const float delta = 1.0f / static_cast<float>(N);
+	float alpha, beta, gamma;
 
 	FIND_BARY( out );
-
 	int ie = int(floor(alpha*N));
 	int je = int(floor(beta*N));
-	int ke = int(floor(gamma*N));
+	int ke = (int)(floor(gamma*N));
 
 	FIND_BARY( in );
-
 	int i = int(floor(alpha*N));
 	int j = int(floor(beta*N));
 	int k = int(floor(gamma*N));
@@ -892,31 +1038,86 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 		kminus
 	};
 
-	Vector3d a, b, c;
-	Vector3d uva, uvb, uvc;
 	Vector3d cNormal;
-	bool rightOfC;
-	LastChange change;
-	const float delta = 1.0f / static_cast<float>(N);
 	Vector3d intersectionNormal;
 
-	while (true)
+	Vector3d color; float grayColor; float displacementHeight;
+
+#define GET_DISPLACEMENT_HEIGHT(U,V) \
+	static_cast<float>(1.0f - ((color = texture->GetTexel(U, V)).x + color.y + color.z) / 3);
+
+	
+	Vector3d uva;
+	Vector3d uvb;
+	Vector3d uvc;
+	Vector3d a;
+	Vector3d b;
+	Vector3d c, basicC;
+	LastChange change;
+
+	if (i == 0)
 	{
-		float testIntersection = Triangle::intersection(a, b, c, rayOrigin, rayDirection);
-		if (testIntersection > 0)
+		uva.set(beta, gamma, 0);
+		uvb.set(beta+delta, gamma-delta, 0);
+		uvc.set(beta, gamma-delta, 0);
+
+		change = iplus;
+	}
+	else if (j == 0)
+	{
+		uva.set(0, gamma, 0);
+		uvb.set(0, gamma-delta, 0);
+		uvc.set(delta, gamma-delta, 0);
+
+		change = jplus;
+	}
+	else if (k == 0)
+	{
+		uva.set(beta, 0, 0);
+		uvb.set(beta+delta, 0, 0);
+		uvc.set(beta, delta, 0);
+
+		change = kplus;
+	}
+
+	Vector3d dirDown = p2-p3;
+	Vector3d dirRight = p1-p2;
+	a = p3 + dirDown*(1.0f-uva.y) + dirRight*(uva.x);
+	b = p3 + dirDown*(1.0f-uvb.y) + dirRight*(uvb.x);
+	c = p3 + dirDown*(1.0f-uvc.y) + dirRight*(uvc.x);
+	basicC = c;
+
+	// Displace
+	//a += normals[0] * M; //GET_DISPLACEMENT_HEIGHT(uva.x, uva.y);
+	//b += normals[0] * M;
+	//c += normals[0] * M;
+	cNormal = normals[0];
+
+	float testIntersection = Triangle::intersection(p1, p2, p3, rayOrigin, rayDirection);
+	Point3d intersectionPt = rayOrigin + rayDirection*testIntersection;
+
+	int ni = 0;
+	float eps = delta;
+	Vector3d vTmp;
+	while (ni++ < 100)
+	{
+		testIntersection = Triangle::intersection(a, b, c, rayOrigin, rayDirection, u, v);
+		//testIntersection = Triangle::intersection(a+(b-a)*eps+(c-a)*eps, b+(a-b)*eps+(c-b)*eps, c+(a-c)*eps+(b-c)*eps, rayOrigin, rayDirection);
+		if (testIntersection > -std::numeric_limits<float>::epsilon())
 		{
-			intersectionNormal = (b-a).crossProduct(c-a, true);			// is it required?
+			intersectionNormal = (b-a).crossProduct(c-a, true);
 			return testIntersection;
 		}
 
-		if (i == ie && j == je && k == ke)
+		if ((i == ie && j == je && k == ke) || i >= N || j >= N || k >= N)
 		{
-			break;
+			return -1;
 		}
 
-		rightOfC = ((cNormal.crossProduct(rayOrigin - c, false)).dotProduct(rayDirection) > 0);
+		float tmp = (cNormal.crossProduct(rayOrigin - c, true)).dotProduct(rayDirection);
+		bool rightOfC = (tmp > - std::numeric_limits<float>::epsilon());
 
-		if (rightOfC)
+		if (!rightOfC)
 		{
 			a = c;
 			uva = uvc;
@@ -958,9 +1159,22 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 			if (++k >= N) break;
 			uvc = Vector3d(j*delta, (k+1)*delta, 0);
 		}
+		//uvc = uvc*(1+std::numeric_limits<float>::epsilon());
 
-		// TODO!!!!1111
-		//(c,cNormal) = GetPoint(uvc)
+		// Get color and convert it to a gray scale
+		Vector3d color = texture->GetTexel(uvc.x, 1.0f-uvc.y);
+		float grayColor = M;//static_cast<float>(1.0f - (color.x+color.y+color.z) / 3);
+
+		// (c,cNormal) = GetPoint(uvc)
+		//c = basicC + GET_DISPLACEMENT_HEIGHT(uvc.x, uvc.y);
+
+		c = p3 + (p3-p2)*(1.0f-uvc.y) + (p1-p2)*uvc.x;
+		
+		Vector3d ab(a, b, false);
+		Vector3d ac(a, c, false);
+		Vector3d microTriangleNormal = ab.crossProduct(ac, true);
+		//cNormal = microTriangleNormal;
+		//c += cNormal*M;
 	}
 
 	return -1;
