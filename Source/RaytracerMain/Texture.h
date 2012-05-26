@@ -44,12 +44,23 @@ int currentX;
 		double Noise1D(int arg) const;
 		double Noise3D(int ix, int iy, int iz) const;
 		double SmoothNoise3D(double x, double y, double z) const;
-		void GetColor(int palette, float u, Vector3d& in) const;
+		void GetColor(int palette, double u, Vector3d& in) const;
 		double TurbulentNoise3D(double x, double y, double z, double* amplitudes, int no_of_octaves) const;
+
+		void DrawBrick(int x, int y, const Texture& turbulence);
 
 		void GenerateBricks();
 		void GenerateTurbulence();
 		void GenerateGradient();
+
+		static const double BrickWidth;
+		static const double BrickHeight;
+		static const double MortarThickness;
+
+		static const double BMWidth;
+		static const double BMHeight;
+		static const double BorderWidth;
+		static const double BorderHeight;
 };
 
 }

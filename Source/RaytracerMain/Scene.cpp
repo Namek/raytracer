@@ -658,14 +658,12 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		// Refraction component
 		CalculateRefractionComponent(in_color, intersectionPt, observerDir, hitTriangle, material, numReflections - 1);
 
-		Vector3d diffuseComponent(0, 0, 0);
-		Vector3d specularComponent(0, 0, 0);
-		float shadowPower = 1.0f;
-		int lightsShadowing = 0;
+		float lightIntensity = 0.0f;
 		for(int lgt = 0; lgt < numLights; ++lgt)
 		{
 			const LightSource& light = m_Lights[lgt];
 			Vector3d lgtDir = (light.position - intersectionPt);
+			float attenuation = lgtDir.length() / m_Octree.getDomainSize().length();
 			lgtDir.normalize();			
 
 			// Perform a shadow cast from the intersection point
@@ -673,46 +671,28 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			if(m_EnableShadows)
 			{
 				pair<Triangle, Point3d> t;
-				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.0002f, lgtDir, t);
+				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.002f, lgtDir, t);
 
 				if(shadow)
 				{
-					//in_color *= 0.9f;
-					float a = (t.second-intersectionPt).length()/5.2f/1.22f;
-					//float a = (t.second-intersectionPt).length()/m_Octree.getDomainSize().length()/1.22f;
-					//a = (t.second-intersectionPt).length()/(intersectionPt-light.position).length()/2;
-					shadowPower *= a;
-					++lightsShadowing;
-					//continue; 
+					//in_color *= 0.95f;
+					continue;
 				}
 			}
 
-			// If there are no intersections, add the light			
+			// If there are no intersections, add the light
 			// Calculate the diffuse component
-			float id = hitTriangle.norm.dotProduct(lgtDir);
-			float intensityDiffuse = fabsf(id) / (float)numLights;			
-
-			// Value clamping is being done after the rendering
-			diffuseComponent.x += intensityDiffuse * light.r;
-			diffuseComponent.y += intensityDiffuse * light.g;
-			diffuseComponent.z += intensityDiffuse * light.b;
+			float dot = hitTriangle.norm.dotProduct(lgtDir);			
+			dot *= dot;
 
 			// Calculate the specular component
-			float is = material.wg * lgtDir.dotProduct(reflectedRay);
-			float intensitySpecular = fabsf(is) / (float)numLights;
-
-			specularComponent.x += intensitySpecular;
-			specularComponent.y += intensitySpecular;
-			specularComponent.z += intensitySpecular;
+			float specular = lgtDir.dotProduct(reflectedRay);
+			
+			// Apply the specular and diffuse components
+			lightIntensity += (dot * material.kdc + specular * material.ksc) * attenuation;
 		}
-		
-		// Apply the specular and diffuse components
-		diffuseComponent *= material.kdc;
-		specularComponent *= material.ksc;
 
-		in_color += diffuseComponent + specularComponent;
-		in_color *= (1.0f + shadowPower);
-		//in_color *= (1.0f + (shadowPower*log10(static_cast<float>(lightsShadowing*2))));
+		in_color += Vector3d(1.0f, 1.0, 1.0f) * lightIntensity;
 	}
 }
 
@@ -727,7 +707,7 @@ void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color, const nprt::V
 		CalculateColor(reflectedRay, intersectionPt + reflectedRay * 0.01f, numReflections - 1, in_refl_color);
 		
 		// Scaling of the reflection intensity
-		float div = (m_NumReflections) ? m_NumReflections - 1 : 0;
+		float div = static_cast<float>((m_NumReflections) ? m_NumReflections - 1 : 0);
 		float intensity = (m_NumReflections - numReflections) / div;
 		in_color += in_refl_color * material.ksc * intensity;
 	}

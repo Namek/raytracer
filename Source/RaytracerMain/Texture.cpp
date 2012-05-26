@@ -3,6 +3,15 @@
 
 using namespace nprt;
 
+const double Texture::BrickWidth = 45;
+const double Texture::BrickHeight = 15;
+const double Texture::MortarThickness = 4;
+
+const double Texture::BMWidth = BrickWidth + MortarThickness;
+const double Texture::BMHeight = BrickHeight + MortarThickness;
+const double Texture::BorderWidth = MortarThickness / BMWidth;
+const double Texture::BorderHeight = MortarThickness / BMHeight;
+
 Texture::Texture(int width, int height, TextureType::TextureTypes type) : m_Width(width), m_Height(height)
 {
 	m_Texels = new Vector3d[m_Width * m_Height];
@@ -19,7 +28,8 @@ Texture::Texture(int width, int height, TextureType::TextureTypes type) : m_Widt
 		case TextureType::Turbulence:
 			GenerateTurbulence();
 			break;
-	}currentX = 0;
+	}
+	currentX = 0;
 }
 
 Texture::~Texture()
@@ -31,7 +41,7 @@ double Texture::Ramp(double v, double min, double max) const
 {
 	double frac = v * (max - min) / max;
 
-	if(frac < max)
+	if(frac > max)
 	{
 		return 0;
 	}
@@ -65,60 +75,75 @@ void Texture::GenerateBricks()
 
 	m_NumColors.push_back(5);
 	m_ColorPalettes.push_back(std::vector<Vector3d>());
-	m_ColorPalettes[1].push_back(Vector3d(174 / 255.0f, 137 / 255.0f, 118 / 255.0f));
 	m_ColorPalettes[1].push_back(Vector3d(0.8f, 0.75f, 0.6f));
+	m_ColorPalettes[1].push_back(Vector3d(174 / 255.0f, 137 / 255.0f, 118 / 255.0f));	
 	m_ColorPalettes[1].push_back(Vector3d(150 / 255.0f, 25 / 255.0f, 14 / 255.0f));
 	m_ColorPalettes[1].push_back(Vector3d(150 / 255.0f, 22 / 255.0f, 11 / 255.0f));
 	m_ColorPalettes[1].push_back(Vector3d(102 / 255.0f, 0, 0));
 
-	const double BrickWidth = 45;
-	const double BrickHeight = 15;
-	const double MortarThickness = 1;
-
-	const double BMWidth = BrickWidth + MortarThickness;
-	const double BMHeight = BrickHeight + MortarThickness;
-	const double BorderWidth = MortarThickness / BMWidth;
-	const double BorderHeight = MortarThickness / BMHeight;
-		
+	int numBricksHorz = (int)(m_Width / BMWidth);
+	int numBricksVert = (int)(m_Height / BMHeight);
 	Texture turbulence(m_Width, m_Height, TextureType::Turbulence);
-
-	bool brickChange = false;
-	int prevRow = -1;
-	for(int y = m_Height; y--;) 
+		
+	for(int y = 0; y < numBricksVert; ++y)
 	{
-		double v = y / BMHeight; // Varies [0,1] over one brick
+		for(int x = 0; x < numBricksHorz; ++x)
+		{
+			DrawBrick((int)(x * BMWidth), (int)(y * BMHeight), turbulence);
+		}
+	}
+}
 
-		int row = static_cast<int>(floor(v));
+void Texture::DrawBrick(int x, int y, const Texture& turbulence)
+{
+	int maxY = static_cast<int>(y + BMHeight < m_Height ? y + BMHeight : m_Height);
+	int maxX = static_cast<int>(x + BMWidth < m_Width ? x + BMWidth : m_Width);
+
+	for(int row = y; row < maxY; ++row)
+	{	
+		float v = row / (float)BMHeight;
+		int palette = 0;
+		int brickRow = static_cast<int>(floor(v));
+		double randomness = Noise1D(brickRow) / 10;
+		double shift = (brickRow % 2 ? 0.5f + randomness : 0);		
 		v -= floor(v);
 
-		int palette = 0;
-		double randomness = Noise1D(row) / 10;
-		double shift = (row % 2 ? 0.5 + randomness : 0);
-		
-		for(int x = m_Width; x--;) 
+		for(int col = x; col < maxX; ++col)
 		{
-			double u = x / BMWidth; // Varies [0,1] over one brick
+			double u = col / (float)BMWidth;			
 
 			u += shift;
-
 			int column = static_cast<int>(floor(u));
+
 			if (column % 2)
 			{
-				palette = (Noise3D(column, row, column + row) > 0.65f ? 1 : 0);
+				palette = (Noise3D(column, brickRow, column + brickRow) > 0.65f ? 1 : 0);
 			}
-			else palette = 0;
+			else 
+			{
+				palette = 0;
+			}
 
 			u -= floor(u);
 
+			//float angle = 0.3f * 3.14 / 180.0f;
+			//float uo = u - 0.5f;
+			//float vo = v - 0.5f;
+			//u = uo * cosf(angle) - vo * sinf(angle);
+			//v = uo * sinf(angle) + vo * cosf(angle);
+			//u += 0.5f;
+			//v += 0.5f;
+
 			double w = Ramp(u, 0, BorderWidth + randomness) - Ramp(u, 1 - BorderWidth + randomness, 1);
 			double h = Ramp(v, 0, BorderHeight + randomness) - Ramp(v, 1 - BorderHeight + randomness, 1);
-			double B = 0.4f + w * h * turbulence.GetTexel(x, y).x;
+			double B = 0.4f + w * h * turbulence.GetTexel(col, row).x;
 			B *= B;
+			B = Utils::Clamp(B, 0.0, 0.999);
 
-			Vector3d col;
-			GetColor(palette, B, col);
-			m_Texels[x + y * m_Width] = col;
-		} 
+			Vector3d color;
+			GetColor(palette, B, color);
+			m_Texels[col + row * m_Width] = color * (0.5f + turbulence.GetTexel(col, row).x);
+		}
 	}
 }
 
@@ -155,30 +180,29 @@ void Texture::GenerateGradient()
 
 double Texture::SmoothNoise3D(double x, double y, double z) const
 {
-	double ret = 0;
-	double xv = Noise3D(x		, y		, z);
-	double x1 = Noise3D(x + 1	, y		, z);
-	double x2 = Noise3D(x - 1	, y		, z);
-	double y1 = Noise3D(x		, y + 1	, z);
-	double y2 = Noise3D(x		, y - 1	, z);
+	double xv = Noise3D((int)x		, (int)y		, (int)z);
+	double x1 = Noise3D((int)x + 1	, (int)y		, (int)z);
+	double x2 = Noise3D((int)x - 1	, (int)y		, (int)z);
+	double y1 = Noise3D((int)x		, (int)y + 1	, (int)z);
+	double y2 = Noise3D((int)x		, (int)y - 1	, (int)z);
 
 	return (x1 + x2 + y1 + y2 + xv) / 5.0;
 }
 
-void Texture::GetColor(int palette, float u, Vector3d& in) const
+void Texture::GetColor(int palette, double u, Vector3d& in) const
 {
-	float colorStep = 1.0f / m_NumColors[palette];
-	int color = u / colorStep;
+	double colorStep = 1.0f / m_NumColors[palette];
+	int color = (int)(u / colorStep);
 	int nextColor = (color + 1) % m_NumColors[palette];
 
 	const Vector3d& currColor = m_ColorPalettes[palette][color];
 	const Vector3d& destColor = m_ColorPalettes[palette][nextColor];
 	
-	float currU = color * colorStep;
-	float destU = nextColor * colorStep;
-	float lerp = fabs((u - currU) / (destU - currU));
+	double currU = color * colorStep;
+	double destU = nextColor * colorStep;
+	double lerp = fabs((u - currU) / (destU - currU));
 
-	in = currColor * (1.0f - lerp) + destColor * lerp;
+	in = currColor * static_cast<float>(1.0f - lerp) + destColor * static_cast<float>(lerp);
 }
 
 double Texture::TurbulentNoise3D(double x, double y, double z, double* amplitudes, int no_of_octaves) const
