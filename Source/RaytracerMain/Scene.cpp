@@ -238,7 +238,11 @@ void Scene::LoadScene(const char* filename)
 								lineStream >> lightSource.position.z;
 								lineStream >> lightSource.position.y;
 								lineStream >> lightSource.position.x;
-							}							
+							}
+							else if (token == "power" && !lineStream.eof())
+							{
+								lineStream >> lightSource.power;
+							}
 						}
 
 						m_Lights.push_back(lightSource);
@@ -689,7 +693,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			float specular = lgtDir.dotProduct(reflectedRay);
 			
 			// Apply the specular and diffuse components
-			lightIntensity += (dot * material.kdc + specular * material.ksc) * attenuation;
+			lightIntensity += (dot * material.kdc + specular * material.ksc) * attenuation * light.power;
 		}
 
 		in_color += Vector3d(1.0f, 1.0, 1.0f) * lightIntensity;
@@ -836,7 +840,7 @@ void Scene::LoadLights(const char* filename)
 						lineStream >> g;
 						lineStream >> b;
 
-						m_Lights.push_back(LightSource(x, y, z, r, g, b));
+						m_Lights.push_back(LightSource(x, y, z, r, g, b, flux));
 					}
 				}
 			}
