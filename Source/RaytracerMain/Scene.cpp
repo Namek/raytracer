@@ -346,12 +346,18 @@ void Scene::LoadScene(const char* filename)
 	}
 	file.close();
 
-
 	for (int i = 0, n = m_Triangles.size(); i < n; ++i)
 	{
-		const Triangle& triangle = m_Triangles[i];
+		Triangle& triangle = m_Triangles[i];
+
 		triangle.hasDisplacement = (triangle.texture != 0);
 		triangle.texture = &m_WallTexture;
+		Vector3d triangleCenter = triangle.p1 + (triangle.p2 - triangle.p1) * 0.5f + (triangle.p3 - triangle.p1) * 0.5f;
+
+		if (triangle.norm.dotProduct(triangleCenter - m_Camera.cameraCenter) > 0)
+		{
+			m_Triangles[i] = Triangle(triangle.p3, triangle.p2, triangle.p1, triangle.ind);
+		}
 	}
 
 	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
@@ -558,7 +564,9 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 	volatile long rowsDoneCount = 0;
 
+#ifndef _DEBUG
 	#pragma omp parallel for
+#endif
 	for (int y = 0; y < height; y++)
 	{	
 		cout << "Completed: " << (100 * (static_cast<int>(rowsDoneCount) + 1) / height) << "%\t\t\t\t\t\r";
