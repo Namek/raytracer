@@ -46,7 +46,6 @@ namespace nprt
 
 			mutable bool hasDisplacement;
 			mutable Texture* texture;
-			
-
 	};
+
 }

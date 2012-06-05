@@ -63,7 +63,8 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /E $(ProjectDir)\Assets\* $(ProjectDir)\Bin\$(Configuration)\$(ProjectName)\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -84,7 +85,8 @@
       <AdditionalDependencies>$(SolutionDir)Bin\$(Configuration)\Utils\Utils.lib;FreeImage.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /E $(ProjectDir)\Assets\* $(ProjectDir)\Bin\$(Configuration)\$(ProjectName)\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -12,23 +12,23 @@ using namespace nprt;
 
 int main(int argc, char* argv[])
 {
-	// Procedural texture debugging
-	/*const int width = 147;
-	const int height = 152;
-	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
-	Texture t(width, height, TextureType::Bricks);
-	RGBQUAD color = {0};
-	for(int p = 0; p < width * height; ++p)
-	{
-		const Vector3d& texel = t.GetTexel(p % width, p / width);
-		color.rgbRed = static_cast<BYTE>(texel.x * 255.0f);
-		color.rgbGreen = static_cast<BYTE>(texel.y * 255.0f);
-		color.rgbBlue = static_cast<BYTE>(texel.z * 255.0f);
-		FreeImage_SetPixelColor(dib, p % width, height - p / width, &color);
-	}
-	FreeImage_Save(FIF_PNG, dib, "Output\\proc_tex.png", PNG_Z_BEST_SPEED);
-	FreeImage_Unload(dib);
-	return 0;*/
+	//// Procedural texture debugging
+	//const int width = 147;
+	//const int height = 152;
+	//FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
+	//Texture t(width, height, TextureType::Bricks);
+	//RGBQUAD color = {0};
+	//for(int p = 0; p < width * height; ++p)
+	//{
+	//	const Vector3d& texel = t.GetTexel(p % width, p / width);
+	//	color.rgbRed = static_cast<BYTE>(texel.x * 255.0f);
+	//	color.rgbGreen = static_cast<BYTE>(texel.y * 255.0f);
+	//	color.rgbBlue = static_cast<BYTE>(texel.z * 255.0f);
+	//	FreeImage_SetPixelColor(dib, p % width, height - p / width, &color);
+	//}
+	//FreeImage_Save(FIF_PNG, dib, "Output\\proc_tex.png", PNG_Z_BEST_SPEED);
+	//FreeImage_Unload(dib);
+	//return 0;
 
 	Params params(argc > 1 ? argv[1] : "params.txt");
 	int numScenes = params.GetInt("num_scenes", 0);

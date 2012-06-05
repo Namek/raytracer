@@ -9,7 +9,7 @@ using namespace nprt;
 using namespace std;
 
 
-Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(294, 304, TextureType::Bricks)
+Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(1176, 1216, TextureType::Bricks)
 { }
 
 void Scene::LoadScene(const char* filename)
@@ -649,6 +649,11 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 		const Material& material = m_Materials[hitTriangle.materialIndex];
 		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
 		reflectedRay.normalize();		
+
+		if (material > 6)
+		{
+			return;
+		}
 
 		if(material.texture == 0)
 		{

@@ -13,7 +13,8 @@ namespace TextureType
 	{
 		LinearGradient = 0,
 		Bricks,
-		Turbulence
+		Turbulence,
+		Ramp
 	};
 }
 
@@ -40,7 +41,7 @@ int currentX;
 		int m_Height;
 		std::vector<int> m_NumColors;
 
-		double Ramp(double v, double min, double max) const;
+		double Ramp(double v, double min, double max, double range) const;
 		double Noise1D(int arg) const;
 		double Noise3D(int ix, int iy, int iz) const;
 		double SmoothNoise3D(double x, double y, double z) const;
@@ -48,10 +49,13 @@ int currentX;
 		double TurbulentNoise3D(double x, double y, double z, double* amplitudes, int no_of_octaves) const;
 
 		void DrawBrick(int x, int y, const Texture& turbulence);
+		void FillWithMortar(int x, int y, const Texture& turbulence);
+		Vector3d rotateVec(Vector3d vec, float angle) const;
 
 		void GenerateBricks();
 		void GenerateTurbulence();
 		void GenerateGradient();
+		void GenerateRamp();
 
 		static const double BrickWidth;
 		static const double BrickHeight;
