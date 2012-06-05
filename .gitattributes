@@ -62,7 +62,6 @@ Assets/data/room/v7/img1.jpg -text
 Assets/data/room/v7/v7.atr -text
 Assets/data/room/v7/v7.cam -text
 Assets/data/room/v7/v7.lgt -text
-Assets/data_new/kuchnia/ZMGK.exe -text
 Assets/data_new/kuchnia/kuchnia-v1.scn -text
 Assets/data_new/kuchnia/kuchnia-v1.scn.png -text
 Assets/data_new/kuchnia/kuchnia-v2.scn -text
@@ -109,7 +108,6 @@ Assets/data_new/temple/temple-v3.scn -text
 Assets/data_new/temple/temple-v3.scn.png -text
 Assets/data_new/temple/temple-v4.scn -text
 Assets/data_new/temple/temple-v4.scn.png -text
-Assets/data_new/ulica/ZMGK.exe -text
 Assets/data_new/ulica/ulica-v1.scn -text
 Assets/data_new/ulica/ulica-v1.scn.png -text
 Assets/params.txt -text
