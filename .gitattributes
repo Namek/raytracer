@@ -135,6 +135,7 @@ Source/BaseUtils/Params.cpp -text
 Source/BaseUtils/Params.h -text
 Source/RaytracerMain/Camera.cpp -text
 Source/RaytracerMain/Camera.h -text
+Source/RaytracerMain/Geometry/Displacement.cpp -text
 Source/RaytracerMain/Geometry/Octree.cpp -text
 Source/RaytracerMain/Geometry/Octree.h -text
 Source/RaytracerMain/Geometry/Plane.cpp -text

@@ -201,17 +201,17 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 		for (int i = 0; i < 6; ++i)
 		{
 			const Plane& plane = planes[i];
+			float distance = plane.intersectLine(rayOrigin, rayDirection, intersectionPoint);
 
-			if (plane.intersectLine(rayOrigin, rayDirection, intersectionPoint))
+			if (distance > 0)
 			{
-				// Check if point is containted in the rectangle (plane has infinite size)
+				// Check if point is contained in the rectangle (plane has infinite size)
 				if (m_pRoot->containsPoint(intersectionPoint))
 				{
 					// Choose a point with the shortest distance
-					float dist = (intersectionPoint - rayOrigin).length();
-					if (dist < smallestDist && dist > 0)
+					if (distance < smallestDist && distance > 0)
 					{
-						smallestDist = dist;
+						smallestDist = distance;
 						nearestIntersectionPoint = intersectionPoint;
 					}
 				}
@@ -335,16 +335,29 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 		{
 			// Test ray-triangle intersection.
 			const Triangle& triangle = node->m_Triangles[i];
-			
-			float intersectionDist = triangle.intersection(rayOrigin, rayDirection);
-			Point3d intersectionPoint = rayOrigin + rayDirection*intersectionDist;
+
+			float intersectionDist;
+			Triangle microTriangle;
+
+			// TODO leave only first subcondition
+			if (triangle.hasDisplacement && triangle.texture->currentX == /*389*/111394 && triangle.ind == 3270)
+			{
+				intersectionDist = triangle.displacedIntersection(rayOrigin, rayDirection, microTriangle);
+			}
+			else
+			{
+				intersectionDist = triangle.intersection(rayOrigin, rayDirection);
+			}
 
 			if (intersectionDist > 0 && intersectionDist < minDistance)// && node->containsPoint(intersectionPoint, 0.000001f))
 			{
 				foundTriangle = true;
-				triangleWithIntersectionPoint = std::pair<Triangle, Point3d>(triangle, intersectionPoint);
+				const Point3d intersectionPoint = rayOrigin + rayDirection*intersectionDist;
+				const Triangle& intersectedTriangle = /*triangle.hasDisplacement ? microTriangle :*/ triangle;
+
+				triangleWithIntersectionPoint = std::pair<Triangle, Point3d>(intersectedTriangle, intersectionPoint);
 				minDistance = intersectionDist;
-			}			
+			}
 		}
 
 		if (foundTriangle)

@@ -37,6 +37,9 @@
     <ClCompile Include="Source\RaytracerMain\Texture.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Geometry\Displacement.cpp">
+      <Filter>Source\Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RaytracerMain\Scene.h">

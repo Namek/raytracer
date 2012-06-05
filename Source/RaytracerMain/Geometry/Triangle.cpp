@@ -38,13 +38,13 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind)
 	hasDisplacement = false;
 }
 
-Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int index, int ind)
+Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int materialIndex, int ind)
 {
 	this->p1 = p1;
 	this->p2 = p2;
 	this->p3 = p3;
 	this->ind = ind;
-	materialIndex = index;
+	this->materialIndex = materialIndex;
 
 	Vector3d p1p2(p1, p2, false);
 	Vector3d p1p3(p1, p3, false);
@@ -62,12 +62,6 @@ void Triangle::setMaterialIndex(int index)
 
 float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 {
-	if (hasDisplacement && texture->currentX == 313 && ind == 3270)
-	{
-		//return displacedIntersection(origin, dir);
-	}
-
-
 	// Check ray-plane intersection
 	float dist = -(origin.dotProduct(norm) + d) / (dir.dotProduct(norm));
 
@@ -96,6 +90,12 @@ float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 
 float Triangle::intersection(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& origin, const Vector3d& dir)
 {
+	Vector3d intersectionPoint;
+	return intersection(p1, p2, p3, origin, dir, intersectionPoint);
+}
+
+float Triangle::intersection(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& origin, const Vector3d& dir, Vector3d& out_intersectionPoint)
+{
 	// Check ray-plane intersection
 	Vector3d p1p2 = p2 - p1;
 	Vector3d p1p3 = p3 - p1;
@@ -109,11 +109,11 @@ float Triangle::intersection(const Vector3d& p1, const Vector3d& p2, const Vecto
 	}
 	
 	// Calculate the intersection point
-	Vector3d intersectionPt = origin + dir * dist;
+	out_intersectionPoint = origin + dir * dist;
 
 	// Check if the point is inside the triangle (barycentric method)
 	float u, v;
-	getUV(p1, p2, p3, intersectionPt, u, v);
+	getUV(p1, p2, p3, out_intersectionPoint, u, v);
 
 	// Check if point is in triangle
 	if((u >= std::numeric_limits<float>::epsilon()) && (v >= std::numeric_limits<float>::epsilon()) && (u + v < 1))
@@ -131,7 +131,8 @@ float Triangle::intersection(const Vector3d& p1, const Vector3d& p2, const Vecto
 	// Check ray-plane intersection
 	Vector3d p1p2 = p2 - p1;
 	Vector3d p1p3 = p3 - p1;
-	Vector3d norm = p1p2.crossProduct(p1p3, true);
+	Vector3d norm = p1p2.crossProduct(p1p3, false);
+	norm.normalize();
 	float d = -(norm.x*p1.x + norm.y*p1.y + norm.z*p1.z);
 	float dist = -(rayOrigin.dotProduct(norm) + d) / (rayDirection.dotProduct(norm));
 
@@ -183,6 +184,46 @@ void Triangle::getUV(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3,
 	float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
 	out_u = (dot11 * dot02 - dot01 * dot12) * invDenom;
 	out_v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+}
+
+
+bool Triangle::isRightTriangle(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3,
+	Vector3d& out_largestAnglePoint, Vector3d& out_otherPoint1, Vector3d& out_otherPoint2)
+{
+	// Check if it is right triangle (triangle having 90-degree angle)
+	float a = (p3 - p2).length();
+	float b = (p3 - p1).length();
+	float c = (p2 - p1).length();
+	out_largestAnglePoint = p1;
+
+	a *= a;
+	b *= b;
+	c *= c;
+
+	if (a > b && a > c)
+	{
+		std::swap(a, c);
+		out_largestAnglePoint = p3;
+		out_otherPoint1 = p1;
+		out_otherPoint2 = p2;
+	}
+	else if (b > c)
+	{
+		std::swap(b, c);
+		out_largestAnglePoint = p2;		
+		out_otherPoint1 = p1;
+		out_otherPoint2 = p3;
+	}
+	else
+	{		
+		out_otherPoint1 = p2;
+		out_otherPoint2 = p3;
+	}
+
+	float ab = a + b;
+	float diff = (a + b - c);
+
+	return diff < std::numeric_limits<float>::epsilon();
 }
 
 /********************************************************/
@@ -389,7 +430,7 @@ void Triangle::SetTexcoords(float u1, float v1, float u2, float v2, float u3, fl
 /*         "Direct Ray Tracing of Displacement Mapped Triangles"              */
 /*     available here: http://www.cs.utah.edu/~shirley/papers/disp.pdf        */
 /*                                                                            */
-/*   Paper was partly implemented in RISE project, which can be foudn here:   */
+/*   Paper was partly implemented in RISE project, which can be found here:   */
 /* http://www.koders.com/cpp/fid52A652AEE2337998D1866267C44996B287014234.aspx */
 /******************************************************************************/
 #define NEARZERO float(1e-12)
@@ -852,9 +893,13 @@ void RayTriangleIntersection(
 	}
 }
 
+
+
+
+/*
 float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection) const
 {
-	float M = 0.5f;
+	float M = 0.0f;
 	float m = 0.01f;
 
 	Vector3d p1 = this->p1;
@@ -918,7 +963,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 		topcapHit.dRange2 = topcapHit.dRange;
 		topcapHit.bHit = true;
 		topcapHit.alpha = u;
-		topcapHit.beta = 1.0f - u - v;
+		topcapHit.beta = v;
 	}
 
 	bottomcapHit.dRange = Triangle::intersection(bottom[0], bottom[1], bottom[2], rayOrigin, rayDirection, u, v);
@@ -926,8 +971,8 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	{
 		bottomcapHit.dRange2 = bottomcapHit.dRange;
 		bottomcapHit.bHit = true;
-		bottomcapHit.alpha = v;
-		bottomcapHit.beta = 1.0f - u - v;
+		bottomcapHit.alpha = u;
+		bottomcapHit.beta = v;
 	}
 
 
@@ -1012,9 +1057,17 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 
 	// Now we compute i,j,k which is the start co-ordinates and
 	// ie,je,ke which are the end co-ordinates based on in and out
-	const int N = texture->GetWidth();
+	const int N = 2;//texture->GetWidth();
 	const float delta = 1.0f / static_cast<float>(N);
 	float alpha, beta, gamma;
+
+	// Let's find alpha, beta and gamma values to determine i,j,k
+	if (out == 1)
+	{
+		beta = bottomcapHit.alpha;//u
+		gamma = 1.0f - bottomcapHit.beta;//1-v
+
+	}
 
 	FIND_BARY( out );
 	int ie = int(floor(alpha*N));
@@ -1079,8 +1132,8 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 		change = kplus;
 	}
 
-	Vector3d dirDown = p2-p3;
-	Vector3d dirRight = p1-p2;
+	Vector3d dirDown = p3-p1;
+	Vector3d dirRight = p2-p1;
 	a = p3 + dirDown*(1.0f-uva.y) + dirRight*(uva.x);
 	b = p3 + dirDown*(1.0f-uvb.y) + dirRight*(uvb.x);
 	c = p3 + dirDown*(1.0f-uvc.y) + dirRight*(uvc.x);
@@ -1167,7 +1220,11 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 		// (c,cNormal) = GetPoint(uvc)
 		//c = basicC + GET_DISPLACEMENT_HEIGHT(uvc.x, uvc.y);
 
-		c = p3 + (p3-p2)*(1.0f-uvc.y) + (p1-p2)*uvc.x;
+		alpha = static_cast<float>(i) / static_cast<float>(N);
+		beta = static_cast<float>(j) / static_cast<float>(N);
+		gamma = static_cast<float>(k) / static_cast<float>(N);
+
+		//c = p3 + (p3-p2)*(1.0f-uvc.y) + (p1-p2)*uvc.x;
 		
 		Vector3d ab(a, b, false);
 		Vector3d ac(a, c, false);

@@ -650,11 +650,7 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
 		reflectedRay.normalize();		
 
-		if (material > 6)
-		{
-			return;
-		}
-
+		
 		if(material.texture == 0)
 		{
 			// Apply the material
@@ -687,7 +683,7 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 			if(m_EnableShadows)
 			{
 				pair<Triangle, Point3d> t;				
-				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.01f, lgtDir, t);
+				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.001f, lgtDir, t);
 
 				// Check if the intersection does not occur behind the light source
 				float intDist = (t.second - intersectionPt).length();
@@ -754,7 +750,7 @@ void Scene::CalculateRefractionComponent(nprt::Vector3d& in_color, const nprt::V
 			Vector3d refractedRay = horz_vec + vert_vec;
 			refractedRay.normalize();
 
-			CalculateColor(refractedRay, intersectionPt + refractedRay * 0.01f, numReflections - 1, in_refr_color);
+			CalculateColor(refractedRay, intersectionPt + refractedRay * 0.001f, numReflections - 1, in_refr_color);
 			in_color += in_refr_color * material.kt;
 		}
 }

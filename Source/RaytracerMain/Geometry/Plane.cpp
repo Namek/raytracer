@@ -1,4 +1,5 @@
 #include "Plane.h"
+#include "Triangle.h"
 
 using namespace nprt;
 
@@ -55,7 +56,7 @@ float Plane::distance(const Point3d& point) const
 	return abs(alfa*point.x + beta*point.y + gamma*point.z + delta);
 }
 
-bool Plane::intersectLine(const Point3d& origin, const Point3d& direction, Point3d& out_intersectionPoint) const
+float Plane::intersectLine(const Point3d& origin, const Point3d& direction, Point3d& out_intersectionPoint) const
 {
 	float u = A * origin.x + B * origin.y + C * origin.z + D;
 	float den = -A * direction.x - B * direction.y - C * direction.z;
@@ -64,8 +65,51 @@ bool Plane::intersectLine(const Point3d& origin, const Point3d& direction, Point
 	{
 		u /= den;
 		out_intersectionPoint = origin + direction*u;
-		return true;
+		return u;
 	}
 
-	return false;
+	return -1;
+}
+
+// Note: Rectangle points should be given in clockwise or counter-clockwise order.
+float Plane::intersectLineInSegment(const Point3d& lineOrigin, const Point3d& lineDirection,
+	const Point3d& p1, const Point3d& p2, const Point3d& p3, const Point3d& p4, Point3d& out_intersectionPoint) const
+{
+	/*
+	float distance = intersectLine(lineOrigin, lineDirection, out_intersectionPoint);
+
+	if (distance < 0)
+		return -1;
+		
+	const Point3d& p = out_intersectionPoint;
+
+	// define four lines defining the segment of a plane
+	Vector3d k1(p1, p3);
+	Vector3d k2(p2, p4);
+	Vector3d l1(p1, p2);
+	Vector3d l2(p3, p4);
+
+	float k1k2Distance = k1.lineLineDistance(p2, p4);
+	float l1l2Distance = l1.lineLineDistance(p3, p4);
+
+	if (k1.pointLineDistance(p) < k1k2Distance && k2.pointLineDistance(p) < k1k2Distance
+		&& l1.pointLineDistance(p) < l1l2Distance && l2.pointLineDistance(p) < l1l2Distance)
+	{
+		return distance;
+	}	
+
+	return -1;*/
+
+	out_intersectionPoint;
+	float distance = Triangle::intersection(p1, p2, p3, lineOrigin, lineDirection, out_intersectionPoint);
+
+	if (distance < 0)
+	{
+		distance = Triangle::intersection(p1, p3, p4, lineOrigin, lineDirection, out_intersectionPoint);
+
+		if (distance < 0)
+			return -1;
+	}
+
+	return distance;
 }

@@ -91,6 +91,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\RaytracerMain\Camera.cpp" />
+    <ClCompile Include="Source\RaytracerMain\Geometry\Displacement.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Octree.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Plane.cpp" />
     <ClCompile Include="Source\RaytracerMain\Geometry\Triangle.cpp" />
