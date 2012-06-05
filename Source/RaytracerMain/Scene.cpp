@@ -9,7 +9,7 @@ using namespace nprt;
 using namespace std;
 
 
-Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(512, 512, TextureType::Bricks)
+Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(294, 304, TextureType::Bricks)
 { }
 
 void Scene::LoadScene(const char* filename)
@@ -667,12 +667,14 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 		// Refraction component
 		CalculateRefractionComponent(in_color, intersectionPt, observerDir, hitTriangle, material, numReflections - 1);
 
-		float lightIntensity = 0.0f;
+		Vector3d lightIntensity(0, 0, 0);
 		for(int lgt = 0; lgt < numLights; ++lgt)
 		{
 			const LightSource& light = m_Lights[lgt];
-			Vector3d lgtPos = light.position;
+			const Vector3d lgtColor(light.r, light.g, light.b);
+			const Vector3d lgtPos = light.position;			
 			Vector3d lgtDir = (lgtPos - intersectionPt);
+			float attenuation = 1.0f - lgtDir.length() / m_Octree.getDomainSize().length();
 			lgtDir.normalize();
 
 			// Perform a shadow cast from the intersection point
@@ -696,17 +698,17 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 			// If there are no intersections, add the light
 			// Calculate the diffuse component
 			float dot = hitTriangle.norm.dotProduct(lgtDir);			
-			dot = fabsf(dot);
-
+			dot *= dot;
+			
 			// Calculate the specular component
 			float specular = lgtDir.dotProduct(reflectedRay);
 			
 			// Apply the specular and diffuse components
-			lightIntensity += (dot * material.kdc + specular * material.ksc) * light.power / (float)numLights;
+			lightIntensity += lgtColor * (dot * material.kdc + specular * material.ksc) * light.power * attenuation * attenuation;
 		}
 
 		// Apply the light component to the output pixel
-		in_color += Vector3d(1.0f, 1.0, 1.0f) * lightIntensity;
+		in_color += lightIntensity;
 	}
 }
 
