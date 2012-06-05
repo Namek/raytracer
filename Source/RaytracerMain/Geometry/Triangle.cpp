@@ -60,7 +60,6 @@ void Triangle::setMaterialIndex(int index)
 	materialIndex = index;
 }
 
-
 float Triangle::intersection(const Vector3d& origin, const Vector3d& dir) const
 {
 	if (hasDisplacement && texture->currentX == 313 && ind == 3270)

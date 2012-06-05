@@ -12,7 +12,8 @@ using namespace nprt;
 
 int main(int argc, char* argv[])
 {
-	const int width = 147;
+	// Procedural texture debugging
+	/*const int width = 147;
 	const int height = 152;
 	FIBITMAP* dib = FreeImage_Allocate(width, height, 24);
 	Texture t(width, height, TextureType::Bricks);
@@ -27,9 +28,9 @@ int main(int argc, char* argv[])
 	}
 	FreeImage_Save(FIF_PNG, dib, "Output\\proc_tex.png", PNG_Z_BEST_SPEED);
 	FreeImage_Unload(dib);
-	return 0;
+	return 0;*/
 
-	/*Params params(argc > 1 ? argv[1] : "params.txt");
+	Params params(argc > 1 ? argv[1] : "params.txt");
 	int numScenes = params.GetInt("num_scenes", 0);
 	bool newDataFormat = params.GetBool("use_new_format", true);
 	unsigned totalTime = 0;
@@ -87,5 +88,5 @@ int main(int argc, char* argv[])
 	cout << "Rendered " << numScenes << " scenes in " << totalTime / 1000.0f << " seconds" << endl;
 	_getch();
 
-	return 0;*/
+	return 0;
 }

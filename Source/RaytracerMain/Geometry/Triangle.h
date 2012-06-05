@@ -27,6 +27,8 @@ namespace nprt
 			static void getUV(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Point3d& pointInTriangle, float& out_u, float& out_v);
 			
 			void SetTexcoords(float u1, float v1, float u2, float v2, float u3, float v3);
+			inline void setP1(const Point3d& p) {this->p1 = p;};
+			inline void setP3(const Point3d& p) {this->p3 = p;};
 
 			// Checks if Axis-Aligned Bounding Box contains (minimum partly containment) this triangle.
 			bool overlapsWithAABB(const Point3d& minDomain, const Point3d& maxDomain) const;

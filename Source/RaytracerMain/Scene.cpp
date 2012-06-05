@@ -356,7 +356,9 @@ void Scene::LoadScene(const char* filename)
 
 		if (triangle.norm.dotProduct(triangleCenter - m_Camera.cameraCenter) > 0)
 		{
-			m_Triangles[i] = Triangle(triangle.p3, triangle.p2, triangle.p1, triangle.ind);
+			const Vector3d tmp(triangle.p1);			
+			triangle.setP1(triangle.p3);
+			triangle.setP3(tmp);
 		}
 	}
 
@@ -575,7 +577,9 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 		Vector3d floatColor(0, 0, 0);
 
 		for (int x = 0; x < width; x++)
-		{m_WallTexture.currentX = x;
+		{
+			m_WallTexture.currentX = x;
+
 			// Calculate the ray direction based on the magic equations from the lecture
 			Point3d P_ij = m_Camera.topLeft + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
 			rayDirection = P_ij - observerPos;
@@ -627,12 +631,14 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	FreeImage_Unload(dib);
 }
 
-void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observerPos, int numReflections, Vector3d& in_color) const
+void Scene::CalculateColor(	const Vector3d& rayDirection, 
+							const Vector3d& observerPos, 
+							int numReflections, 
+							Vector3d& in_color) const
 {
 	const int numLights = m_Lights.size();
 
 	// Trace the ray in Octree
-	vector<pair<Triangle, Point3d>> intersectedTriangles;
 	pair<Triangle, Point3d> intersectedTriangle;
 	
 	if(m_Octree.castRayForTriangle(observerPos, rayDirection, intersectedTriangle))
@@ -642,16 +648,7 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		const Vector3d observerDir = -rayDirection;
 		const Material& material = m_Materials[hitTriangle.materialIndex];
 		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
-		reflectedRay.normalize();
-
-		// Wireframe mode
-		//float u, v;
-		//hitTriangle.getUV(intersectedTriangle.second, u, v);
-		//if(u * v > 0.01f)
-		//	return;
-
-		/*if(hitTriangle.materialIndex != 32)
-			return;*/
+		reflectedRay.normalize();		
 
 		if(material.texture == 0)
 		{
@@ -674,20 +671,24 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 		for(int lgt = 0; lgt < numLights; ++lgt)
 		{
 			const LightSource& light = m_Lights[lgt];
-			Vector3d lgtDir = (light.position - intersectionPt);
-			float attenuation = lgtDir.length() / m_Octree.getDomainSize().length();
-			lgtDir.normalize();			
+			Vector3d lgtPos = light.position;
+			Vector3d lgtDir = (lgtPos - intersectionPt);
+			lgtDir.normalize();
 
 			// Perform a shadow cast from the intersection point
 			bool shadow = false;
 			if(m_EnableShadows)
 			{
-				pair<Triangle, Point3d> t;
-				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.002f, lgtDir, t);
+				pair<Triangle, Point3d> t;				
+				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.01f, lgtDir, t);
 
-				if(shadow)
+				// Check if the intersection does not occur behind the light source
+				float intDist = (t.second - intersectionPt).length();
+				float lgtDist = (light.position - intersectionPt).length();
+
+				if(shadow 
+					&& intDist < lgtDist)
 				{
-					//in_color *= 0.95f;
 					continue;
 				}
 			}
@@ -695,21 +696,25 @@ void Scene::CalculateColor(const Vector3d& rayDirection, const Vector3d& observe
 			// If there are no intersections, add the light
 			// Calculate the diffuse component
 			float dot = hitTriangle.norm.dotProduct(lgtDir);			
-			dot *= dot;
+			dot = fabsf(dot);
 
 			// Calculate the specular component
 			float specular = lgtDir.dotProduct(reflectedRay);
 			
 			// Apply the specular and diffuse components
-			lightIntensity += (dot * material.kdc + specular * material.ksc) * attenuation * light.power;
+			lightIntensity += (dot * material.kdc + specular * material.ksc) * light.power / (float)numLights;
 		}
 
+		// Apply the light component to the output pixel
 		in_color += Vector3d(1.0f, 1.0, 1.0f) * lightIntensity;
 	}
 }
 
-void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color, const nprt::Vector3d& intersectionPt, const nprt::Material& material,
-										const nprt::Vector3d& reflectedRay, int numReflections) const 
+void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color, 
+										const nprt::Vector3d& intersectionPt,
+										const nprt::Material& material,
+										const nprt::Vector3d& reflectedRay, 
+										int numReflections) const 
 {
 	if(m_EnableReflection
 		&& material.ksc > 0 
@@ -946,4 +951,33 @@ void Scene::ApplyTexture(const Triangle& hitTriangle, const Vector3d& hitPoint, 
 
 	hitTriangle.texture = &m_WallTexture;
 	hitTriangle.hasDisplacement = true;
+}
+
+bool Scene::ManualRaytrace(const Vector3d& rayPos, const Vector3d& rayDir, std::pair<Triangle, Vector3d>& out) const
+{
+	float minDist = std::numeric_limits<float>::max();
+	float dist = 0;
+	int minTri = -1;
+
+	for (int i = 0; i < m_Triangles.size(); ++i)
+	{
+		const Triangle& tri = m_Triangles[i];
+		dist = tri.intersection(rayPos, rayDir);
+
+		if (dist > 0 
+			&& dist < minDist)
+		{
+			minDist = dist;
+			minTri = i;
+		}
+	}
+
+	if (minTri != -1)
+	{
+		out.first = m_Triangles[minTri];
+		out.second = rayPos + rayDir * minDist;
+		return true;
+	}
+
+	return false;
 }

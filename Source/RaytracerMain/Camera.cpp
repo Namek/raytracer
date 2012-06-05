@@ -49,7 +49,7 @@ void Camera::initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, fl
 
 void Camera::setResolution(int /*width*/, int /*height*/)
 {
-	//float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	////float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 	this->fovVertical = this->fovHorizontal / 1;//aspectRatio;
 	
 	Vector3d bottomLeftDir(forwardDir);

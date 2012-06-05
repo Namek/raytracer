@@ -80,6 +80,12 @@ template<typename T> inline T Clamp(T value, T lower_bound, T upper_bound)
 	else 
 		return value;
 }
+template<typename T> inline void Swap(T& val1, T& val2)
+{
+	T tmp = val1;
+	val1 = val2;
+	val2 = tmp;
+}
 
 /*! @{
 	@name Type conversion functions
