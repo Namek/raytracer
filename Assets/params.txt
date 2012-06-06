@@ -9,7 +9,7 @@ enable_gamma 1
 tone_mapping_key 0.5
 num_reflections 3
 gamma 2.45
-num_scenes 5
+num_scenes 1
 data_folder0 v2
 data_folder1 v2
 data_folder2 v3

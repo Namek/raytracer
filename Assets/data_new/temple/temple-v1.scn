@@ -39929,7 +39929,7 @@ light_name lgt0
 enabled 1
 light_type point
 rgb 0.3333 0.3333 0.3333
-power 15
+power 4
 pos 41.6638 427.309 -6.3617
 dir 1 1 1
 inner_angle 30
@@ -39942,7 +39942,7 @@ light_name lgt1
 enabled 1
 light_type point
 rgb 0.3333 0.3333 0.3333
-power 15
+power 4
 pos 40.4717 23.0733 -16.2391
 dir 1 1 1
 inner_angle 30
@@ -39955,7 +39955,7 @@ light_name lgt2
 enabled 1
 light_type point
 rgb 0.3333 0.3333 0.3333
-power 15
+power 4
 pos 8.8796 23.0733 34.6044
 dir 1 1 1
 inner_angle 30
@@ -39968,7 +39968,7 @@ light_name lgt3
 enabled 1
 light_type point
 rgb 0.3333 0.3333 0.3333
-power 15
+power 4
 pos 40.9653 23.0733 21.7701
 dir 1 1 1
 inner_angle 30
@@ -39981,7 +39981,7 @@ light_name lgt4
 enabled 1
 light_type point
 rgb 0.3333 0.3333 0.3333
-power 15
+power 4
 pos 41.4589 23.0733 8.9358
 dir 1 1 1
 inner_angle 30

@@ -650,7 +650,6 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
 		reflectedRay.normalize();		
 
-		
 		if(material.texture == 0)
 		{
 			// Apply the material
@@ -709,7 +708,13 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 		}
 
 		// Apply the light component to the output pixel
-		in_color += lightIntensity;
+		float intensityFactor = 1.0f;
+		if (numLights > 1)
+		{
+			intensityFactor = 1.0f / log((double)numLights);
+		}
+
+		in_color += lightIntensity * intensityFactor;
 	}
 }
 
