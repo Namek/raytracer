@@ -165,7 +165,7 @@ void Texture::DrawBrick(int x, int y, const Texture& turbulence)
 	Vector3d p4(0, 1 - BorderHeight, 0);
 
 	// Transformed
-	float angle = 10 - 20 * Noise3D(x, y, x + y);
+	float angle = 20 - 40 * Noise3D(x, y, x + y);
 	Vector3d p1t = rotateVec(p1, angle);
 	Vector3d p2t = rotateVec(p2, angle);
 	Vector3d p3t = rotateVec(p3, angle);
