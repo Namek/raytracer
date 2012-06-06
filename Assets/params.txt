@@ -2,15 +2,15 @@ width 800
 height 600
 max_divide_depth 5
 enable_tone_mapping 0
-enable_shadows 0
+enable_shadows 1
 enable_refraction 1
 enable_reflection 1
 enable_gamma 1
 tone_mapping_key 0.5
 num_reflections 3
 gamma 2.45
-num_scenes 1
-data_folder0 v2
+num_scenes 4
+data_folder0 v0
 data_folder1 v2
 data_folder2 v3
 data_folder3 v4
@@ -18,5 +18,5 @@ data_folder4 v5
 data_folder5 v6
 data_folder6 v7
 data_folder7 v0
-geometry_name kuchnia
+geometry_name room_brick
 use_new_format true
