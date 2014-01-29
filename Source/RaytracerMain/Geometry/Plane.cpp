@@ -15,15 +15,15 @@ Plane::Plane(float A, float B, float C, float D)
 	setGeneral(A, B, C, D);
 }
 
-Plane::Plane(const Point3d& p1, const Point3d& p2, const Point3d& p3)
+Plane::Plane(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3)
 {
-	Point3d N = (p2-p1).crossProduct(p3-p1, true);
+	Vector3d N = (p2-p1).crossProduct(p3-p1, true);
 	float D = -(N.x * p1.x + N.y * p1.y + N.z * p1.z);
 
 	setGeneral(N.x, N.y, N.z, D);
 }
 
-Plane::Plane(const Point3d& point, const Vector3d& normal)
+Plane::Plane(const Vector3d& point, const Vector3d& normal)
 {
 	const Vector3d& N = normal;
 	float D = -(N.x * point.x + N.y * point.y + N.z * point.z);
@@ -46,17 +46,17 @@ void Plane::setGeneral(float A, float B, float C, float D)
 	c = -D/C;
 	normal.set(A, B, C);
 	normal.normalize();
-	pointOnAxisX = Point3d(a, 0, 0);
-	pointOnAxisY = Point3d(0, b, 0);
-	pointOnAxisZ = Point3d(0, 0, c);
+	pointOnAxisX = Vector3d(a, 0, 0);
+	pointOnAxisY = Vector3d(0, b, 0);
+	pointOnAxisZ = Vector3d(0, 0, c);
 }
 
-float Plane::distance(const Point3d& point) const
+float Plane::distance(const Vector3d& point) const
 {
 	return abs(alfa*point.x + beta*point.y + gamma*point.z + delta);
 }
 
-float Plane::intersectLine(const Point3d& origin, const Point3d& direction, Point3d& out_intersectionPoint) const
+float Plane::intersectLine(const Vector3d& origin, const Vector3d& direction, Vector3d& out_intersectionPoint) const
 {
 	float u = A * origin.x + B * origin.y + C * origin.z + D;
 	float den = -A * direction.x - B * direction.y - C * direction.z;
@@ -72,8 +72,8 @@ float Plane::intersectLine(const Point3d& origin, const Point3d& direction, Poin
 }
 
 // Note: Rectangle points should be given in clockwise or counter-clockwise order.
-float Plane::intersectLineInSegment(const Point3d& lineOrigin, const Point3d& lineDirection,
-	const Point3d& p1, const Point3d& p2, const Point3d& p3, const Point3d& p4, Point3d& out_intersectionPoint) const
+float Plane::intersectLineInSegment(const Vector3d& lineOrigin, const Vector3d& lineDirection,
+	const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& p4, Vector3d& out_intersectionPoint) const
 {
 	/*
 	float distance = intersectLine(lineOrigin, lineDirection, out_intersectionPoint);
@@ -81,7 +81,7 @@ float Plane::intersectLineInSegment(const Point3d& lineOrigin, const Point3d& li
 	if (distance < 0)
 		return -1;
 		
-	const Point3d& p = out_intersectionPoint;
+	const Vector3d& p = out_intersectionPoint;
 
 	// define four lines defining the segment of a plane
 	Vector3d k1(p1, p3);

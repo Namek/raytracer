@@ -4,9 +4,12 @@
 #include <omp.h>
 #include <cmath>
 #include <numeric>
+#include "Math/Math.h"
 
 using namespace nprt;
 using namespace std;
+
+static const float REDIRECTED_RAY_MIRROR_FACTOR = 0.001f;
 
 
 Scene::Scene() : m_Triangles(), m_ToneMappingKey(0.0f), m_WallTexture(1176, 1216, TextureType::Bricks)
@@ -22,8 +25,8 @@ void Scene::LoadScene(const char* filename)
 	string line, token;
 	stringstream lineStream;
 
-	vector<Point3d> vertices;
-	Point3d minDomain, maxDomain;
+	Vector3d* vertices;
+	Vector3d minDomain, maxDomain;
 
 	maxDomain.x = maxDomain.y = maxDomain.z = -numeric_limits<float>::infinity();
 	minDomain.x = minDomain.y = minDomain.z = numeric_limits<float>::infinity();
@@ -44,7 +47,7 @@ void Scene::LoadScene(const char* filename)
 				{
 					int verticesCount;
 					lineStream >> verticesCount;
-					vertices = vector<Point3d>(verticesCount);
+					vertices = new Vector3d[verticesCount];
 
 					for (int i = 0; i < verticesCount; ++i)
 					{
@@ -65,7 +68,7 @@ void Scene::LoadScene(const char* filename)
 						maxDomain.y = t2 > maxDomain.y ? t2 : maxDomain.y;
 						maxDomain.z = t3 > maxDomain.z ? t3 : maxDomain.z;
 						
-						vertices[i] = Point3d(t1, t2, t3);
+						vertices[i] = Vector3d(t1, t2, t3);
 					}
 				}
 				else if (token == "triangles_count" && !lineStream.eof())
@@ -302,7 +305,7 @@ void Scene::LoadScene(const char* filename)
 								lineStream >> x;
 								lineStream >> y;
 								lineStream >> z;
-								pos = Point3d(x, y, z);
+								pos = Vector3d(x, y, z);
 							}
 
 							else if (token == "screen_topLeft")
@@ -310,21 +313,21 @@ void Scene::LoadScene(const char* filename)
 								lineStream >> x;
 								lineStream >> y;
 								lineStream >> z;
-								topLeft = Point3d(x, y, z);
+								topLeft = Vector3d(x, y, z);
 							}
 							else if (token == "screen_topRight")
 							{
 								lineStream >> x;
 								lineStream >> y;
 								lineStream >> z;
-								topRight = Point3d(x, y, z);
+								topRight = Vector3d(x, y, z);
 							}
 							else if (token == "screen_bottomLeft")
 							{							
 								lineStream >> x;
 								lineStream >> y;
 								lineStream >> z;
-								bottomLeft = Point3d(x, y, z);
+								bottomLeft = Vector3d(x, y, z);
 							}
 							else
 								params--;
@@ -361,6 +364,7 @@ void Scene::LoadScene(const char* filename)
 			triangle.setP3(tmp);
 		}
 	}
+	delete[] vertices;
 
 	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
 }
@@ -371,8 +375,8 @@ void Scene::LoadGeometry(const char* filename)
 	ifstream file;
 	string line, token;
 	stringstream lineStream;
-	vector<Point3d> vertices;
-	Point3d minDomain, maxDomain;
+	Vector3d* vertices;
+	Vector3d minDomain, maxDomain;
 
 	maxDomain.x = maxDomain.y = maxDomain.z = -numeric_limits<float>::infinity();
 	minDomain.x = minDomain.y = minDomain.z = numeric_limits<float>::infinity();
@@ -392,7 +396,7 @@ void Scene::LoadGeometry(const char* filename)
 				if (token == "vertices" && !lineStream.eof()) 
 				{
 					lineStream >> vertSize;
-					vertices = vector<Point3d>(vertSize);
+					vertices = new Vector3d[vertSize];
 					
 					for (int i=0; i<vertSize; i++) 
 					{
@@ -413,7 +417,7 @@ void Scene::LoadGeometry(const char* filename)
 						maxDomain.y = t2 > maxDomain.y ? t2 : maxDomain.y;
 						maxDomain.z = t3 > maxDomain.z ? t3 : maxDomain.z;
 						
-						vertices[i] = Point3d(t1, t2, t3);
+						vertices[i] = Vector3d(t1, t2, t3);
 					}
 				}
 				
@@ -460,6 +464,7 @@ void Scene::LoadGeometry(const char* filename)
 		}
 	}
 	file.close();
+	delete[] vertices;
 	
 	m_Octree.buildTree(m_Triangles, minDomain, maxDomain);
 }
@@ -560,18 +565,21 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	const int numPixels = width * height;
 	Vector3d* pixels = new Vector3d[numPixels];
 	
-	const Point3d observerPos(m_Camera.cameraCenter);
-	Point3d U = m_Camera.topRight - m_Camera.topLeft;
-	Point3d V = m_Camera.bottomLeft - m_Camera.topLeft;
+	const Vector3d observerPos(m_Camera.cameraCenter);
+	const Vector3d U = m_Camera.topRight - m_Camera.topLeft;
+	const Vector3d V = m_Camera.bottomLeft - m_Camera.topLeft;
 
 	volatile long rowsDoneCount = 0;
+
+	const int linesForOnePercent = height / 100;
 
 #ifndef _DEBUG
 	#pragma omp parallel for
 #endif
 	for (int y = 0; y < height; y++)
-	{	
-		cout << "Completed: " << (100 * (static_cast<int>(rowsDoneCount) + 1) / height) << "%\t\t\t\t\t\r";
+	{
+		if (rowsDoneCount % linesForOnePercent == 0 || y == height-1)
+			cout << "Completed: " << (100 * (static_cast<int>(rowsDoneCount) + 1) / height) << "%\t\t\t\t\t\r";
 
 		Vector3d rayDirection;
 		Vector3d floatColor(0, 0, 0);
@@ -581,18 +589,12 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 			m_WallTexture.currentX = x;
 
 			// Calculate the ray direction based on the magic equations from the lecture
-			Point3d P_ij = m_Camera.topLeft + U * (static_cast<float>(x) / (width - 1)) + V * (static_cast<float>(y) / (height - 1));
+			Vector3d P_ij = m_Camera.topLeft + U * (static_cast<float>(x) / static_cast<float>(width - 1)) + V * (static_cast<float>(y) / static_cast<float>(height - 1));
 			rayDirection = P_ij - observerPos;
 			rayDirection.normalize();
 			CalculateColor(rayDirection, observerPos, m_NumReflections, floatColor);
 
-			pixels[y * width + x].x = floatColor.x;
-			pixels[y * width + x].y = floatColor.y;
-			pixels[y * width + x].z = floatColor.z;
-
-			floatColor.x = 0;
-			floatColor.y = 0;
-			floatColor.z = 0;
+			pixels[y * width + x].set(floatColor);
 		}
 
 		_InterlockedIncrement(&rowsDoneCount);
@@ -601,14 +603,10 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 
 	// Do some tone mapping
 	if(m_EnableToneMapping)
-	{
 		PerformToneMapping(pixels, numPixels);
-	}
 
 	if(m_EnableGamma)
-	{
 		PerformGammaCorrection(pixels, numPixels);
-	}
 
 	//Determine the maximum colour value	
 	RGBQUAD color = {0};
@@ -616,13 +614,18 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	// Normalize the colours
 	for(int p = 0; p < numPixels; ++p)
 	{
-		pixels[p].x = Utils::Clamp(pixels[p].x, 0.0f, 1.0f);
-		pixels[p].y = Utils::Clamp(pixels[p].y, 0.0f, 1.0f);
-		pixels[p].z = Utils::Clamp(pixels[p].z, 0.0f, 1.0f);
+		Vector3d& pixel = pixels[p];
+		pixel.x = Utils::Clamp(pixel.x, 0.0f, 1.0f);
+		pixel.y = Utils::Clamp(pixel.y, 0.0f, 1.0f);
+		pixel.z = Utils::Clamp(pixel.z, 0.0f, 1.0f);
 
-		color.rgbRed = static_cast<BYTE>(255 * pixels[p].x);
-		color.rgbGreen = static_cast<BYTE>(255 * pixels[p].y);
-		color.rgbBlue = static_cast<BYTE>(255 * pixels[p].z);
+		BYTE r = Utils::Clamp(static_cast<BYTE>(255.0f * pixel.x), static_cast<BYTE>(0), static_cast<BYTE>(255));
+		BYTE g = Utils::Clamp(static_cast<BYTE>(255.0f * pixel.y), static_cast<BYTE>(0), static_cast<BYTE>(255));
+		BYTE b = Utils::Clamp(static_cast<BYTE>(255.0f * pixel.z), static_cast<BYTE>(0), static_cast<BYTE>(255));
+
+		color.rgbRed = r;
+		color.rgbGreen = g;
+		color.rgbBlue = b;
 		FreeImage_SetPixelColor(dib, p % width, height - p / width, &color);
 	}
 
@@ -631,6 +634,7 @@ void Scene::RenderToFile(const char* filename, int width, int height) const
 	FreeImage_Unload(dib);
 }
 
+inline
 void Scene::CalculateColor(	const Vector3d& rayDirection, 
 							const Vector3d& observerPos, 
 							int numReflections, 
@@ -639,16 +643,23 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 	const int numLights = m_Lights.size();
 
 	// Trace the ray in Octree
-	pair<Triangle, Point3d> intersectedTriangle;
+	pair<Triangle, AlignedVector3d> intersectedTriangle;
 	
 	if(m_Octree.castRayForTriangle(observerPos, rayDirection, intersectedTriangle))
 	{
 		const Triangle& hitTriangle = intersectedTriangle.first;
-		const Vector3d intersectionPt = intersectedTriangle.second;
+		const Vector3d intersectionPt = intersectedTriangle.second;// - rayDirection * 0.001f;
 		const Vector3d observerDir = -rayDirection;
 		const Material& material = m_Materials[hitTriangle.materialIndex];
+
+		if (hitTriangle.norm.dotProduct(rayDirection) > 0)
+		{
+			// HACK fix for bad data given from dr
+			(const_cast<Vector3d*>(&hitTriangle.norm))->set(hitTriangle.norm.x * (-1.0f), hitTriangle.norm.y * (-1.0f), hitTriangle.norm.z * (-1.0f));
+		}
+
 		Vector3d reflectedRay = hitTriangle.norm * 2 * observerDir.dotProduct(hitTriangle.norm) - observerDir;
-		reflectedRay.normalize();		
+		reflectedRay.normalize();
 
 		if(material.texture == 0)
 		{
@@ -662,10 +673,12 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 		}
 
 		// Mirror reflection component
-		CalculateReflectionComponent(in_color, intersectionPt, material, reflectedRay, numReflections - 1);
+		if (m_EnableReflection)
+			CalculateReflectionComponent(in_color, intersectionPt, material, reflectedRay, numReflections - 1);
 		 
 		// Refraction component
-		CalculateRefractionComponent(in_color, intersectionPt, observerDir, hitTriangle, material, numReflections - 1);
+		if (m_EnableRefraction)
+			CalculateRefractionComponent(in_color, intersectionPt, observerDir, hitTriangle, material, numReflections - 1);
 
 		Vector3d lightIntensity(0, 0, 0);
 		for(int lgt = 0; lgt < numLights; ++lgt)
@@ -674,62 +687,67 @@ void Scene::CalculateColor(	const Vector3d& rayDirection,
 			const Vector3d lgtColor(light.r, light.g, light.b);
 			const Vector3d lgtPos = light.position;			
 			Vector3d lgtDir = (lgtPos - intersectionPt);
-			float attenuation = 1.0f - lgtDir.length() / m_Octree.getDomainSize().length();
+			static const float a = 1.1f;
+			static const float b = 1.4f;
+			static const float c = 0.8f;
+			const float d = lgtDir.length();
+			float attenuation = 1.0f / (a + b*d + c*d*d) * 2.5f;
 			lgtDir.normalize();
 
 			// Perform a shadow cast from the intersection point
 			bool shadow = false;
 			if(m_EnableShadows)
 			{
-				pair<Triangle, Point3d> t;				
-				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * 0.001f, lgtDir, t);
+				pair<Triangle, AlignedVector3d> t;				
+				shadow = m_Octree.castRayForTriangle(intersectionPt + lgtDir * REDIRECTED_RAY_MIRROR_FACTOR, lgtDir, t);
 
 				// Check if the intersection does not occur behind the light source
 				float intDist = (t.second - intersectionPt).length();
 				float lgtDist = (light.position - intersectionPt).length();
 
-				if(shadow 
-					&& intDist < lgtDist)
+				if(shadow && intDist < lgtDist)
 				{
 					continue;
 				}
 			}
 
-			// If there are no intersections, add the light
+			// If there are no intersections (shadows) then add the light.
+
 			// Calculate the diffuse component
 			float dot = hitTriangle.norm.dotProduct(lgtDir);			
-			dot *= dot;
+			float diffuseFactor = material.kdc * dot;
 			
-			// Calculate the specular component
-			float specular = lgtDir.dotProduct(reflectedRay);
-			
-			// Apply the specular and diffuse components
-			lightIntensity += lgtColor * (dot * material.kdc + specular * material.ksc) * light.power * attenuation * attenuation;
+			if (diffuseFactor > 0) {
+				lightIntensity += (in_color * lgtColor * diffuseFactor * attenuation);
+			}
+
+			// Calculate specular
+			Vector3d lightReflect = hitTriangle.norm * (hitTriangle.norm*2).dotProduct(lgtDir) - lgtDir;
+			const float cosFactor = hitTriangle.norm.dotProduct(lightReflect);
+
+			if (cosFactor) {
+				lightIntensity += (lgtColor * material.ksc * powf(cosFactor, material.wg) * attenuation);
+			}
 		}
 
 		// Apply the light component to the output pixel
-		float intensityFactor = 1.0f;
-		if (numLights > 1)
-		{
-			intensityFactor = 1.0f / log((double)numLights);
-		}
 
-		in_color += lightIntensity * intensityFactor;
+		const float colorFactor = m_EnableGamma || m_EnableToneMapping ? 1.0f : (1.0f - 1.0f/static_cast<float>(numLights));
+		in_color.set(in_color * colorFactor + lightIntensity);
 	}
 }
 
+inline
 void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color, 
 										const nprt::Vector3d& intersectionPt,
 										const nprt::Material& material,
 										const nprt::Vector3d& reflectedRay, 
 										int numReflections) const 
 {
-	if(m_EnableReflection
-		&& material.ksc > 0 
-		&& numReflections > 0)
+	if(material.ksc > 0 && numReflections > 0)
 	{
 		Vector3d in_refl_color(0, 0, 0);
-		CalculateColor(reflectedRay, intersectionPt + reflectedRay * 0.01f, numReflections - 1, in_refl_color);
+		CalculateColor(reflectedRay, intersectionPt + reflectedRay * REDIRECTED_RAY_MIRROR_FACTOR, numReflections - 1, in_refl_color);
 		
 		// Scaling of the reflection intensity
 		float div = static_cast<float>((m_NumReflections) ? m_NumReflections - 1 : 0);
@@ -738,30 +756,39 @@ void Scene::CalculateReflectionComponent(nprt::Vector3d& in_color,
 	}
 }
 
+inline
 void Scene::CalculateRefractionComponent(nprt::Vector3d& in_color, const nprt::Vector3d& intersectionPt, 
 										const nprt::Vector3d& observerDir, const nprt::Triangle& hitTriangle, 
 										const nprt::Material& material, int numReflections) const 
 {
-	if(m_EnableRefraction  
-			&& material.kt > 0
-			&& numReflections > 0)
-		{
-			Vector3d in_refr_color(0, 0, 0);
-			Vector3d horz_vec = (observerDir - hitTriangle.norm * observerDir.dotProduct(hitTriangle.norm)) * (-material.eta);
+	if(material.kt > 0 && numReflections > 0)
+	{
+		Vector3d in_refr_color(0, 0, 0);
+		Vector3d horz_vec = (observerDir - hitTriangle.norm * observerDir.dotProduct(hitTriangle.norm)) * (-material.eta);
 
-			float ndo = hitTriangle.norm.dotProduct(observerDir);
-			float vert_vec_scale = -sqrt(1 - material.eta * material.eta * (1 - ndo * ndo));
-			Vector3d vert_vec = hitTriangle.norm * vert_vec_scale;
-			Vector3d refractedRay = horz_vec + vert_vec;
-			refractedRay.normalize();
+		float ndo = hitTriangle.norm.dotProduct(observerDir);
+		float vert_vec_scale = -nprt::math::fsqrt(1 - material.eta * material.eta * (1 - ndo * ndo));
+		Vector3d vert_vec = hitTriangle.norm * vert_vec_scale;
+		Vector3d refractedRay = horz_vec + vert_vec;
+		refractedRay.normalize();
 
-			CalculateColor(refractedRay, intersectionPt + refractedRay * 0.001f, numReflections - 1, in_refr_color);
-			in_color += in_refr_color * material.kt;
-		}
+		CalculateColor(refractedRay, intersectionPt + refractedRay * REDIRECTED_RAY_MIRROR_FACTOR, numReflections - 1, in_refr_color);
+		in_color += in_refr_color * material.kt;
+	}
 }
 
 void Scene::PerformGammaCorrection(Vector3d* pixels, const int numPixels) const
 {
+	Vector3d pixel;
+	for(int p = 0; p < numPixels; ++p)
+	{
+		pixels[p].x = powf(pixels[p].x, 1.0f / m_Gamma);
+		pixels[p].y = powf(pixels[p].y, 1.0f / m_Gamma);
+		pixels[p].z = powf(pixels[p].z, 1.0f / m_Gamma);
+	}
+
+	return;
+
 	for(int p = 0; p < numPixels; ++p)
 	{
 		pixels[p].x = powf(pixels[p].x, m_Gamma);
@@ -875,7 +902,7 @@ void Scene::LoadCamera(const char* filePath)
 	ifstream file;
 	string line, token;
 	stringstream lineStream;
-	Point3d cameraCenter, topLeft, bottomLeft, topRight;
+	Vector3d cameraCenter, topLeft, bottomLeft, topRight;
 	int xRes = -1, yRes = -1;
 
 	file.open(filePath);
@@ -895,7 +922,7 @@ void Scene::LoadCamera(const char* filePath)
 					lineStream >> x;
 					lineStream >> y;
 					lineStream >> z;
-					cameraCenter = Point3d(x, y, z);
+					cameraCenter = Vector3d(x, y, z);
 				}
 
 				if (token == "screen")
@@ -907,7 +934,7 @@ void Scene::LoadCamera(const char* filePath)
 					lineStream >> x;
 					lineStream >> y;
 					lineStream >> z;
-					topLeft = Point3d(x, y, z);
+					topLeft = Vector3d(x, y, z);
 
 					getline(file, line);
 					lineStream.clear();
@@ -915,7 +942,7 @@ void Scene::LoadCamera(const char* filePath)
 					lineStream >> x;
 					lineStream >> y;
 					lineStream >> z;
-					topRight = Point3d(x, y, z);
+					topRight = Vector3d(x, y, z);
 
 					getline(file, line);
 					lineStream.clear();
@@ -923,7 +950,7 @@ void Scene::LoadCamera(const char* filePath)
 					lineStream >> x;
 					lineStream >> y;
 					lineStream >> z;
-					bottomLeft = Point3d(x, y, z);
+					bottomLeft = Vector3d(x, y, z);
 				}
 
 				if (token == "resolution")
@@ -938,6 +965,7 @@ void Scene::LoadCamera(const char* filePath)
 	m_Camera = Camera(cameraCenter, topLeft, bottomLeft, topRight, xRes, yRes);
 }
 
+inline
 void Scene::ApplyMaterialColor(const Material& material, Vector3d& in_color) const
 {
 	in_color.x = material.r * (1.0f - material.kt);
@@ -945,6 +973,7 @@ void Scene::ApplyMaterialColor(const Material& material, Vector3d& in_color) con
 	in_color.z = material.b * (1.0f - material.kt);
 }
 
+inline
 void Scene::ApplyTexture(const Triangle& hitTriangle, const Vector3d& hitPoint, Vector3d& in_color) const
 {
 	Vector3d barycentric;
@@ -953,15 +982,15 @@ void Scene::ApplyTexture(const Triangle& hitTriangle, const Vector3d& hitPoint, 
 	
 	float u = barycentric.x * hitTriangle.u1 + barycentric.y * hitTriangle.u2 + barycentric.z * hitTriangle.u3;
 	float v = barycentric.x * hitTriangle.v1 + barycentric.y * hitTriangle.v2 + barycentric.z * hitTriangle.v3;
-	in_color.x = m_WallTexture.GetTexel(u, v).x;
-	in_color.y = m_WallTexture.GetTexel(u, v).y;
-	in_color.z = m_WallTexture.GetTexel(u, v).z;
+	const Vector3d& texel = m_WallTexture.GetTexel(u, v);
+	in_color.set(texel);
 
 	hitTriangle.texture = &m_WallTexture;
-	hitTriangle.hasDisplacement = true;
+	//hitTriangle.hasDisplacement = true;
 }
 
-bool Scene::ManualRaytrace(const Vector3d& rayPos, const Vector3d& rayDir, std::pair<Triangle, Vector3d>& out) const
+inline
+bool Scene::ManualRaytrace(const Vector3d& rayPos, const Vector3d& rayDir, std::pair<Triangle, AlignedVector3d>& out) const
 {
 	float minDist = std::numeric_limits<float>::max();
 	float dist = 0;

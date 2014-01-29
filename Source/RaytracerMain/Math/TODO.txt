@@ -1,0 +1,23 @@
+(przed optymalizacjami) z profilera Very Sleepy:
+- Octree::procSubtree zabiera 40% exclusive, 85% inclusive czasu
+- Triangle::intersection - 12-13% oraz 20%
+- Octree::nextNode, Octree::firstNode oraz Triangle::getUV po prawie 8%
+- konstruktor Triangle - 4-5%
+
+
+mozliwe optymalizacje:
+- zamienic Octree na drzewo o podziale zaleznym od zageszczenia trojkatow w danej przestrzeni
+- kroic trojkaty aby nie wystepowaly w tych samych elementach drzewa
+- pozbyc sie rekurencji z Octree
+- wiecej SSE do vector3d
+
+optymalizacje znalezione w internecie: http://stackoverflow.com/questions/777997/improving-raytracer-performance
+ - Bounding Volume Hierarchies (cos innego zamiast octree)
+ - Triangle::getUV(const Vector3d& pointInTriangle, float& out_u, float& out_v) - mozna zrobic cache dla dot01, dot01, dot11, v0 i v1. Ostatnia proba wykazala duze artefakty, zatem cos musi byc wczytywane troche pozniej.
+
+ rzeczy, ktore nalezy poprawic:
+ - oswietlenie wciaz przeswietla obraz, cienie sa dosc slabe. Korekcja gamma i tone mapping (w formie jakiej sa teraz) nie wydaja sie przydatne do uzyskania ladnego obrazu
+ - jakosc zalamania swiatla (Refrakcja)
+ - jakosc odbicia (reflection)
+ - niektore trojkaty pojawiaja sie, mimo ze nie powinny. Przyklad: kuchnia na meblach po lewej albo krzeslo z przodu.
+ - czasami cien wytwarza zrodlo swiatla, ktore nie powinno dojsc, np. w kuchni nad okapem znajduje sie falszywy cien

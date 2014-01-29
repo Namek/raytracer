@@ -35,7 +35,7 @@ int currentX;
 		~Texture();
 
 	private:
-		std::vector<std::vector<Vector3d> > m_ColorPalettes;
+		std::vector<std::vector<AlignedVector3d> > m_ColorPalettes;
 		Vector3d* m_Texels;
 		int m_Width;
 		int m_Height;
@@ -50,7 +50,7 @@ int currentX;
 
 		void DrawBrick(int x, int y, const Texture& turbulence);
 		void FillWithMortar(int x, int y, const Texture& turbulence);
-		Vector3d rotateVec(Vector3d vec, float angle) const;
+		Vector3d rotateVec(const Vector3d& vec, float angle) const;
 
 		void GenerateBricks();
 		void GenerateTurbulence();

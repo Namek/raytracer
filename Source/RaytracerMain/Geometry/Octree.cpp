@@ -7,6 +7,7 @@ using namespace std;
 Octree::OctreeNode::OctreeNode() : 
 	m_isLeaf(false),
 	m_TrianglesInclusiveCount(0),
+	m_TrianglesExclusiveCount(0),
 	m_NearNodes(new OctreeNode*[NEAR_NODES_COUNT]),
 	m_Subnodes(new OctreeNode*[CHILD_SUBNODES_COUNT]),
 	m_Triangles(),
@@ -18,9 +19,10 @@ Octree::OctreeNode::OctreeNode() :
 {
 }
 
-Octree::OctreeNode::OctreeNode(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int maxDivideDepth, int currentDivideDepth) :
+Octree::OctreeNode::OctreeNode(const Vector3d& minDomain, const Vector3d& maxDomain, const std::vector<Triangle>& triangles, int maxDivideDepth, int currentDivideDepth) :
 	m_isLeaf(false),
 	m_TrianglesInclusiveCount(0),
+	m_TrianglesExclusiveCount(triangles.size()),
 	m_NearNodes(new OctreeNode*[NEAR_NODES_COUNT]),
 	m_Subnodes(new OctreeNode*[CHILD_SUBNODES_COUNT]),
 	m_Triangles(),
@@ -29,17 +31,22 @@ Octree::OctreeNode::OctreeNode(Point3d minDomain, Point3d maxDomain, const std::
 	m_MinDomain(numeric_limits<float>::infinity(), numeric_limits<float>::infinity(), numeric_limits<float>::infinity()),
 	m_DomainSize(0, 0, 0)
 {
-	// Generate whole tree
-	divide(minDomain, maxDomain, triangles, maxDivideDepth, currentDivideDepth);
+	if (m_TrianglesExclusiveCount > 0) {
+		// Generate whole tree
+		divide(minDomain, maxDomain, triangles, maxDivideDepth, currentDivideDepth);
+	}
+	else {
+		m_isLeaf = true;
+	}
 }
 
-bool Octree::OctreeNode::containsPoint(const Point3d& point, float epsilon) const
+bool Octree::OctreeNode::containsPoint(const Vector3d& point, float epsilon) const
 {
 	return point.isInAABB(m_MinDomain, m_MaxDomain, epsilon);
 }
 
-void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std::vector<Triangle>& triangles, int maxDivideDepth, int currentDepth)
-{	
+void Octree::OctreeNode::divide(const Vector3d& minDomain, const Vector3d& maxDomain, const std::vector<Triangle>& triangles, int maxDivideDepth, int currentDepth)
+{
 	float epsilon = currentDepth == 0 ? 0.00001f :  0.000001f;
 	Vector3d epsilonVect = Vector3d(epsilon, epsilon, epsilon);
 
@@ -58,25 +65,25 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 	if (currentDepth+1 <= maxDivideDepth)
 	{
 		std::vector<Triangle> nodesTriangles[CHILD_SUBNODES_COUNT];
-		pair<Point3d, Point3d> nodesDomains[CHILD_SUBNODES_COUNT];
+		pair<Vector3d, Vector3d> nodesDomains[CHILD_SUBNODES_COUNT];
 		Vector3d halfDomainSize = m_DomainSize * 0.5f;
-		Point3d center = m_MinDomain + halfDomainSize;
+		Vector3d center = m_MinDomain + halfDomainSize;
 
 		// Calculate subboxes' domains
-		nodesDomains[CHILD_LOWER_NEAR_LEFT_INDEX]	= pair<Point3d, Point3d>(m_MinDomain, center);
-		nodesDomains[CHILD_LOWER_FAR_LEFT_INDEX]	= pair<Point3d, Point3d>(m_MinDomain + Vector3d(0, 0, halfDomainSize.z), center + Vector3d(0, 0, halfDomainSize.z));
-		nodesDomains[CHILD_UPPER_NEAR_LEFT_INDEX]	= pair<Point3d, Point3d>(m_MinDomain + Vector3d(0, halfDomainSize.y, 0), center + Vector3d(0, halfDomainSize.y, 0));
-		nodesDomains[CHILD_UPPER_FAR_LEFT_INDEX]	= pair<Point3d, Point3d>(m_MinDomain + Vector3d(0, halfDomainSize.y, halfDomainSize.z), center + Vector3d(0, halfDomainSize.y, halfDomainSize.z));
+		nodesDomains[CHILD_LOWER_NEAR_LEFT_INDEX]	= pair<Vector3d, Vector3d>(m_MinDomain, center);
+		nodesDomains[CHILD_LOWER_FAR_LEFT_INDEX]	= pair<Vector3d, Vector3d>(m_MinDomain + Vector3d(0, 0, halfDomainSize.z), center + Vector3d(0, 0, halfDomainSize.z));
+		nodesDomains[CHILD_UPPER_NEAR_LEFT_INDEX]	= pair<Vector3d, Vector3d>(m_MinDomain + Vector3d(0, halfDomainSize.y, 0), center + Vector3d(0, halfDomainSize.y, 0));
+		nodesDomains[CHILD_UPPER_FAR_LEFT_INDEX]	= pair<Vector3d, Vector3d>(m_MinDomain + Vector3d(0, halfDomainSize.y, halfDomainSize.z), center + Vector3d(0, halfDomainSize.y, halfDomainSize.z));
 
-		nodesDomains[CHILD_LOWER_NEAR_RIGHT_INDEX]	= pair<Point3d, Point3d>(m_MinDomain + Vector3d(halfDomainSize.x, 0, 0), center + Vector3d(halfDomainSize.x, 0, 0));
-		nodesDomains[CHILD_LOWER_FAR_RIGHT_INDEX]	= pair<Point3d, Point3d>(m_MinDomain + Vector3d(halfDomainSize.x, 0, halfDomainSize.z), center + Vector3d(halfDomainSize.x, 0, halfDomainSize.z));
-		nodesDomains[CHILD_UPPER_NEAR_RIGHT_INDEX]	= pair<Point3d, Point3d>(m_MinDomain + Vector3d(halfDomainSize.x, halfDomainSize.y, 0), center + Vector3d(halfDomainSize.x, halfDomainSize.y, 0));
-		nodesDomains[CHILD_UPPER_FAR_RIGHT_INDEX]	= pair<Point3d, Point3d>(center, m_MaxDomain);
+		nodesDomains[CHILD_LOWER_NEAR_RIGHT_INDEX]	= pair<Vector3d, Vector3d>(m_MinDomain + Vector3d(halfDomainSize.x, 0, 0), center + Vector3d(halfDomainSize.x, 0, 0));
+		nodesDomains[CHILD_LOWER_FAR_RIGHT_INDEX]	= pair<Vector3d, Vector3d>(m_MinDomain + Vector3d(halfDomainSize.x, 0, halfDomainSize.z), center + Vector3d(halfDomainSize.x, 0, halfDomainSize.z));
+		nodesDomains[CHILD_UPPER_NEAR_RIGHT_INDEX]	= pair<Vector3d, Vector3d>(m_MinDomain + Vector3d(halfDomainSize.x, halfDomainSize.y, 0), center + Vector3d(halfDomainSize.x, halfDomainSize.y, 0));
+		nodesDomains[CHILD_UPPER_FAR_RIGHT_INDEX]	= pair<Vector3d, Vector3d>(center, m_MaxDomain);
 
 		
 		for (int i = 0; i < CHILD_SUBNODES_COUNT; ++i)
 		{
-			nodesDomains[i] = pair<Point3d, Point3d>(nodesDomains[i].first - epsilonVect, nodesDomains[i].second + epsilonVect);
+			nodesDomains[i] = pair<Vector3d, Vector3d>(nodesDomains[i].first - epsilonVect, nodesDomains[i].second + epsilonVect);
 		}
 
 
@@ -110,7 +117,7 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 				// then probably it's a wall (or floor or ceiling) of a domain.
 
 				float minDistance = numeric_limits<float>::max();
-				Point3d triangleCenter = ((triangle.p1 + triangle.p2) * 0.5f + triangle.p3) * 0.5f;
+				Vector3d triangleCenter = ((triangle.p1 + triangle.p2) * 0.5f + triangle.p3) * 0.5f;
 
 				for (int subNodeIndex = 0; subNodeIndex < CHILD_SUBNODES_COUNT; ++subNodeIndex)
 				{
@@ -118,6 +125,7 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 				}
 			}
 		}
+		m_TrianglesInclusiveCount = assignments;
 
 		// Create subnodes
 		for (int i = 0; i < CHILD_SUBNODES_COUNT; ++i)
@@ -136,9 +144,11 @@ void Octree::OctreeNode::divide(Point3d minDomain, Point3d maxDomain, const std:
 		// We won't divide deeper so gimme teh your triangles.
 		m_Triangles.assign(triangles.begin(), triangles.end());
 		m_isLeaf = true;
+
+		//std::cout << "Leaf " << " has " <<  m_Triangles.size() << " triangles." << std::endl;
 	}
 	
-	m_TrianglesInclusiveCount = m_Triangles.size();
+	m_TrianglesExclusiveCount = m_Triangles.size();
 }
 
 // Deprecated
@@ -171,7 +181,7 @@ Octree::Octree() :
 {
 }
 
-void Octree::buildTree(const std::vector<Triangle>& triangles, const Point3d& minDomain, const Point3d& maxDomain)
+void Octree::buildTree(const std::vector<Triangle>& triangles, const Vector3d& minDomain, const Vector3d& maxDomain)
 {
 	// Save domain
 	m_MinDomain = minDomain;
@@ -182,7 +192,7 @@ void Octree::buildTree(const std::vector<Triangle>& triangles, const Point3d& mi
 	m_pRoot.reset(new OctreeNode(minDomain, maxDomain, triangles, m_MaxDivideDepth));
 }
 
-void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& out_intersectedTriangles) const
+void Octree::traceRayForTriangles(const Vector3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, AlignedVector3d>>& out_intersectedTriangles) const
 {
 	// Starting point must be located in the domain.
 	// If it isn't then cast ray at the domain to calculate the starting point.
@@ -195,8 +205,8 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 	{
 		const Plane* planes = m_pRoot->m_DomainPlanes.get();
 		float smallestDist = numeric_limits<float>::max();
-		Point3d nearestIntersectionPoint;
-		Point3d intersectionPoint;
+		Vector3d nearestIntersectionPoint;
+		Vector3d intersectionPoint;
 
 		for (int i = 0; i < 6; ++i)
 		{
@@ -230,7 +240,7 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 		}
 	}
 
-	pair<Triangle, Point3d> triangleWithIntersectionPoint;
+	pair<Triangle, AlignedVector3d> triangleWithIntersectionPoint;
 	Vector3d currentRayDirection = rayDirection;
 	int rayNumber = 1;
 
@@ -248,8 +258,13 @@ void Octree::traceRayForTriangles(const Point3d& rayOrigin, const Vector3d& rayD
 	}
 }
 
+
+volatile int maxFoundTriangles = 0;
+volatile int maxRetIndex = 0;
+
 // Returns true if there's an ray-triangle intersection.
-bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, Point3d>& triangleWithIntersectionPoint) const
+inline
+bool Octree::castRayForTriangle(const Vector3d& rayOrigin, const Vector3d& rayDirection, std::pair<Triangle, AlignedVector3d>& triangleWithIntersectionPoint) const
 {
 	// Swap ray direction and origin due to the domain (X, Y, Z must be non-negative)
 	int indexSwapper = 0;
@@ -290,8 +305,16 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 	// Don't check ray-triangle intersections until the starting node isn't found
 	if (max(tx0, max(ty0, tz0)) < min(tx1, min(ty1, tz1)))
 	{
-		std::vector<std::pair<Triangle, Point3d>> foundTriangles;
+		// TODO zamiast zwracac trojkaty z procSubtree, nalezaloby zbierac OctreeNode'y, sprawdzic ktore sa najblizej i wtedy wybierac trojkaty.
+		// Ponadto foundTriangles nie powinno byc instancjonowane w tym miejscu, bo jest to robione niepotrzebnie do kazdej klatki.
+
+		std::vector<std::pair<Triangle, AlignedVector3d>> foundTriangles;
 		procSubtree(tx0, ty0, tz0, tx1, ty1, tz1, m_pRoot.get(), indexSwapper, rayOrigin, rayDirection, foundTriangles);
+
+		if (foundTriangles.size() > maxFoundTriangles) {
+			maxFoundTriangles = foundTriangles.size();
+			std::cout << "Max found triangles: " << maxFoundTriangles << std::endl;
+		}
 
 		if (foundTriangles.size() > 0)
 		{
@@ -308,6 +331,11 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 				}
 			}
 
+			if (retIndex > maxRetIndex) {
+				maxRetIndex = retIndex;
+				std::cout << "Max retIndex: " << retIndex << std::endl;
+			}
+
 			triangleWithIntersectionPoint = foundTriangles[retIndex];
 			return true;
 		}
@@ -317,8 +345,9 @@ bool Octree::castRayForTriangle(const Point3d& rayOrigin, const Vector3d& rayDir
 }
 
 // Returns true if there's an ray-triangle intersection.
+inline
 bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, float tz1, const OctreeNode* node,
-	int indexSwapper, const Point3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, Point3d>>& foundTriangles) const
+	int indexSwapper, const Vector3d& rayOrigin, const Vector3d& rayDirection, std::vector<std::pair<Triangle, AlignedVector3d>>& foundTriangles) const
 {
 	if (tx1 < 0 || ty1 < 0 || tz1 < 0)
 		return false;
@@ -328,7 +357,7 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 	{
 		bool foundTriangle = false;
 		float minDistance = numeric_limits<float>::max();
-		std::pair<Triangle, Point3d> triangleWithIntersectionPoint;
+		int bestIndex = -1;
 
 		// Check ray's collision with triangles in the leaf node
 		for (int i = 0, n = node->m_Triangles.size(); i < n; ++i)
@@ -340,28 +369,33 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 			Triangle microTriangle;
 
 			// TODO leave only first subcondition
-			if (triangle.hasDisplacement && triangle.texture->currentX == /*389*/111394 && triangle.ind == 3270)
-			{
-				intersectionDist = triangle.displacedIntersection(rayOrigin, rayDirection, microTriangle);
-			}
-			else
-			{
+			//if (triangle.hasDisplacement && triangle.texture->currentX == /*389*/111394 && triangle.ind == 3270)
+			//{
+			//	intersectionDist = triangle.displacedIntersection(rayOrigin, rayDirection, microTriangle);
+			//}
+			//else
+			//{
 				intersectionDist = triangle.intersection(rayOrigin, rayDirection);
-			}
+			//}
 
 			if (intersectionDist > 0 && intersectionDist < minDistance)// && node->containsPoint(intersectionPoint, 0.000001f))
 			{
 				foundTriangle = true;
-				const Point3d intersectionPoint = rayOrigin + rayDirection*intersectionDist;
+				
 				const Triangle& intersectedTriangle = /*triangle.hasDisplacement ? microTriangle :*/ triangle;
 
-				triangleWithIntersectionPoint = std::pair<Triangle, Point3d>(intersectedTriangle, intersectionPoint);
+				bestIndex = i;
 				minDistance = intersectionDist;
 			}
 		}
 
 		if (foundTriangle)
+		{
+			const Vector3d intersectionPoint = rayOrigin + rayDirection*minDistance;
+			std::pair<Triangle, AlignedVector3d> triangleWithIntersectionPoint(node->m_Triangles[bestIndex], intersectionPoint);
 			foundTriangles.push_back(triangleWithIntersectionPoint);
+			return true;
+		}
 
 		return false;
 	}
@@ -375,14 +409,18 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 	
 	do
 	{
+		OctreeNode* subNode;
+
 		switch(currNode)
 		{
-			case 0: if (procSubtree(tx0,ty0,tz0, txm,tym,tzm, node->m_Subnodes[0^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
+			case 0:
+				if (procSubtree(tx0,ty0,tz0, txm,tym,tzm, node->m_Subnodes[0^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(txm,tym,tzm,4,2,1);
 					break;
 
-			case 1: if (procSubtree(tx0,ty0,tzm, txm,tym,tz1, node->m_Subnodes[1^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
+			case 1:
+					if (procSubtree(tx0,ty0,tzm, txm,tym,tz1, node->m_Subnodes[1^indexSwapper], indexSwapper, rayOrigin, rayDirection, foundTriangles))
 						return true;
 					currNode = nextNode(txm,tym,tz1,5,3,8);
 					break;
@@ -423,54 +461,53 @@ bool Octree::procSubtree(float tx0, float ty0, float tz0, float tx1, float ty1, 
 }
 
 // Implements tables 1 and 2 [Revelles95].
+inline
 int Octree::firstNode(float tx0, float ty0, float tz0, float txm, float tym, float tzm) const
 {
-	float tmax = max(tx0, max(ty0, tz0));
-	int nodeIndex = 0;
+	// when tx0 is the biggest: Entry plane is YOZ
+	// when ty0 is the biggest: Entry plane is XOZ
+	// when tz0 is the biggest: Entry plane is XOY
 
-	// Entry plane: XOY
-	if (tmax == tz0)
+	#define PLANE_XOY() ((txm < tz0) << 2) | ((tym < tz0) << 1)
+	#define PLANE_XOZ() ((txm < ty0) << 2) | ((tzm < ty0) << 0)
+	#define PLANE_YOZ() ((tym < tx0) << 1) | ((tzm < tx0) << 0)
+
+	if (tx0 > ty0)
 	{
-		nodeIndex |= (txm < tz0) << 2;
-		nodeIndex |= (tym < tz0) << 1;
+		if (tx0 > tz0)
+			return PLANE_YOZ();
+		else
+			return PLANE_XOY();
+	}
+	else
+	{
+		if (ty0 > tz0)
+			return PLANE_XOZ();
+		else
+			return PLANE_XOY();
 	}
 
-	// Entry plane: XOZ
-	else if (tmax == ty0)
-	{
-		nodeIndex |= (txm < ty0) << 2;
-		nodeIndex |= (tzm < ty0) << 0;
-	}
-
-	// Entry plane: YOZ
-	else if (tmax == tx0)
-	{
-		nodeIndex |= (tym < tx0) << 1;
-		nodeIndex |= (tzm < tx0) << 0;
-	}
-
-	return nodeIndex;
+	return 0;
 }
 
 // Returns the i-th integer where the i-th float value is the minimum of the three float values.
-inline int Octree::nextNode(float tx, float ty, float tz, int ix, int iy, int iz) const
+inline
+int Octree::nextNode(float tx, float ty, float tz, int ix, int iy, int iz) const
 {
-	int ret;
-
 	if (tx < ty)
 	{
 		if (tx < tz)
-			ret = ix;
+			return ix;
 		else
-			ret = iz;
+			return iz;
 	}
 	else
 	{
 		if (ty < tz)
-			ret = iy;
+			return iy;
 		else
-			ret = iz;
+			return iz;
 	}
 
-	return ret;
+	return 0;
 }

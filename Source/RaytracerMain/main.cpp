@@ -86,7 +86,9 @@ int main(int argc, char* argv[])
 	}
 
 	cout << "Rendered " << numScenes << " scenes in " << totalTime / 1000.0f << " seconds" << endl;
-	_getch();
+	
+	if (params.GetBool("wait_on_end"))
+		_getch();
 
 	return 0;
 }

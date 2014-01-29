@@ -18,8 +18,8 @@ float displacementHeight(const Texture* texture, float u, float v)
 	return (color.x*0.3f + color.y*0.59f + color.z*0.11f) * g_heightSweep - g_m;
 }
 
-float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection,
-	const Point3d& p1, const Point3d& p2, const Point3d& p3, const Vector3d& normal,
+float displacedIntersection(const Vector3d& rayOrigin, const Vector3d& rayDirection,
+	const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& normal,
 	const Texture* texture, Triangle& out_Triangle)
 {
 	// We assume that parameters p1, p2 and p3 are given such as:
@@ -29,11 +29,11 @@ float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirecti
 	Plane thisTriangle(p1, p2, p3);
 
 	// Firstly, find the closest and the furthest intersection points with top, bottom and side segments.
-	Point3d topCapPoints[] = { p1 + normal*g_M, p2 + normal*g_M, p3 + normal*g_M };
-	Point3d bottomCapPoints[] = { p1 - normal*g_m, p2 - normal*g_m, p3 - normal*g_m };
-	Point3d hypotenuseSideSegmentPoints[] = { p2 + normal*g_M, p2 - normal*g_m, p3 + normal*g_M, p3 - normal*g_m };
-	Point3d otherSideSegment1[] = { p2 + normal*g_M, p2 - normal*g_m, p1 + normal*g_M, p1 - normal*g_m };
-	Point3d otherSideSegment2[] = { p1 + normal*g_M, p1 - normal*g_m, p3 + normal*g_M, p3 - normal*g_m };
+	Vector3d topCapPoints[] = { p1 + normal*g_M, p2 + normal*g_M, p3 + normal*g_M };
+	Vector3d bottomCapPoints[] = { p1 - normal*g_m, p2 - normal*g_m, p3 - normal*g_m };
+	Vector3d hypotenuseSideSegmentPoints[] = { p2 + normal*g_M, p2 - normal*g_m, p3 + normal*g_M, p3 - normal*g_m };
+	Vector3d otherSideSegment1[] = { p2 + normal*g_M, p2 - normal*g_m, p1 + normal*g_M, p1 - normal*g_m };
+	Vector3d otherSideSegment2[] = { p1 + normal*g_M, p1 - normal*g_m, p3 + normal*g_M, p3 - normal*g_m };
 
 	Triangle topCap(topCapPoints[0], topCapPoints[1], topCapPoints[2]);
 	Triangle bottomCap(bottomCapPoints[0], bottomCapPoints[1], bottomCapPoints[2]);
@@ -41,11 +41,11 @@ float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirecti
 	Plane otherSidePlane1(otherSideSegment1[0], otherSideSegment1[1], otherSideSegment1[2]);		// side having right angle
 	Plane otherSidePlane2(otherSideSegment2[0], otherSideSegment2[1], otherSideSegment2[2]);		// side having right angle
 	
-	Point3d topIntersectionPoint;
-	Point3d bottomIntersectionPoint;
-	Point3d hypotenuseIntersectionPoint;
-	Point3d otherSide1IntersectionPoint;
-	Point3d otherSide2IntersectionPoint;
+	Vector3d topIntersectionPoint;
+	Vector3d bottomIntersectionPoint;
+	Vector3d hypotenuseIntersectionPoint;
+	Vector3d otherSide1IntersectionPoint;
+	Vector3d otherSide2IntersectionPoint;
 
 	float hypotenuseIntersectionDistance = hypotenuseSidePlane.intersectLineInSegment(rayOrigin, rayDirection, hypotenuseSideSegmentPoints[0],
 		hypotenuseSideSegmentPoints[1], hypotenuseSideSegmentPoints[2], hypotenuseSideSegmentPoints[3], hypotenuseIntersectionPoint);
@@ -69,7 +69,7 @@ float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirecti
 		kPlane = 4,
 		PlaneTypesCount = 5
 	};
-	typedef std::tuple<void*, float, Point3d, PlaneType> PlaneIntersectionInfo;	
+	typedef std::tuple<void*, float, Vector3d, PlaneType> PlaneIntersectionInfo;	
 	#define IntersectionInfo_Plane 0
 	#define IntersectionInfo_Distance 1
 	#define IntersectionInfo_Point 2
@@ -92,15 +92,15 @@ float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirecti
 	);
 
 	// Choose the closest plane and based on it's intersection point calculate the point placed on the triangle to be displaced.	
-	auto castPointOnTriangle = [normal, thisTriangle](const PlaneIntersectionInfo& intersectionInfo, Point3d& out_castedPoint)
+	auto castPointOnTriangle = [normal, thisTriangle](const PlaneIntersectionInfo& intersectionInfo, Vector3d& out_castedPoint)
 	{
-		Point3d testPoint1, testPoint2;
-		const Point3d& intersectionPoint = std::get<IntersectionInfo_Point>(intersectionInfo);
+		Vector3d testPoint1, testPoint2;
+		const Vector3d& intersectionPoint = std::get<IntersectionInfo_Point>(intersectionInfo);
 		float distanceToTriangle = thisTriangle.distance(intersectionPoint);
 
-		Point3d samplePoint;
-		if (thisTriangle.intersectLine(Point3d(), normal, samplePoint) < 0)
-			thisTriangle.intersectLine(Point3d(), normal, samplePoint);
+		Vector3d samplePoint;
+		if (thisTriangle.intersectLine(Vector3d(), normal, samplePoint) < 0)
+			thisTriangle.intersectLine(Vector3d(), normal, samplePoint);
 
 		testPoint1.set(samplePoint + normal);
 		testPoint1.set(samplePoint - normal);
@@ -112,7 +112,7 @@ float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirecti
 	};
 	
 	// Calculate i,j and k
-	Point3d castedPoint;
+	Vector3d castedPoint;
 	int closestIntersectionIndex = 0;
 
 	while (closestIntersectionIndex < PlaneTypesCount)
@@ -167,9 +167,9 @@ float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirecti
 	
 
 	// TODO Calculate vertices for first micro-triangle (don't displace a and b; displace only c)
-	Point3d a;
-	Point3d b;
-	Point3d c;
+	Vector3d a;
+	Vector3d b;
+	Vector3d c;
 	Vector3d currentNormal = (p2 - p1).crossProduct(p3 - p1, true);
 
 	typedef enum LastChange
@@ -295,7 +295,7 @@ float displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirecti
 }
 
 // Gets triangle from flyweight or creates a new one and stores it, then returns it
-float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection, Triangle& out_Triangle) const
+float Triangle::displacedIntersection(const Vector3d& rayOrigin, const Vector3d& rayDirection, Triangle& out_Triangle) const
 {
 	float distance;
 	Vector3d largestAnglePoint, otherPoint1, otherPoint2;
@@ -310,13 +310,13 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	else
 	{
 		// Cut triangle by casting a ray from the vertex having the largest angle		
-		const Point3d& V1 = otherPoint1;
-		const Point3d& V2 = otherPoint2;
-		const Point3d& V3 = largestAnglePoint;
+		const Vector3d& V1 = otherPoint1;
+		const Vector3d& V2 = otherPoint2;
+		const Vector3d& V3 = largestAnglePoint;
 				
 		Vector3d V1V2 = V1 - V2;
 		float u = (V3 - V1).dotProduct(V2 - V1) / (V1V2).dotProduct(V1V2);
-		Point3d cutPoint = V1 - V1V2*u;
+		Vector3d cutPoint = V1 - V1V2*u;
 
 		Vector3d normal = (V1 - cutPoint).crossProduct(V1 - V3, true);
 		distance = ::displacedIntersection(rayOrigin, rayDirection, V1, V3, cutPoint, normal, texture, out_Triangle);

@@ -72,19 +72,19 @@ double Texture::Noise3D(int ix, int iy, int iz) const
 void Texture::GenerateBricks()
 {
 	m_NumColors.push_back(4);
-	m_ColorPalettes.push_back(std::vector<Vector3d>());
+	m_ColorPalettes.push_back(std::vector<AlignedVector3d>());
 	m_ColorPalettes[0].push_back(Vector3d(0.8f, 0.75f, 0.6f));
 	m_ColorPalettes[0].push_back(Vector3d(0.5f, 0.4f, 0.3f));
 	m_ColorPalettes[0].push_back(Vector3d(0.4f, 0.2f, 0.1f));
 	m_ColorPalettes[0].push_back(Vector3d(0.2f, 0.1f, 0.0f));
 
 	m_NumColors.push_back(5);
-	m_ColorPalettes.push_back(std::vector<Vector3d>());
-	m_ColorPalettes[1].push_back(Vector3d(0.8f, 0.75f, 0.6f));
-	m_ColorPalettes[1].push_back(Vector3d(174 / 255.0f, 137 / 255.0f, 118 / 255.0f));	
-	m_ColorPalettes[1].push_back(Vector3d(150 / 255.0f, 25 / 255.0f, 14 / 255.0f));
-	m_ColorPalettes[1].push_back(Vector3d(150 / 255.0f, 22 / 255.0f, 11 / 255.0f));
-	m_ColorPalettes[1].push_back(Vector3d(102 / 255.0f, 0, 0));
+	m_ColorPalettes.push_back(std::vector<AlignedVector3d>());
+	m_ColorPalettes[1].push_back(AlignedVector3d(0.8f, 0.75f, 0.6f));
+	m_ColorPalettes[1].push_back(AlignedVector3d(174 / 255.0f, 137 / 255.0f, 118 / 255.0f));	
+	m_ColorPalettes[1].push_back(AlignedVector3d(150 / 255.0f, 25 / 255.0f, 14 / 255.0f));
+	m_ColorPalettes[1].push_back(AlignedVector3d(150 / 255.0f, 22 / 255.0f, 11 / 255.0f));
+	m_ColorPalettes[1].push_back(AlignedVector3d(102 / 255.0f, 0, 0));
 
 	int numBricksHorz = (int)(m_Width / BMWidth);
 	int numBricksVert = (int)(m_Height / BMHeight);
@@ -321,7 +321,7 @@ void Texture::GenerateRamp()
 	}
 }
 
-Vector3d Texture::rotateVec(Vector3d vec, float angle) const
+Vector3d Texture::rotateVec(const Vector3d& vec, float angle) const
 {
 	Vector3d out(0, 0, 0);
 	angle *= 3.14 / 180.0f;

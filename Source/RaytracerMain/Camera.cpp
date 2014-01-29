@@ -10,12 +10,12 @@ Camera::Camera(void)
 	yResolution = -1;
 }
 
-Camera::Camera(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3d topRight, int xResolution, int yResolution)
+Camera::Camera(const Vector3d& cameraCenter, const Vector3d& topLeft, const Vector3d& bottomLeft, const Vector3d& topRight, int xResolution, int yResolution)
 {
 	initialize(cameraCenter, topLeft, bottomLeft, topRight, xResolution, yResolution);
 }
 
-void Camera::initialize(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3d topRight, int xResolution, int yResolution)
+void Camera::initialize(const Vector3d& cameraCenter, const Vector3d& topLeft, const Vector3d& bottomLeft, const Vector3d& topRight, int xResolution, int yResolution)
 {
 	this->cameraCenter = cameraCenter;
 	this->topLeft = topLeft;
@@ -24,10 +24,10 @@ void Camera::initialize(Point3d cameraCenter, Point3d topLeft, Point3d bottomLef
 	this->xResolution = xResolution;
 	this->yResolution = yResolution;
 
-	Point3d U = topRight - topLeft;
-	Point3d V = bottomLeft - topLeft;
-	Point3d ul = topLeft;
-	Point3d P_ij = ul + U * 0.5f + V * 0.5f;
+	Vector3d U = topRight - topLeft;
+	Vector3d V = bottomLeft - topLeft;
+	Vector3d ul = topLeft;
+	Vector3d P_ij = ul + U * 0.5f + V * 0.5f;
 	this->forwardDir = P_ij - cameraCenter;
 	this->forwardDir.normalize();
 }

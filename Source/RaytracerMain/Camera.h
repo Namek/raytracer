@@ -7,13 +7,13 @@ namespace nprt
 	class Camera
 	{
 	public:
-		Point3d cameraCenter;
-		Point3d lookAt;
+		Vector3d cameraCenter;
+		Vector3d lookAt;
 		float fovHorizontal, fovVertical;
 		float rotation;
-		Point3d topLeft;
-		Point3d bottomLeft;
-		Point3d topRight;
+		Vector3d topLeft;
+		Vector3d bottomLeft;
+		Vector3d topRight;
 		Vector3d upDir, rightDir, forwardDir;
 		int xResolution, yResolution;
 		Camera(void);
@@ -24,9 +24,9 @@ namespace nprt
 			cameraCenter = copy.cameraCenter;
 			lookAt = copy.lookAt;
 		}
-		Camera(Point3d, Point3d, Point3d, Point3d, int, int);
+		Camera(const Vector3d&, const Vector3d&, const Vector3d&, const Vector3d&, int, int);
 
-		void initialize(Point3d cameraCenter, Point3d topLeft, Point3d bottomLeft, Point3d topRight, int xResolution, int yResolution);
+		void initialize(const Vector3d& cameraCenter, const Vector3d& topLeft, const Vector3d& bottomLeft, const Vector3d& topRight, int xResolution, int yResolution);
 		void initialize(const Vector3d& cameraCenter, const Vector3d& lookAt, float fovHorizontal);
 		void setResolution(int width, int height);
 

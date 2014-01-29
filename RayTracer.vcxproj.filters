@@ -8,6 +8,9 @@
     <Filter Include="Source\Geometry">
       <UniqueIdentifier>{b4e2978b-e305-46b5-b185-8975c52bee4a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{2a53d602-863b-4fe0-99c0-00969b3d7789}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\RaytracerMain\main.cpp">
@@ -40,6 +43,12 @@
     <ClCompile Include="Source\RaytracerMain\Geometry\Displacement.cpp">
       <Filter>Source\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Math\floats.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RaytracerMain\Math\Math.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RaytracerMain\Scene.h">
@@ -69,5 +78,14 @@
     <ClInclude Include="Source\RaytracerMain\Texture.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\Math\floats.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RaytracerMain\Math\Math.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\RaytracerMain\Math\TODO.txt" />
   </ItemGroup>
 </Project>

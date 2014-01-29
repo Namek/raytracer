@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <limits>
+#include "../Math/Math.h"
 
 using namespace nprt;
 
@@ -11,9 +12,9 @@ float Triangle::MaxDistance = 100000.0f;
 
 Triangle::Triangle()
 {
-	p1 = Point3d();
-	p2 = Point3d();
-	p3 = Point3d();	
+	p1 = Vector3d();
+	p2 = Vector3d();
+	p3 = Vector3d();	
 	materialIndex = -1;
 	d = -1;
 	norm = Vector3d();
@@ -21,7 +22,7 @@ Triangle::Triangle()
 	hasDisplacement = false;
 }
 
-Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind)
+Triangle::Triangle(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, int ind)
 {
 	this->p1 = p1;
 	this->p2 = p2;
@@ -38,7 +39,7 @@ Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int ind)
 	hasDisplacement = false;
 }
 
-Triangle::Triangle(Point3d p1, Point3d p2, Point3d p3, int materialIndex, int ind)
+Triangle::Triangle(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, int materialIndex, int ind)
 {
 	this->p1 = p1;
 	this->p2 = p2;
@@ -161,24 +162,24 @@ float Triangle::intersection(const Vector3d& p1, const Vector3d& p2, const Vecto
 	}
 }
 
-inline void Triangle::getUV(const Point3d& pointInTriangle, float& out_u, float& out_v) const
+inline void Triangle::getUV(const Vector3d& pointInTriangle, float& out_u, float& out_v) const
 {
 	getUV(p1, p2, p3, pointInTriangle, out_u, out_v);
 }
 
-void Triangle::getUV(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Point3d& pointInTriangle, float& out_u, float& out_v)
+void Triangle::getUV(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& pointInTriangle, float& out_u, float& out_v)
 {
-	// Compute vectors        
-	Vector3d v0 = p3 - p1;
-	Vector3d v1 = p2 - p1;
-	Vector3d v2 = pointInTriangle - p1;
+	// Compute vectors
+	const Vector3d& v0 = p3 - p1;
+	const Vector3d& v1 = p2 - p1;
+	const Vector3d& v2 = pointInTriangle - p1;
 
 	// Compute dot products
-	float dot00 = v0.dotProduct(v0);
-	float dot01 = v0.dotProduct(v1);
-	float dot02 = v0.dotProduct(v2);
-	float dot11 = v1.dotProduct(v1);
-	float dot12 = v1.dotProduct(v2);
+	const float dot00 = v0.dotProduct(v0);
+	const float dot01 = v0.dotProduct(v1);
+	const float dot02 = v0.dotProduct(v2);
+	const float dot11 = v1.dotProduct(v1);
+	const float dot12 = v1.dotProduct(v2);
 
 	// Compute barycentric coordinates
 	float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
@@ -231,9 +232,9 @@ bool Triangle::isRightTriangle(const Vector3d& p1, const Vector3d& p2, const Vec
 /* by Tomas Akenine-Möller                              */
 /********************************************************/
 
-bool Triangle::overlapsWithAABB(const Point3d& minDomain, const Point3d& maxDomain) const
+bool Triangle::overlapsWithAABB(const Vector3d& minDomain, const Vector3d& maxDomain) const
 {
-	Point3d boxHalfSize((maxDomain - minDomain)*0.5f);
+	Vector3d boxHalfSize((maxDomain - minDomain)*0.5f);
 	return overlapsWithAABB_byDomainCenter(minDomain + boxHalfSize, boxHalfSize);
 }
 
@@ -335,7 +336,8 @@ bool planeBoxOverlap(const Vector3d& normal, const Vector3d& vert, const Vector3
 	return false;
 }
 
-bool Triangle::overlapsWithAABB_byDomainCenter(const Point3d& boxCenter, const Point3d& boxHalfSize) const
+inline
+bool Triangle::overlapsWithAABB_byDomainCenter(const Vector3d& boxCenter, const Vector3d& boxHalfSize) const
 {
 	// Move everything so that the boxCenter is in (0,0,0)
 	Vector3d v0(this->p1 - boxCenter);
@@ -463,7 +465,7 @@ struct BILINEAR_HIT : public HIT
 
 struct BilinearPatch
 {
-	Point3d pts[4];
+	Vector3d pts[4];
 };
 
 #define FIND_BARY( x )												\
@@ -538,7 +540,7 @@ inline float getu(
 float computet(
 	const Vector3d& rayOrigin,
 	const Vector3d& rayDirection,
-	const Point3d& srfpos
+	const Vector3d& srfpos
 	)
 {
 	if(fabs(rayDirection.x) >= fabs(rayDirection.y) && fabs(rayDirection.x) >= fabs(rayDirection.z)) {
@@ -594,9 +596,9 @@ int SolveQuadricWithinRange(
 
 #ifdef _WIN32
 	// Bloody MSVC crt
-	const float q = -0.5  * (b + _copysign(sqrt(d),b));
+	const float q = -0.5  * (b + _copysign(nprt::math::fsqrt(d),b));
 #else
-	const float q = -0.5  * (b + copysign(sqrt(d),b));
+	const float q = -0.5  * (b + copysign(nprt::math::fsqrt(d),b));
 #endif
 
 	sol[0] = c/q;
@@ -619,13 +621,13 @@ int SolveQuadricWithinRange(
 	return 0;
 }
 
-Point3d EvaluateBilinearPatchAt( 
+Vector3d EvaluateBilinearPatchAt( 
 	const BilinearPatch& patch,
 	const float u, 
 	const float v 
 	)
 {
-	Point3d ret;
+	Vector3d ret;
 	ret.x = ( ( (1.0 - u) * (1.0 - v) * patch.pts[0].x +
 			(1.0 - u) *        v  * patch.pts[1].x + 
 			u  * (1.0 - v) * patch.pts[2].x +
@@ -731,7 +733,7 @@ void RayBilinearPatchIntersection(
 			hit.u = getu(sol[0],A2,A1,B2,B1,C2,C1,D2,D1);
 			hit.v = sol[0];
 				
-			const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
+			const Vector3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
 			hit.dRange = computet(rayOrigin, rayDirection, pos1);
 
 			if( hit.u < 1+NEARZERO && hit.u > -NEARZERO && hit.dRange > 0 ) {
@@ -744,7 +746,7 @@ void RayBilinearPatchIntersection(
 			hit.v = sol[0];
 			hit.u = getu(sol[0],A2,A1,B2,B1,C2,C1,D2,D1);
 				
-			const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
+			const Vector3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
 			hit.dRange = computet(rayOrigin, rayDirection, pos1); 
 
 			if( hit.u < 1+NEARZERO && hit.u > -NEARZERO && hit.dRange > 0 ) {
@@ -752,7 +754,7 @@ void RayBilinearPatchIntersection(
 
 				const float u = getu(sol[1],A2,A1,B2,B1,C2,C1,D2,D1);
 				if( u < 1+NEARZERO && u > NEARZERO ) {
-					const Point3d pos2 = EvaluateBilinearPatchAt( patch, u, sol[1] );
+					const Vector3d pos2 = EvaluateBilinearPatchAt( patch, u, sol[1] );
 					const float t2 = computet(rayOrigin, rayDirection, pos2);
 					if(t2 < 0 || hit.dRange < t2) { // t2 is bad or t1 is better
 						return;
@@ -767,7 +769,7 @@ void RayBilinearPatchIntersection(
 			{
 				hit.u = getu(sol[1],A2,A1,B2,B1,C2,C1,D2,D1);
 				hit.v = sol[1];
-				const Point3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
+				const Vector3d pos1 = EvaluateBilinearPatchAt( patch, hit.u, hit.v );
 				hit.dRange = computet(rayOrigin, rayDirection, pos1);
 
 				if( hit.u < 1+NEARZERO && hit.u > -NEARZERO && hit.dRange > 0 ) {
@@ -802,7 +804,7 @@ void RayTriangleIntersection(
 	const Vector3d& rayOrigin,
 	const Vector3d& rayDirection,
 	TRIANGLE_HIT& hit,
-	const Point3d& vPt1,
+	const Vector3d& vPt1,
 	const Vector3d& vEdgeA,
 	const Vector3d& vEdgeB
 	)
@@ -897,7 +899,7 @@ void RayTriangleIntersection(
 
 
 /*
-float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& rayDirection) const
+float Triangle::displacedIntersection(const Vector3d& rayOrigin, const Vector3d& rayDirection) const
 {
 	float M = 0.0f;
 	float m = 0.01f;
@@ -919,12 +921,12 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	// end-cap triangles
 
 
-	Point3d top[3];			// The top end-cap
+	Vector3d top[3];			// The top end-cap
 	top[0] = p1 + normals[0] * M;
 	top[1] = p2 + normals[1] * M;
 	top[2] = p3 + normals[2] * M;
 
-	Point3d bottom[3];		// The bottom end-cap
+	Vector3d bottom[3];		// The bottom end-cap
 	bottom[0] = p1 + normals[0] * (-m);
 	bottom[1] = p2 + normals[1] * (-m);
 	bottom[2] = p3 + normals[2] * (-m);
@@ -1146,7 +1148,7 @@ float Triangle::displacedIntersection(const Point3d& rayOrigin, const Vector3d& 
 	cNormal = normals[0];
 
 	float testIntersection = Triangle::intersection(p1, p2, p3, rayOrigin, rayDirection);
-	Point3d intersectionPt = rayOrigin + rayDirection*testIntersection;
+	Vector3d intersectionPt = rayOrigin + rayDirection*testIntersection;
 
 	int ni = 0;
 	float eps = delta;

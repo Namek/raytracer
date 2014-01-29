@@ -145,6 +145,11 @@ Source/RaytracerMain/Geometry/Vector3d.h -text
 Source/RaytracerMain/LightSource.cpp -text
 Source/RaytracerMain/LightSource.h -text
 Source/RaytracerMain/Material.h -text
+Source/RaytracerMain/Math/Math.cpp -text
+Source/RaytracerMain/Math/Math.h -text
+Source/RaytracerMain/Math/TODO.txt -text
+Source/RaytracerMain/Math/floats.cpp -text
+Source/RaytracerMain/Math/floats.h -text
 Source/RaytracerMain/Scene.cpp -text
 Source/RaytracerMain/Scene.h -text
 Source/RaytracerMain/Texture.cpp -text

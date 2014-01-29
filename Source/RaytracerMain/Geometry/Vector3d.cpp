@@ -1,38 +1,33 @@
 #include "Vector3d.h"
-
+#include "../Math/Math.h"
+#include "../Math/floats.h"
 
 using namespace nprt;
 
-
-Vector3d::Vector3d(void)
+Vector3d::Vector3d()
 {
 	x = y = z = 0;
 }
 
-Vector3d::Vector3d(float x, float y, float z, bool normalize)
+Vector3d::Vector3d(float x, float y, float z, bool shouldNormalize)
 {
 	set(x, y, z);
 
-	if (normalize)
+	if (shouldNormalize)
 	{
-		float len = this->length();
-		x /= len;
-		y /= len;
-		z /= len;
+		normalize();
 	}
 }
 
-Vector3d::Vector3d(const Point3d& p1, const Point3d& p2, bool normalize)
+Vector3d::Vector3d(const Vector3d& p1, const Vector3d& p2, bool shouldNormalize)
 {
 	x = p2.x - p1.x;
 	y = p2.y - p1.y;
 	z = p2.z - p1.z;
-	if (normalize)
+
+	if (shouldNormalize)
 	{
-		float len = this->length();
-		x/=len;
-		y/=len;
-		z/=len;
+		normalize();
 	}
 }
 
@@ -65,6 +60,7 @@ void Vector3d::set(const Vector3d& v)
 
 float Vector3d::dotProduct(const Vector3d& vector) const
 {
+//	nprt::math::dot_product(this.values, vector.values);
 	return x*vector.x + y*vector.y + z*vector.z;
 }
 
@@ -98,21 +94,21 @@ void Vector3d::rotateZ(float roll)
 	this->x = X;
 }
 
-float Vector3d::pointLineDistance(const Point3d& point, const Point3d& linePoint1, const Point3d& linePoint2)
+float Vector3d::pointLineDistance(const Vector3d& point, const Vector3d& linePoint1, const Vector3d& linePoint2)
 {
 	const Vector3d x1x2 = linePoint2 - linePoint1;
 	return (x1x2).crossProduct(linePoint1 - point).length() / x1x2.length();
 }
 
-float Vector3d::pointLineDistance(const Point3d& point) const
+float Vector3d::pointLineDistance(const Vector3d& point) const
 {
 	// Calculating distance for a line given in points from (0,0,0) to (x,y,z).
 	// The points doesn't really matter, they only must be placed on the line.
 
-	return pointLineDistance(point, Point3d(), Point3d(x, y, z));
+	return pointLineDistance(point, Vector3d(), Vector3d(x, y, z));
 }
 
-float Vector3d::lineLineDistance(const Point3d& line1Point1, const Point3d& line1Point2, const Point3d& line2Point1, const Point3d& line2Point2)
+float Vector3d::lineLineDistance(const Vector3d& line1Point1, const Vector3d& line1Point2, const Vector3d& line2Point1, const Vector3d& line2Point2)
 {
 	const Vector3d a = line1Point2 - line1Point1;
 	const Vector3d b = line2Point2 - line2Point1;
@@ -122,12 +118,13 @@ float Vector3d::lineLineDistance(const Point3d& line1Point1, const Point3d& line
 	return fabs(c.dotProduct(d)) / d.length();
 }
 
+inline
 float Vector3d::lineLineDistance(const Vector3d& otherLinePoint1, const Vector3d& otherLinePoint2) const
 {
-	return lineLineDistance(otherLinePoint1, otherLinePoint2, Point3d(0, 0, 0), Point3d(x, y, z));
+	return lineLineDistance(otherLinePoint1, otherLinePoint2, Vector3d(0, 0, 0), Vector3d(x, y, z));
 }
 
-bool Vector3d::isInAABB(const Point3d& minDomain, const Point3d& maxDomain, float epsilon) const
+bool Vector3d::isInAABB(const Vector3d& minDomain, const Vector3d& maxDomain, float epsilon) const
 {
 	return x >= minDomain.x-epsilon && x <= maxDomain.x+epsilon
 		&& y >= minDomain.y-epsilon && x <= maxDomain.y+epsilon
@@ -136,15 +133,16 @@ bool Vector3d::isInAABB(const Point3d& minDomain, const Point3d& maxDomain, floa
 
 float Vector3d::length() const
 {
-	return (float)sqrt(x*x + y*y + z*z);
+	return nprt::math::fsqrt(x*x + y*y + z*z);
 }
 
-void Vector3d::normalize()
-{
+inline void Vector3d::normalize()
+{	
 	float l = this->length();
 	this->x /= l;
 	this->y /= l;
 	this->z /= l;
+
+	// TODO normalize3_accurate seems to be inaccurate... sometimes returns normal directed in opposite direction
+	//nprt::math::normalize3_accurate(nprt::math::Load3Floats(this->x, this->y, this->z));
 }
-
-
